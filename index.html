@@ -255,12 +255,23 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Define __app_id_global at the top-most scope possible, before any other Firebase-related definitions.
+        // This ensures it's available when firebaseConfig is used and when window.fb.appId is set.
+        let __app_id_global;
+        if (typeof __app_id !== 'undefined') {
+            __app_id_global = __app_id;
+        } else {
+            console.warn("Global __app_id not defined by environment. Using 'default-app-id'.");
+            __app_id_global = 'default-app-id';
+        }
+
         // Global variables for Firebase instances
         window.fb = {};
         window.fb.app = null;
         window.fb.db = null;
         window.fb.auth = null;
         window.fb.userId = null;
+        window.fb.appId = __app_id_global; // Initialize appId with the global or fallback value
         window.fb.isAuthReady = false;
 
         // Firebase configuration provided by the user
@@ -304,6 +315,7 @@
                     console.warn("Using random user ID due to authentication failure. Data may not persist.");
                 }
             }
+            // Set isAuthReady after authentication is attempted
             window.fb.isAuthReady = true;
             // Dispatch a custom event to indicate Firebase is ready
             document.dispatchEvent(new CustomEvent('firebaseReady'));
@@ -684,7 +696,17 @@
                 // Simple hardcoded password for demonstration.
                 // In a real application, this would involve secure authentication.
                 if (password === 'admin123') {
-                    alert('Administrator access granted! (In a real app, this would lead to admin features)');
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4">Administrator access granted!</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
+
                     closeModal(adminModal);
                     adminMessage.classList.add('hidden');
                 } else {
@@ -707,9 +729,18 @@
             addEmployeeForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
-                if (!window.fb.isAuthReady || !window.fb.userId) {
-                    console.error("Firebase not ready or user not authenticated.");
-                    alert("System not ready. Please try again in a moment.");
+                if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
+                    console.error("Firebase not ready or user/app ID not authenticated.");
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-red-600">System not ready. Please try again in a moment.</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
                     return;
                 }
 
@@ -728,13 +759,34 @@
                 };
 
                 try {
-                    const docRef = await window.fb.addDoc(window.fb.collection(window.fb.db, `artifacts/${__app_id}/users/${window.fb.userId}/employees`), employeeData);
+                    const docRef = await window.fb.addDoc(window.fb.collection(window.fb.db, `artifacts/${window.fb.appId}/users/${window.fb.userId}/employees`), employeeData);
                     console.log("Employee added with ID: ", docRef.id);
                     dashboardActivities.innerHTML = `<li>New employee, ${employeeData.name}, added.</li>` + dashboardActivities.innerHTML;
                     closeModal(addEmployeeModal);
+
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-green-600">Employee saved successfully!</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
+
                 } catch (e) {
                     console.error("Error adding document: ", e);
-                    alert("Error saving employee. Please check console for details.");
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-red-600">Error saving employee. Please check console for details.</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
                 }
             });
 
@@ -751,9 +803,18 @@
             addDeptSiteForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
-                if (!window.fb.isAuthReady || !window.fb.userId) {
-                    console.error("Firebase not ready or user not authenticated.");
-                    alert("System not ready. Please try again in a moment.");
+                if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
+                    console.error("Firebase not ready or user/app ID not authenticated.");
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-red-600">System not ready. Please try again in a moment.</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
                     return;
                 }
 
@@ -764,62 +825,136 @@
                 };
 
                 try {
-                    const collectionPath = `artifacts/${__app_id}/users/${window.fb.userId}/${deptSiteData.type === 'Department' ? 'departments' : 'sites'}`;
+                    const collectionPath = `artifacts/${window.fb.appId}/users/${window.fb.userId}/${deptSiteData.type === 'Department' ? 'departments' : 'sites'}`;
                     const docRef = await window.fb.addDoc(window.fb.collection(window.fb.db, collectionPath), deptSiteData);
                     console.log(`${deptSiteData.type} added with ID: `, docRef.id);
                     dashboardActivities.innerHTML = `<li>New ${deptSiteData.type}, ${deptSiteData.name}, added.</li>` + dashboardActivities.innerHTML;
                     closeModal(addDeptSiteModal);
+
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-green-600">Department/Site saved successfully!</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
+
                 } catch (e) {
                     console.error("Error adding document: ", e);
-                    alert("Error saving department/site. Please check console for details.");
+                    // Using a custom message box instead of alert()
+                    const messageBox = document.createElement('div');
+                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                    messageBox.innerHTML = `
+                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                            <p class="text-lg font-semibold mb-4 text-red-600">Error saving department/site. Please check console for details.</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                        </div>
+                    `;
+                    document.body.appendChild(messageBox);
                 }
             });
 
             // Global functions for Firestore operations (called from rendered HTML)
             window.editEmployee = (docId) => {
                 console.log('Edit employee:', docId);
-                alert('Edit functionality not yet implemented for ' + docId);
+                // Using a custom message box instead of alert()
+                const messageBox = document.createElement('div');
+                messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                messageBox.innerHTML = `
+                    <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                        <p class="text-lg font-semibold mb-4">Edit functionality not yet implemented for employee ID: ${docId}</p>
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                    </div>
+                `;
+                document.body.appendChild(messageBox);
                 // Future: Populate add-employee-modal with existing data and change save button to update
             };
 
             window.deleteEmployee = async (docId) => {
-                if (!confirm('Are you sure you want to delete this employee?')) {
-                    return;
-                }
-                if (!window.fb.isAuthReady || !window.fb.userId) {
-                    console.error("Firebase not ready or user not authenticated.");
-                    alert("System not ready. Please try again in a moment.");
-                    return;
-                }
-                try {
-                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, `artifacts/${__app_id}/users/${window.fb.userId}/employees`, docId));
-                    console.log("Employee deleted:", docId);
-                    dashboardActivities.innerHTML = `<li>Employee with ID ${docId} deleted.</li>` + dashboardActivities.innerHTML;
-                } catch (e) {
-                    console.error("Error deleting document: ", e);
-                    alert("Error deleting employee. Please check console for details.");
-                }
+                // Using a custom confirmation box instead of confirm()
+                const confirmBox = document.createElement('div');
+                confirmBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                confirmBox.innerHTML = `
+                    <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                        <p class="text-lg font-semibold mb-4">Are you sure you want to delete this employee?</p>
+                        <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md mr-2" id="confirm-delete-yes">Yes</button>
+                        <button class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-md" id="confirm-delete-no">No</button>
+                    </div>
+                `;
+                document.body.appendChild(confirmBox);
+
+                document.getElementById('confirm-delete-yes').onclick = async () => {
+                    confirmBox.remove(); // Close confirmation box
+
+                    if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
+                        console.error("Firebase not ready or user/app ID not authenticated.");
+                        // Using a custom message box instead of alert()
+                        const messageBox = document.createElement('div');
+                        messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                        messageBox.innerHTML = `
+                            <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                                <p class="text-lg font-semibold mb-4 text-red-600">System not ready. Please try again in a moment.</p>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                            </div>
+                        `;
+                        document.body.appendChild(messageBox);
+                        return;
+                    }
+                    try {
+                        await window.fb.deleteDoc(window.fb.doc(window.fb.db, `artifacts/${window.fb.appId}/users/${window.fb.userId}/employees`, docId));
+                        console.log("Employee deleted:", docId);
+                        dashboardActivities.innerHTML = `<li>Employee with ID ${docId} deleted.</li>` + dashboardActivities.innerHTML;
+
+                        // Using a custom message box instead of alert()
+                        const messageBox = document.createElement('div');
+                        messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                        messageBox.innerHTML = `
+                            <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                                <p class="text-lg font-semibold mb-4 text-green-600">Employee deleted successfully!</p>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                            </div>
+                        `;
+                        document.body.appendChild(messageBox);
+
+                    } catch (e) {
+                        console.error("Error deleting document: ", e);
+                        // Using a custom message box instead of alert()
+                        const messageBox = document.createElement('div');
+                        messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
+                        messageBox.innerHTML = `
+                            <div class="bg-white p-8 rounded-lg shadow-xl text-center">
+                                <p class="text-lg font-semibold mb-4 text-red-600">Error deleting employee. Please check console for details.</p>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
+                            </div>
+                        `;
+                        document.body.appendChild(messageBox);
+                    }
+                };
+
+                document.getElementById('confirm-delete-no').onclick = () => {
+                    confirmBox.remove(); // Close confirmation box
+                };
             };
 
             // Close modals when clicking outside
             window.addEventListener('click', (event) => {
-                if (event.target == adminModal) {
-                    closeModal(adminModal);
-                }
-                if (event.target == addEmployeeModal) {
-                    closeModal(addEmployeeModal);
-                }
-                if (event.target == addDeptSiteModal) {
-                    closeModal(addDeptSiteModal);
-                }
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (event.target == modal) {
+                        closeModal(modal);
+                    }
+                });
             });
 
             // Listen for FirebaseReady event to start data listeners
             document.addEventListener('firebaseReady', () => {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const appId = window.fb.appId;
                 const userId = window.fb.userId;
 
-                if (userId) {
+                if (userId && appId) {
                     // Listen for employees data
                     window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/employees`), (snapshot) => {
                         employeesData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
@@ -827,7 +962,7 @@
                         console.log("Employees data updated:", employeesData);
                     }, (error) => {
                         console.error("Error fetching employees:", error);
-                        employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">Error loading employees.</td></tr>`;
+                        employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">Error loading employees. Check console for permissions.</td></tr>`;
                     });
 
                     // Listen for departments data
@@ -837,7 +972,7 @@
                         console.log("Departments data updated:", departmentsData);
                     }, (error) => {
                         console.error("Error fetching departments:", error);
-                        departmentsList.innerHTML = `<li>Error loading departments.</li>`;
+                        departmentsList.innerHTML = `<li>Error loading departments. Check console for permissions.</li>`;
                     });
 
                     // Listen for sites data
@@ -847,13 +982,13 @@
                         console.log("Sites data updated:", sitesData);
                     }, (error) => {
                         console.error("Error fetching sites:", error);
-                        sitesList.innerHTML = `<li>Error loading sites.</li>`;
+                        sitesList.innerHTML = `<li>Error loading sites. Check console for permissions.</li>`;
                     });
                 } else {
-                    console.warn("User ID not available, cannot fetch Firestore data.");
-                    employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-gray-500">Please sign in to load data.</td></tr>`;
-                    departmentsList.innerHTML = `<li>Please sign in to load data.</li>`;
-                    sitesList.innerHTML = `<li>Please sign in to load data.</li>`;
+                    console.warn("Firebase not fully initialized. User ID or App ID is missing. Cannot fetch Firestore data.");
+                    employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-gray-500">Firebase not ready. Please ensure authentication is set up.</td></tr>`;
+                    departmentsList.innerHTML = `<li>Firebase not ready.</li>`;
+                    sitesList.innerHTML = `<li>Firebase not ready.</li>`;
                 }
             });
         });
