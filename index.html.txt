@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLV Electrical Services Co. Payroll System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7f6;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #1a202c; /* Darker background for sidebar */
+            color: #e2e8f0;
+            padding: 1.5rem;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            flex-grow: 1;
+            background-color: #ffffff;
+            min-height: 100vh;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+        }
+        .nav-button {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .nav-button:hover {
+            background-color: #2d3748; /* Slightly lighter dark on hover */
+            color: #a0aec0;
+        }
+        .nav-button.active {
+            background-color: #4a5568; /* Active state background */
+            color: #ffffff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .nav-button svg {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+        }
+        .section-content {
+            display: none;
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .section-content.active {
+            display: block;
+        }
+        .admin-button {
+            background-color: #4299e1; /* Blue for admin button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+            margin-top: auto; /* Pushes button to the bottom */
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .admin-button:hover {
+            background-color: #3182ce;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px; /* Increased max-width for more fields */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            text-align: left; /* Align text left for forms */
+        }
+        .modal-content input, .modal-content select {
+            width: calc(100% - 2rem);
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            display: block; /* Ensure inputs take full width */
+        }
+        .modal-content label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .modal-content button {
+            background-color: #4299e1;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .modal-content button:hover {
+            background-color: #3182ce;
+        }
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        /* Specific styling for the Add Employee Modal */
+        #add-employee-modal .modal-content {
+            max-width: 600px; /* Wider for better form layout */
+            padding: 2.5rem;
+        }
+        #add-employee-form .form-group {
+            /* Removed flex properties here to rely on default block flow within grid cell */
+            /* The grid gap will handle spacing between form-groups */
+        }
+        #add-employee-form .grid-cols-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        #add-employee-form .grid-cols-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        #add-employee-form input,
+        #add-employee-form select {
+            width: 100%; /* Make inputs fill their grid column */
+            padding: 0.6rem 0.8rem; /* Slightly smaller padding for denser form */
+            display: block; /* Ensure input/select is a block element */
+            margin-top: 0; /* No top margin, controlled by label's margin-bottom */
+            margin-bottom: 0; /* No bottom margin, controlled by grid gap */
+        }
+        #add-employee-form label {
+            display: block; /* Ensure label is a block element */
+            margin-bottom: 0.25rem; /* Consistent space below label */
+            font-size: 0.9rem;
+            color: #2d3748;
+        }
+        #add-employee-form button[type="submit"] {
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            margin-top: 2rem;
+            background-color: #2f855a; /* Green for save button */
+        }
+        #add-employee-form button[type="submit"]:hover {
+            background-color: #276749;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-radius: 0;
+                padding: 1rem;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .nav-button {
+                margin: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            .nav-button svg {
+                margin-right: 0.5rem;
+                width: 16px;
+                height: 16px;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            .admin-button {
+                width: 100%;
+                margin-top: 1rem;
+            }
+            .sidebar .nav-links {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: 100%;
+            }
+            .modal-content {
+                padding: 1.5rem;
+            }
+            .modal-content input, .modal-content select {
+                width: calc(100% - 1rem); /* Adjust for smaller padding */
+                padding: 0.6rem 0.8rem;
+            }
+            #add-employee-modal .modal-content {
+                max-width: 95%; /* Adjust max-width for small screens */
+                padding: 1.5rem;
+            }
+            #add-employee-form .grid-cols-2,
+            #add-employee-form .grid-cols-3 {
+                grid-template-columns: 1fr; /* Stack columns on small screens */
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="flex items-center mb-8">
+            <svg class="w-8 h-8 mr-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+            <h1 class="text-2xl font-bold text-white">DLV Payroll</h1>
+        </div>
+
+        <nav class="nav-links flex flex-col md:flex-col">
+            <button class="nav-button active" data-section="dashboard">
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 01-8 8v-8H2z"></path>
+                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+                </svg>
+                Dashboard
+            </button>
+            <button class="nav-button" data-section="manage-employees">
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zm-6 9a7 7 0 0012 0H6.755z"></path>
+                </svg>
+                Manage Employees
+            </button>
+            <button class="nav-button" data-section="departments-sites">
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0113 3.414L16.586 7A2 2 0 0118 8.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1-3a1 1 0 100 2h2a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                </svg>
+                Department/Sites
+            </button>
+            <button class="nav-button" data-section="payroll">
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 002-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 2a2 2 0 100 4 2 2 0 000-4z" clip-rule="evenodd"></path>
+                </svg>
+                Payroll
+            </button>
+        </nav>
+
+        <button id="admin-login-btn" class="admin-button">
+            Administrator Login
+        </button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">Welcome, DLV Electrical Services Co.</h2>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-content" class="section-content active">
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Dashboard Overview</h3>
+            <p class="text-gray-600">This section provides a quick overview of key payroll metrics, employee status, and upcoming tasks.</p>
+            <div class="mt-6 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
+                <p>No data available. Please add employees and process payroll to see dashboard insights.</p>
+            </div>
+        </section>
+
+        <!-- Manage Employees Section -->
+        <section id="manage-employees-content" class="section-content">
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Manage Employees</h3>
+            <p class="text-gray-600 mb-6">Here you can add, edit, or remove employee records. View detailed profiles including personal information, employment history, and compensation.</p>
+            <button id="add-employee-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">Add New Employee</button>
+
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
+                <p>No employee data available. Click "Add New Employee" to get started.</p>
+            </div>
+        </section>
+
+        <!-- Department/Sites Section -->
+        <section id="departments-sites-content" class="section-content">
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Department & Sites Management</h3>
+            <p class="text-gray-600 mb-6">Manage company departments and project sites. Assign employees to specific departments or sites for accurate payroll allocation.</p>
+            <button id="add-dept-site-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">Add New Department/Site</button>
+
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
+                <p>No department or site data available. Click "Add New Department/Site" to get started.</p>
+            </div>
+        </section>
+
+        <!-- Payroll Section -->
+        <section id="payroll-content" class="section-content">
+            <h3 class="text-2xl font-semibold text-gray-700 mb-4">Payroll Processing</h3>
+            <p class="text-gray-600 mb-6">Process payroll, generate payslips, manage deductions, and view payroll history.</p>
+            <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">Process Payroll for Current Period</button>
+
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
+                <p>No payroll history available. Process payroll to view records here.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Admin Password Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="admin-modal">&times;</span>
+            <h3 class="text-xl font-semibold mb-4 text-center">Administrator Login</h3>
+            <p class="text-gray-700 text-center">Please enter the administrator password:</p>
+            <input type="password" id="admin-password-input" placeholder="Enter password" class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4">
+            <button id="admin-password-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mt-4 transition duration-200">Submit</button>
+            <p id="admin-message" class="text-red-500 mt-2 hidden text-center">Incorrect password. Please try again.</p>
+        </div>
+    </div>
+
+    <!-- Add New Employee Modal -->
+    <div id="add-employee-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="add-employee-modal">&times;</span>
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">Add New Employee</h3>
+            <form id="add-employee-form">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-group">
+                        <label for="employee-id">Employee ID:</label>
+                        <input type="text" id="employee-id" value="DLV-XXXXX" readonly class="bg-gray-100 cursor-not-allowed">
+                    </div>
+                    <div class="form-group">
+                        <label for="employee-name">Full Name:</label>
+                        <input type="text" id="employee-name" placeholder="e.g., Juan Dela Cruz" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-group">
+                        <label for="employee-department">Department:</label>
+                        <input type="text" id="employee-department" placeholder="e.g., Engineering" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="employee-position">Position:</label>
+                        <input type="text" id="employee-position" placeholder="e.g., Electrical Engineer" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="form-group">
+                        <label for="employee-status">Status:</label>
+                        <select id="employee-status" required>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="employee-site">Site:</label>
+                        <input type="text" id="employee-site" placeholder="e.g., Main Office - QC" required>
+                    </div>
+                </div>
+
+                <div class="form-group mb-6">
+                    <label for="employee-salary">Monthly Salary (PHP):</label>
+                    <input type="number" id="employee-salary" placeholder="e.g., 25000.00" step="0.01" required>
+                </div>
+
+                <h4 class="text-lg font-semibold text-gray-700 mb-3">Government Deductions</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="form-group">
+                        <label for="deduction-sss">SSS Contribution:</label>
+                        <input type="number" id="deduction-sss" placeholder="e.g., 800.00" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="deduction-philhealth">PH Contribution:</label>
+                        <input type="number" id="deduction-philhealth" placeholder="e.g., 400.00" step="0.01" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="deduction-pagibig">Pag-IBIG Contribution:</label>
+                        <input type="number" id="deduction-pagibig" placeholder="e.g., 200.00" step="0.01" value="0">
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition duration-200">Save Employee</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add New Department/Site Modal -->
+    <div id="add-dept-site-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" data-modal-id="add-dept-site-modal">&times;</span>
+            <h3 class="text-xl font-semibold mb-4 text-center">Add New Department or Site</h3>
+            <form id="add-dept-site-form">
+                <label for="dept-site-name">Name:</label>
+                <input type="text" id="dept-site-name" placeholder="Enter name" required>
+
+                <label for="dept-site-type">Type:</label>
+                <select id="dept-site-type" required>
+                    <option value="Department">Department</option>
+                    <option value="Site">Site</option>
+                </select>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mt-4 transition duration-200">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navButtons = document.querySelectorAll('.nav-button');
+            const sections = document.querySelectorAll('.section-content');
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            const adminModal = document.getElementById('admin-modal');
+            const adminCloseBtn = adminModal.querySelector('.modal-close');
+            const adminPasswordInput = document.getElementById('admin-password-input');
+            const adminPasswordSubmit = document.getElementById('admin-password-submit');
+            const adminMessage = document.getElementById('admin-message');
+
+            const addEmployeeBtn = document.getElementById('add-employee-btn');
+            const addEmployeeModal = document.getElementById('add-employee-modal');
+            const addEmployeeCloseBtn = addEmployeeModal.querySelector('.modal-close');
+            const addEmployeeForm = document.getElementById('add-employee-form');
+            const employeeIdInput = document.getElementById('employee-id');
+
+            const addDeptSiteBtn = document.getElementById('add-dept-site-btn');
+            const addDeptSiteModal = document.getElementById('add-dept-site-modal');
+            const addDeptSiteCloseBtn = addDeptSiteModal.querySelector('.modal-close');
+            const addDeptSiteForm = document.getElementById('add-dept-site-form');
+
+            // Function to show a specific section
+            const showSection = (sectionId) => {
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+            };
+
+            // Function to open a modal
+            const openModal = (modalElement) => {
+                modalElement.style.display = 'flex';
+            };
+
+            // Function to close a modal
+            const closeModal = (modalElement) => {
+                modalElement.style.display = 'none';
+            };
+
+            // Generate Employee ID
+            const generateEmployeeId = () => {
+                const randomNumbers = Math.floor(10000 + Math.random() * 90000); // Generates a 5-digit number
+                return `DLV-${randomNumbers}`;
+            };
+
+            // Handle navigation button clicks
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const targetSectionId = button.dataset.section + '-content';
+                    showSection(targetSectionId);
+                });
+            });
+
+            // Show Dashboard by default
+            showSection('dashboard-content');
+
+            // Admin Login Modal functionality
+            adminLoginBtn.addEventListener('click', () => {
+                openModal(adminModal);
+                adminPasswordInput.value = ''; // Clear previous input
+                adminMessage.classList.add('hidden'); // Hide previous messages
+            });
+
+            adminCloseBtn.addEventListener('click', () => {
+                closeModal(adminModal);
+            });
+
+            adminPasswordSubmit.addEventListener('click', () => {
+                const password = adminPasswordInput.value;
+                // Simple hardcoded password for demonstration.
+                // In a real application, this would involve secure authentication.
+                if (password === 'admin123') {
+                    // In a real app, this would lead to admin features
+                    alert('Administrator access granted!');
+                    closeModal(adminModal);
+                    adminMessage.classList.add('hidden');
+                } else {
+                    adminMessage.textContent = 'Incorrect password. Please try again.';
+                    adminMessage.classList.remove('hidden');
+                }
+            });
+
+            // Add New Employee Modal functionality
+            addEmployeeBtn.addEventListener('click', () => {
+                employeeIdInput.value = generateEmployeeId(); // Set new ID
+                addEmployeeForm.reset(); // Clear form fields
+                openModal(addEmployeeModal);
+            });
+
+            addEmployeeCloseBtn.addEventListener('click', () => {
+                closeModal(addEmployeeModal);
+            });
+
+            addEmployeeForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                const employeeData = {
+                    id: employeeIdInput.value,
+                    name: document.getElementById('employee-name').value,
+                    department: document.getElementById('employee-department').value,
+                    position: document.getElementById('employee-position').value,
+                    status: document.getElementById('employee-status').value,
+                    site: document.getElementById('employee-site').value,
+                    salary: parseFloat(document.getElementById('employee-salary').value),
+                    sss: parseFloat(document.getElementById('deduction-sss').value),
+                    philhealth: parseFloat(document.getElementById('deduction-philhealth').value),
+                    pagibig: parseFloat(document.getElementById('deduction-pagibig').value)
+                };
+
+                console.log('New Employee Data:', employeeData);
+                alert('Employee saved! Check console for data.'); // For demonstration
+                closeModal(addEmployeeModal);
+            });
+
+            // Add New Department/Site Modal functionality
+            addDeptSiteBtn.addEventListener('click', () => {
+                addDeptSiteForm.reset(); // Clear form fields
+                openModal(addDeptSiteModal);
+            });
+
+            addDeptSiteCloseBtn.addEventListener('click', () => {
+                closeModal(addDeptSiteModal);
+            });
+
+            addDeptSiteForm.addEventListener('submit', (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                const deptSiteData = {
+                    name: document.getElementById('dept-site-name').value,
+                    type: document.getElementById('dept-site-type').value
+                };
+
+                console.log('New Department/Site Data:', deptSiteData);
+                alert('Department/Site saved! Check console for data.'); // For demonstration
+                closeModal(addDeptSiteModal);
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', (event) => {
+                if (event.target == adminModal) {
+                    closeModal(adminModal);
+                }
+                if (event.target == addEmployeeModal) {
+                    closeModal(addEmployeeModal);
+                }
+                if (event.target == addDeptSiteModal) {
+                    closeModal(addDeptSiteModal);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
