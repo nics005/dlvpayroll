@@ -155,8 +155,9 @@
             padding: 2.5rem;
         }
         #add-employee-form .form-group {
-            /* Removed flex properties here to rely on default block flow within grid cell */
-            /* The grid gap will handle spacing between form-groups */
+            display: flex; /* Re-added flex for consistent vertical stacking */
+            flex-direction: column; /* Stack label and input vertically */
+            justify-content: flex-start; /* Align content to the top */
         }
         #add-employee-form .grid-cols-2 {
             display: grid;
@@ -173,12 +174,12 @@
             width: 100%; /* Make inputs fill their grid column */
             padding: 0.6rem 0.8rem; /* Slightly smaller padding for denser form */
             display: block; /* Ensure input/select is a block element */
-            margin-top: 0; /* No top margin, controlled by label's margin-bottom */
+            margin-top: 0.25rem; /* Small margin from label */
             margin-bottom: 0; /* No bottom margin, controlled by grid gap */
         }
         #add-employee-form label {
             display: block; /* Ensure label is a block element */
-            margin-bottom: 0.25rem; /* Consistent space below label */
+            margin-bottom: 0; /* Removed margin-bottom here, relying on input's margin-top */
             font-size: 0.9rem;
             color: #2d3748;
         }
@@ -248,6 +249,76 @@
             }
         }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase instances
+        window.fb = {};
+        window.fb.app = null;
+        window.fb.db = null;
+        window.fb.auth = null;
+        window.fb.userId = null;
+        window.fb.isAuthReady = false;
+
+        // Firebase configuration provided by the user
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYpApEwrgAsso-dJ-uTAX3AI4yRZBn9JU",
+            authDomain: "payroll-aef73.firebaseapp.com",
+            projectId: "payroll-aef73",
+            storageBucket: "payroll-aef73.firebasestorage.app",
+            messagingSenderId: "717714854870",
+            appId: "1:717714854870:web:b1e7eb0dc82cd61dbc8a77",
+            measurementId: "G-F31PSMN7RD"
+        };
+
+        // Initialize Firebase
+        window.fb.app = initializeApp(firebaseConfig);
+        window.fb.db = getFirestore(window.fb.app);
+        window.fb.auth = getAuth(window.fb.app);
+
+        // Authenticate user
+        onAuthStateChanged(window.fb.auth, async (user) => {
+            if (user) {
+                window.fb.userId = user.uid;
+                console.log("Firebase authenticated as:", user.uid);
+            } else {
+                // Sign in anonymously if no user is logged in
+                try {
+                    // Use __initial_auth_token if available, otherwise sign in anonymously
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.fb.auth, __initial_auth_token);
+                        window.fb.userId = window.fb.auth.currentUser.uid;
+                        console.log("Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(window.fb.auth);
+                        window.fb.userId = window.fb.auth.currentUser.uid;
+                        console.log("Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("Firebase authentication error:", error);
+                    // Fallback to a random ID if authentication fails, though data won't persist securely
+                    window.fb.userId = crypto.randomUUID();
+                    console.warn("Using random user ID due to authentication failure. Data may not persist.");
+                }
+            }
+            window.fb.isAuthReady = true;
+            // Dispatch a custom event to indicate Firebase is ready
+            document.dispatchEvent(new CustomEvent('firebaseReady'));
+        });
+
+        // Expose Firestore functions globally for use in inline scripts
+        window.fb.getFirestore = () => window.fb.db;
+        window.fb.collection = collection;
+        window.fb.addDoc = addDoc;
+        window.fb.onSnapshot = onSnapshot;
+        window.fb.query = query;
+        window.fb.doc = doc;
+        window.fb.deleteDoc = deleteDoc;
+        window.fb.updateDoc = updateDoc;
+    </script>
 </head>
 <body class="flex flex-col md:flex-row min-h-screen">
 
@@ -301,8 +372,25 @@
         <section id="dashboard-content" class="section-content active">
             <h3 class="text-2xl font-semibold text-gray-700 mb-4">Dashboard Overview</h3>
             <p class="text-gray-600">This section provides a quick overview of key payroll metrics, employee status, and upcoming tasks.</p>
-            <div class="mt-6 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
-                <p>No data available. Please add employees and process payroll to see dashboard insights.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-blue-700 mb-2">Total Employees</h4>
+                    <p id="total-employees-count" class="text-3xl font-bold text-blue-900">0</p>
+                </div>
+                <div class="bg-green-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-green-700 mb-2">Upcoming Payroll</h4>
+                    <p class="text-3xl font-bold text-green-900">N/A</p>
+                </div>
+                <div class="bg-yellow-50 p-6 rounded-lg shadow-md">
+                    <h4 class="text-xl font-semibold text-yellow-700 mb-2">Pending Approvals</h4>
+                    <p class="text-3xl font-bold text-yellow-900">0</p>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Recent Activities</h4>
+                <ul class="list-disc list-inside text-gray-600" id="dashboard-activities">
+                    <li>No recent activities.</li>
+                </ul>
             </div>
         </section>
 
@@ -312,8 +400,27 @@
             <p class="text-gray-600 mb-6">Here you can add, edit, or remove employee records. View detailed profiles including personal information, employment history, and compensation.</p>
             <button id="add-employee-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">Add New Employee</button>
 
-            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
-                <p>No employee data available. Click "Add New Employee" to get started.</p>
+            <div class="mt-8">
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Employee List</h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white rounded-lg shadow-md">
+                        <thead>
+                            <tr class="bg-gray-100 text-left text-gray-600 uppercase text-sm leading-normal">
+                                <th class="py-3 px-6 text-left">Employee ID</th>
+                                <th class="py-3 px-6 text-left">Name</th>
+                                <th class="py-3 px-6 text-left">Department</th>
+                                <th class="py-3 px-6 text-left">Position</th>
+                                <th class="py-3 px-6 text-left">Status</th>
+                                <th class="py-3 px-6 text-left">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700 text-sm font-light" id="employees-table-body">
+                            <tr>
+                                <td colspan="6" class="py-4 text-center text-gray-500">Loading employee data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -323,8 +430,17 @@
             <p class="text-gray-600 mb-6">Manage company departments and project sites. Assign employees to specific departments or sites for accurate payroll allocation.</p>
             <button id="add-dept-site-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200">Add New Department/Site</button>
 
-            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md text-gray-700">
-                <p>No department or site data available. Click "Add New Department/Site" to get started.</p>
+            <div class="mt-8">
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Departments</h4>
+                <ul class="list-disc list-inside text-gray-600 pl-4" id="departments-list">
+                    <li>Loading departments...</li>
+                </ul>
+            </div>
+            <div class="mt-8">
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Project Sites</h4>
+                <ul class="list-disc list-inside text-gray-600 pl-4" id="sites-list">
+                    <li>Loading sites...</li>
+                </ul>
             </div>
         </section>
 
@@ -456,11 +572,20 @@
             const addEmployeeCloseBtn = addEmployeeModal.querySelector('.modal-close');
             const addEmployeeForm = document.getElementById('add-employee-form');
             const employeeIdInput = document.getElementById('employee-id');
+            const employeesTableBody = document.getElementById('employees-table-body');
+            const totalEmployeesCount = document.getElementById('total-employees-count');
+            const dashboardActivities = document.getElementById('dashboard-activities');
 
             const addDeptSiteBtn = document.getElementById('add-dept-site-btn');
             const addDeptSiteModal = document.getElementById('add-dept-site-modal');
             const addDeptSiteCloseBtn = addDeptSiteModal.querySelector('.modal-close');
             const addDeptSiteForm = document.getElementById('add-dept-site-form');
+            const departmentsList = document.getElementById('departments-list');
+            const sitesList = document.getElementById('sites-list');
+
+            let employeesData = [];
+            let departmentsData = [];
+            let sitesData = [];
 
             // Function to show a specific section
             const showSection = (sectionId) => {
@@ -484,6 +609,50 @@
             const generateEmployeeId = () => {
                 const randomNumbers = Math.floor(10000 + Math.random() * 90000); // Generates a 5-digit number
                 return `DLV-${randomNumbers}`;
+            };
+
+            // Render Employees Table
+            const renderEmployees = () => {
+                if (employeesData.length === 0) {
+                    employeesTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="py-4 text-center text-gray-500">No employee data available. Click "Add New Employee" to get started.</td>
+                        </tr>
+                    `;
+                } else {
+                    employeesTableBody.innerHTML = employeesData.map(employee => `
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.id}</td>
+                            <td class="py-3 px-6 text-left">${employee.name}</td>
+                            <td class="py-3 px-6 text-left">${employee.department}</td>
+                            <td class="py-3 px-6 text-left">${employee.position}</td>
+                            <td class="py-3 px-6 text-left"><span class="bg-${employee.status === 'Active' ? 'green' : 'red'}-200 text-${employee.status === 'Active' ? 'green' : 'red'}-800 py-1 px-3 rounded-full text-xs">${employee.status}</span></td>
+                            <td class="py-3 px-6 text-left">
+                                <button class="text-blue-500 hover:text-blue-700 mr-2" onclick="editEmployee('${employee.docId}')">Edit</button>
+                                <button class="text-red-500 hover:text-red-700" onclick="deleteEmployee('${employee.docId}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+                totalEmployeesCount.textContent = employeesData.length;
+            };
+
+            // Render Departments List
+            const renderDepartments = () => {
+                if (departmentsData.length === 0) {
+                    departmentsList.innerHTML = `<li>No departments added yet.</li>`;
+                } else {
+                    departmentsList.innerHTML = departmentsData.map(dept => `<li>${dept.name}</li>`).join('');
+                }
+            };
+
+            // Render Sites List
+            const renderSites = () => {
+                if (sitesData.length === 0) {
+                    sitesList.innerHTML = `<li>No sites added yet.</li>`;
+                } else {
+                    sitesList.innerHTML = sitesData.map(site => `<li>${site.name}</li>`).join('');
+                }
             };
 
             // Handle navigation button clicks
@@ -515,8 +684,7 @@
                 // Simple hardcoded password for demonstration.
                 // In a real application, this would involve secure authentication.
                 if (password === 'admin123') {
-                    // In a real app, this would lead to admin features
-                    alert('Administrator access granted!');
+                    alert('Administrator access granted! (In a real app, this would lead to admin features)');
                     closeModal(adminModal);
                     adminMessage.classList.add('hidden');
                 } else {
@@ -536,8 +704,14 @@
                 closeModal(addEmployeeModal);
             });
 
-            addEmployeeForm.addEventListener('submit', (event) => {
+            addEmployeeForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
+
+                if (!window.fb.isAuthReady || !window.fb.userId) {
+                    console.error("Firebase not ready or user not authenticated.");
+                    alert("System not ready. Please try again in a moment.");
+                    return;
+                }
 
                 const employeeData = {
                     id: employeeIdInput.value,
@@ -548,13 +722,20 @@
                     site: document.getElementById('employee-site').value,
                     salary: parseFloat(document.getElementById('employee-salary').value),
                     sss: parseFloat(document.getElementById('deduction-sss').value),
-                    philhealth: parseFloat(document.getElementById('deduction-philhealth').value),
-                    pagibig: parseFloat(document.getElementById('deduction-pagibig').value)
+                    philhealth: parseFloat(document.getElementById('deduction-philhealth').value), // Keep this name for data consistency
+                    pagibig: parseFloat(document.getElementById('deduction-pagibig').value),
+                    createdAt: new Date() // Timestamp for sorting or activity tracking
                 };
 
-                console.log('New Employee Data:', employeeData);
-                alert('Employee saved! Check console for data.'); // For demonstration
-                closeModal(addEmployeeModal);
+                try {
+                    const docRef = await window.fb.addDoc(window.fb.collection(window.fb.db, `artifacts/${__app_id}/users/${window.fb.userId}/employees`), employeeData);
+                    console.log("Employee added with ID: ", docRef.id);
+                    dashboardActivities.innerHTML = `<li>New employee, ${employeeData.name}, added.</li>` + dashboardActivities.innerHTML;
+                    closeModal(addEmployeeModal);
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    alert("Error saving employee. Please check console for details.");
+                }
             });
 
             // Add New Department/Site Modal functionality
@@ -567,18 +748,58 @@
                 closeModal(addDeptSiteModal);
             });
 
-            addDeptSiteForm.addEventListener('submit', (event) => {
+            addDeptSiteForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
+
+                if (!window.fb.isAuthReady || !window.fb.userId) {
+                    console.error("Firebase not ready or user not authenticated.");
+                    alert("System not ready. Please try again in a moment.");
+                    return;
+                }
 
                 const deptSiteData = {
                     name: document.getElementById('dept-site-name').value,
-                    type: document.getElementById('dept-site-type').value
+                    type: document.getElementById('dept-site-type').value,
+                    createdAt: new Date()
                 };
 
-                console.log('New Department/Site Data:', deptSiteData);
-                alert('Department/Site saved! Check console for data.'); // For demonstration
-                closeModal(addDeptSiteModal);
+                try {
+                    const collectionPath = `artifacts/${__app_id}/users/${window.fb.userId}/${deptSiteData.type === 'Department' ? 'departments' : 'sites'}`;
+                    const docRef = await window.fb.addDoc(window.fb.collection(window.fb.db, collectionPath), deptSiteData);
+                    console.log(`${deptSiteData.type} added with ID: `, docRef.id);
+                    dashboardActivities.innerHTML = `<li>New ${deptSiteData.type}, ${deptSiteData.name}, added.</li>` + dashboardActivities.innerHTML;
+                    closeModal(addDeptSiteModal);
+                } catch (e) {
+                    console.error("Error adding document: ", e);
+                    alert("Error saving department/site. Please check console for details.");
+                }
             });
+
+            // Global functions for Firestore operations (called from rendered HTML)
+            window.editEmployee = (docId) => {
+                console.log('Edit employee:', docId);
+                alert('Edit functionality not yet implemented for ' + docId);
+                // Future: Populate add-employee-modal with existing data and change save button to update
+            };
+
+            window.deleteEmployee = async (docId) => {
+                if (!confirm('Are you sure you want to delete this employee?')) {
+                    return;
+                }
+                if (!window.fb.isAuthReady || !window.fb.userId) {
+                    console.error("Firebase not ready or user not authenticated.");
+                    alert("System not ready. Please try again in a moment.");
+                    return;
+                }
+                try {
+                    await window.fb.deleteDoc(window.fb.doc(window.fb.db, `artifacts/${__app_id}/users/${window.fb.userId}/employees`, docId));
+                    console.log("Employee deleted:", docId);
+                    dashboardActivities.innerHTML = `<li>Employee with ID ${docId} deleted.</li>` + dashboardActivities.innerHTML;
+                } catch (e) {
+                    console.error("Error deleting document: ", e);
+                    alert("Error deleting employee. Please check console for details.");
+                }
+            };
 
             // Close modals when clicking outside
             window.addEventListener('click', (event) => {
@@ -590,6 +811,49 @@
                 }
                 if (event.target == addDeptSiteModal) {
                     closeModal(addDeptSiteModal);
+                }
+            });
+
+            // Listen for FirebaseReady event to start data listeners
+            document.addEventListener('firebaseReady', () => {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                const userId = window.fb.userId;
+
+                if (userId) {
+                    // Listen for employees data
+                    window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/employees`), (snapshot) => {
+                        employeesData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        renderEmployees();
+                        console.log("Employees data updated:", employeesData);
+                    }, (error) => {
+                        console.error("Error fetching employees:", error);
+                        employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">Error loading employees.</td></tr>`;
+                    });
+
+                    // Listen for departments data
+                    window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/departments`), (snapshot) => {
+                        departmentsData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        renderDepartments();
+                        console.log("Departments data updated:", departmentsData);
+                    }, (error) => {
+                        console.error("Error fetching departments:", error);
+                        departmentsList.innerHTML = `<li>Error loading departments.</li>`;
+                    });
+
+                    // Listen for sites data
+                    window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/sites`), (snapshot) => {
+                        sitesData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                        renderSites();
+                        console.log("Sites data updated:", sitesData);
+                    }, (error) => {
+                        console.error("Error fetching sites:", error);
+                        sitesList.innerHTML = `<li>Error loading sites.</li>`;
+                    });
+                } else {
+                    console.warn("User ID not available, cannot fetch Firestore data.");
+                    employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-gray-500">Please sign in to load data.</td></tr>`;
+                    departmentsList.innerHTML = `<li>Please sign in to load data.</li>`;
+                    sitesList.innerHTML = `<li>Please sign in to load data.</li>`;
                 }
             });
         });
