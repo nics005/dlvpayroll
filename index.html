@@ -783,15 +783,7 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase configuration (provided by the user)
-        const firebaseConfig = {
-            apiKey: "AIzaSyAYpApEwrgAsso-dJ-uTAX3AI4yRZBn9JU",
-            authDomain: "payroll-aef73.firebaseapp.com",
-            projectId: "payroll-aef73",
-            storageBucket: "payroll-aef73.firebasestorage.app",
-            messagingSenderId: "717714854870",
-            appId: "1:717714854870:web:b1e7eb0dc82cd61dbc8a77",
-            measurementId: "G-F31PSMN7RD"
-        };
+        const firebaseConfig = JSON.parse(__firebase_config);
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
@@ -884,7 +876,7 @@
         const payrollRecordDocIdInput = document.getElementById('payroll-record-doc-id'); // New hidden input for payroll record ID
         const workingDaysInput = document.getElementById('working-days');
         const overtimeHrsInput = document.getElementById('overtime-hrs');
-        const sundayHolidayDutyInput = document = document.getElementById('sunday-holiday-duty');
+        const sundayHolidayDutyInput = document.getElementById('sunday-holiday-duty');
         const nightShiftWorkDaysInput = document.getElementById('night-shift-work-days');
         const nightShiftOvertimeHrsInput = document.getElementById('night-shift-overtime-hrs');
         const calculatedBasicPaySpan = document.getElementById('calculated-basic-pay');
@@ -1054,7 +1046,7 @@
         // Function to open the Delete Confirmation Modal (generic for employee, payroll, deduction)
         const openDeleteConfirmationModal = (docId, type) => {
             recordToDeleteDocId = docId; // Store the ID
-            recordTypeToDelete = type; // Store the type ('employee', 'payroll', 'deduction')
+            recordTypeToDelete = type; // Store the type ('employee', 'payroll', or 'deduction')
             deleteConfirmationModal.classList.remove('hidden');
         };
 
@@ -1677,7 +1669,7 @@
                 console.warn("User not authenticated. Cannot fetch employees.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
+            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("fullName")); // Changed to orderBy fullName for better sorting
             onSnapshot(q, (querySnapshot) => {
                 employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
                 processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
