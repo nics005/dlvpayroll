@@ -427,7 +427,7 @@
                     <input type="number" id="sunday-holiday-duty" name="sundayHolidayDuty" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
                 </div>
                 <div>
-                    <label for="night-shift-work-days" class="block text-sm font-medium text-gray-700">Night Shift Work Days</label>
+                    <label for="night-shift-work-days" class="block text-sm font-medium text-gray-700">Night Shift Work Days (8-hour shifts)</label>
                     <input type="number" id="night-shift-work-days" name="nightShiftWorkDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
                 </div>
                 <div>
@@ -1255,37 +1255,45 @@
 
             // Payroll Calculation Logic
             const calculatePayroll = () => {
-                const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
+                const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
                 const workingDays = parseFloat(workingDaysInput.value || 0);
                 const overtimeHrs = parseFloat(overtimeHrsInput.value || 0);
                 const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
-                const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0);
+                const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0); // Represents full 8-hour night shifts
                 const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
 
-                // Assuming salaryRate is the DAILY rate based on your example (700 * 6 = 4200)
-                const dailyRate = salaryRate;
+                // Constants for calculations
+                const dailyRate = salaryRate; // Daily rate is directly from the employee's salaryRate
                 const dailyWorkingHours = 8; // Assuming 8 hours per day
-                const hourlyRate = dailyRate / dailyWorkingHours;
+                const hourlyRate = dailyRate / dailyWorkingHours; // Hourly rate based on daily rate
 
-                // Calculations
+                // --- Individual Payroll Component Calculations ---
+
+                // Basic Pay: Daily Rate multiplied by the number of working days
                 const basicPay = dailyRate * workingDays;
-                console.log(`Basic Pay Calculation: Daily Rate (${dailyRate}) * Working Days (${workingDays}) = ${basicPay}`);
+                console.log(`Basic Pay: ${dailyRate.toFixed(2)} (Daily Rate) * ${workingDays} (Working Days) = ${basicPay.toFixed(2)}`);
 
-                const overtimePay = overtimeHrs * hourlyRate * 1.25; // 125% for regular overtime
-                console.log(`Overtime Pay Calculation: Overtime Hrs (${overtimeHrs}) * Hourly Rate (${hourlyRate}) * 1.25 = ${overtimePay}`);
+                // Overtime Pay: Overtime Hours * Hourly Rate * 125% (standard overtime premium)
+                const overtimePay = overtimeHrs * hourlyRate * 1.25;
+                console.log(`Overtime Pay: ${overtimeHrs} (OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.25 (OT Premium) = ${overtimePay.toFixed(2)}`);
 
-                const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30; // 130% for Sunday/Holiday (simplified)
-                console.log(`Sunday/Holiday Pay Calculation: Sunday/Holiday Duty (${sundayHolidayDuty}) * Hourly Rate (${hourlyRate}) * 1.30 = ${sundayHolidayPay}`);
+                // Sunday/Holiday Pay: Sunday/Holiday Duty Hours * Hourly Rate * 130% (standard premium for working on Sundays/Holidays)
+                const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30;
+                console.log(`Sunday/Holiday Pay: ${sundayHolidayDuty} (Sun/Hol Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.30 (Sun/Hol Premium) = ${sundayHolidayPay.toFixed(2)}`);
 
-                const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10; // 10% of hourly rate for night shift hours
-                console.log(`Night Shift Differential Calculation: Night Shift Work Days (${nightShiftWorkDays}) * Daily Working Hours (${dailyWorkingHours}) * Hourly Rate (${hourlyRate}) * 0.10 = ${nightShiftDifferential}`);
+                // Night Shift Differential: Night Shift Work Days * Daily Working Hours * Hourly Rate * 10% (night shift premium)
+                // Assumes each 'Night Shift Work Day' is a full 8-hour shift.
+                const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10;
+                console.log(`Night Shift Differential: ${nightShiftWorkDays} (Night Shift Days) * ${dailyWorkingHours} (Hrs/Day) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 0.10 (Night Diff Premium) = ${nightShiftDifferential.toFixed(2)}`);
 
-                const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375; // 125% of (hourly + 10% night diff)
-                console.log(`Night Shift Overtime Pay Calculation: Night Shift Overtime Hrs (${nightShiftOvertimeHrs}) * Hourly Rate (${hourlyRate}) * 1.375 = ${nightShiftOvertimePay}`);
+                // Night Shift Overtime Pay: Night Shift Overtime Hours * Hourly Rate * 137.5% (125% OT premium on top of 10% night diff)
+                // Calculation: (Hourly Rate * 1.10 for night shift) * 1.25 for overtime = Hourly Rate * 1.375
+                const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
+                console.log(`Night Shift Overtime Pay: ${nightShiftOvertimeHrs} (NS OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.375 (NS OT Premium) = ${nightShiftOvertimePay.toFixed(2)}`);
 
 
                 const grossPay = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
-                console.log(`Gross Pay Calculation: Basic Pay (${basicPay}) + Overtime Pay (${overtimePay}) + Sunday/Holiday Pay (${sundayHolidayPay}) + Night Shift Differential (${nightShiftDifferential}) + Night Shift Overtime Pay (${nightShiftOvertimePay}) = ${grossPay}`);
+                console.log(`Gross Pay: Basic (${basicPay.toFixed(2)}) + OT (${overtimePay.toFixed(2)}) + Sun/Hol (${sundayHolidayPay.toFixed(2)}) + NSD (${nightShiftDifferential.toFixed(2)}) + NSOT (${nightShiftOvertimePay.toFixed(2)}) = ${grossPay.toFixed(2)}`);
 
 
                 // Update display
