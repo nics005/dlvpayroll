@@ -780,7 +780,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase configuration (provided by the user)
         const firebaseConfig = JSON.parse(__firebase_config);
@@ -1161,11 +1161,23 @@
                 console.warn("User not authenticated. Cannot fetch payroll records.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`), orderBy("payrollDate", "desc"));
+            // Fetch all payroll records without orderBy
+            const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`));
             onSnapshot(q, (querySnapshot) => {
-                payrollRecordsListBody.innerHTML = ''; // Clear current list
+                let payrollRecords = [];
                 querySnapshot.forEach((doc) => {
-                    const record = doc.data();
+                    payrollRecords.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort records by payrollDate in descending order in memory
+                payrollRecords.sort((a, b) => {
+                    const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                    const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                    return dateB - dateA;
+                });
+
+                payrollRecordsListBody.innerHTML = ''; // Clear current list
+                payrollRecords.forEach((record) => {
                     const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
                     const newRow = payrollRecordsListBody.insertRow();
                     newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1176,10 +1188,10 @@
                         <td class="py-3 px-6 text-left">${payrollDate}</td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${record.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-payroll-record-btn" data-record-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-payroll-record-btn" data-record-id="${record.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
@@ -1245,21 +1257,27 @@
                     hiddenPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0);
 
 
-                    // Fetch the latest gross pay from payroll_records
+                    // Fetch all payroll records for this employee to find the latest gross pay
                     const payrollRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                        where("employeeDocId", "==", employeeDocId),
-                        orderBy("payrollDate", "desc"),
-                        limit(1)
+                        where("employeeDocId", "==", employeeDocId)
                     );
                     const payrollSnapshot = await getDocs(payrollRecordsQuery);
                     let latestGrossPay = 0;
                     let latestPayrollDocId = null;
 
                     if (!payrollSnapshot.empty) {
-                        const latestPayrollRecord = payrollSnapshot.docs[0].data();
+                        const allPayrollRecords = [];
+                        payrollSnapshot.forEach(doc => allPayrollRecords.push({ id: doc.id, ...doc.data() }));
+                        // Sort in memory to find the latest
+                        allPayrollRecords.sort((a, b) => {
+                            const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                            const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                            return dateB - dateA;
+                        });
+                        const latestPayrollRecord = allPayrollRecords[0];
                         latestGrossPay = latestPayrollRecord.grossPay || 0;
-                        latestPayrollDocId = payrollSnapshot.docs[0].id;
+                        latestPayrollDocId = latestPayrollRecord.id;
                     } else {
                         console.warn(`No payroll records found for employee ${employeeData.fullName}. Gross Pay set to 0.`);
                     }
@@ -1327,11 +1345,23 @@
                 console.warn("User not authenticated. Cannot fetch deduction records.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`), orderBy("deductionDate", "desc"));
+            // Fetch all deduction records without orderBy
+            const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`));
             onSnapshot(q, (querySnapshot) => {
-                deductionRecordsListBody.innerHTML = ''; // Clear current list
+                let deductionRecords = [];
                 querySnapshot.forEach((doc) => {
-                    const record = doc.data();
+                    deductionRecords.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort records by deductionDate in descending order in memory
+                deductionRecords.sort((a, b) => {
+                    const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
+                    const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
+                    return dateB - dateA;
+                });
+
+                deductionRecordsListBody.innerHTML = ''; // Clear current list
+                deductionRecords.forEach((record) => {
                     const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
                     const newRow = deductionRecordsListBody.insertRow();
                     newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1343,10 +1373,10 @@
                         <td class="py-3 px-6 text-left">${deductionDate}</td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${record.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-deduction-record-btn" data-record-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-deduction-record-btn" data-record-id="${record.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
@@ -1373,8 +1403,14 @@
             payrollSummaryContainer.innerHTML = ''; // Clear previous content
 
             try {
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("fullName"));
-                const employeeSnapshot = await getDocs(employeesQuery);
+                // Fetch all employees without orderBy
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                const employeeRawSnapshot = await getDocs(employeesQuery);
+                let employees = [];
+                employeeRawSnapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+
+                // Sort employees by fullName in memory
+                employees.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
 
                 let reportHtml = `
                     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -1401,38 +1437,49 @@
                                 <tbody class="text-gray-600 text-sm font-light">
                 `;
 
-                if (employeeSnapshot.empty) {
+                if (employees.length === 0) {
                     reportHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No employee records found.</td></tr>`;
                 } else {
-                    for (const employeeDoc of employeeSnapshot.docs) {
-                        const employeeData = employeeDoc.data();
-                        const employeeDocId = employeeDoc.id;
+                    for (const employeeData of employees) {
+                        const employeeDocId = employeeData.id;
 
-                        // Fetch latest payroll record for gross pay
+                        // Fetch all payroll records for this employee
                         const payrollQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                            where("employeeDocId", "==", employeeDocId),
-                            orderBy("payrollDate", "desc"),
-                            limit(1)
+                            where("employeeDocId", "==", employeeDocId)
                         );
                         const payrollSnapshot = await getDocs(payrollQuery);
-                        const latestGrossPay = payrollSnapshot.empty ? 0 : payrollSnapshot.docs[0].data().grossPay || 0;
+                        let allPayrollRecords = [];
+                        payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
+                        // Sort in memory to find the latest
+                        allPayrollRecords.sort((a, b) => {
+                            const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                            const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                            return dateB - dateA;
+                        });
+                        const latestGrossPay = allPayrollRecords.length > 0 ? allPayrollRecords[0].grossPay || 0 : 0;
 
-                        // Fetch latest deduction record for net pay and other deductions
+                        // Fetch all deduction records for this employee
                         const deductionQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                            where("employeeDocId", "==", employeeDocId),
-                            orderBy("deductionDate", "desc"),
-                            limit(1)
+                            where("employeeDocId", "==", employeeDocId)
                         );
                         const deductionSnapshot = await getDocs(deductionQuery);
+                        let allDeductionRecords = [];
+                        deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
+                        // Sort in memory to find the latest
+                        allDeductionRecords.sort((a, b) => {
+                            const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
+                            const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
+                            return dateB - dateA;
+                        });
                         
                         let latestTotalDeductions = 0;
                         let latestNetPay = latestGrossPay; // Default net pay to gross pay if no deductions
                         let otherDeductionsSum = 0; // Sum of non-govt deductions
 
-                        if (!deductionSnapshot.empty) {
-                            const latestDeductionRecord = deductionSnapshot.docs[0].data();
+                        if (allDeductionRecords.length > 0) {
+                            const latestDeductionRecord = allDeductionRecords[0];
                             latestTotalDeductions = latestDeductionRecord.totalDeductions || 0;
                             latestNetPay = latestDeductionRecord.netPay || latestGrossPay;
 
@@ -1489,6 +1536,7 @@
             }
         };
 
+
         // Function to open the Payroll Summary Detail Modal
         const openPayrollSummaryDetailModal = async (employeeDocId) => {
             if (!userId) {
@@ -1521,10 +1569,17 @@
                     // Fetch all payroll records for this employee
                     const payrollRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                        where("employeeDocId", "==", employeeDocId),
-                        orderBy("payrollDate", "desc")
+                        where("employeeDocId", "==", employeeDocId)
                     );
                     const payrollSnapshot = await getDocs(payrollRecordsQuery);
+                    let allPayrollRecords = [];
+                    payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
+                    // Sort in memory for display
+                    allPayrollRecords.sort((a, b) => {
+                        const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                        const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                        return dateB - dateA;
+                    });
 
                     contentHtml += `
                         <div class="bg-gray-100 p-4 rounded-md mb-4">
@@ -1549,11 +1604,10 @@
                                     </thead>
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
-                    if (payrollSnapshot.empty) {
+                    if (allPayrollRecords.length === 0) {
                         contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
                     } else {
-                        payrollSnapshot.forEach(recordDoc => {
-                            const record = recordDoc.data();
+                        allPayrollRecords.forEach(record => {
                             const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
                             contentHtml += `
                                 <tr>
@@ -1583,10 +1637,17 @@
                     // Fetch all deduction records for this employee
                     const deductionRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                        where("employeeDocId", "==", employeeDocId),
-                        orderBy("deductionDate", "desc")
+                        where("employeeDocId", "==", employeeDocId)
                     );
                     const deductionSnapshot = await getDocs(deductionRecordsQuery);
+                    let allDeductionRecords = [];
+                    deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
+                    // Sort in memory for display
+                    allDeductionRecords.sort((a, b) => {
+                        const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
+                        const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
+                        return dateB - dateA;
+                    });
 
                     contentHtml += `
                         <div class="bg-gray-100 p-4 rounded-md">
@@ -1614,11 +1675,10 @@
                                     </thead>
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
-                    if (deductionSnapshot.empty) {
+                    if (allDeductionRecords.length === 0) {
                         contentHtml += `<tr><td colspan="15" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
                     } else {
-                        deductionSnapshot.forEach(recordDoc => {
-                            const record = recordDoc.data();
+                        allDeductionRecords.forEach(record => {
                             const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
                             contentHtml += `
                                 <tr>
@@ -1669,8 +1729,16 @@
                 console.warn("User not authenticated. Cannot fetch employees.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("fullName")); // Changed to orderBy fullName for better sorting
+            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
             onSnapshot(q, (querySnapshot) => {
+                let employees = [];
+                querySnapshot.forEach(doc => {
+                    employees.push({ docId: doc.id, ...doc.data() });
+                });
+
+                // Sort employees by fullName in memory
+                employees.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+
                 employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
                 processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
                 deductionsTablesContainer.innerHTML = ''; // Clear current list for Deductions
@@ -1680,10 +1748,8 @@
                 let totalPayroll = 0;
                 const groupedEmployees = {}; // Object to group employees by department/site
 
-                querySnapshot.forEach((doc) => {
+                employees.forEach((employee) => {
                     totalEmployees++;
-                    const employee = doc.data();
-                    const employeeId = doc.id; 
                     totalPayroll += parseFloat(employee.salaryRate || 0);
 
                     // Add employee to the groupedEmployees object
@@ -1691,13 +1757,13 @@
                     if (!groupedEmployees[departmentSite]) {
                         groupedEmployees[departmentSite] = [];
                     }
-                    groupedEmployees[departmentSite].push({ ...employee, docId: doc.id });
+                    groupedEmployees[departmentSite].push(employee);
 
                     // Row for Manage Employee table
                     const manageRow = employeeListBody.insertRow();
                     manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
                     manageRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employee.docId}</td>
                         <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.position || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
@@ -1706,10 +1772,10 @@
                         <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${employee.docId}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${employee.docId}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
@@ -1720,11 +1786,11 @@
                     const payslipRow = payslipEmployeeListBody.insertRow();
                     payslipRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
                     payslipRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employee.docId}</td>
                         <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
                         <td class="py-3 px-6 text-center">
-                            <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-payslip-btn" data-id="${doc.id}">
+                            <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-payslip-btn" data-id="${employee.docId}">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             </button>
                         </td>
@@ -2174,25 +2240,38 @@
                 }
                 const employeeData = employeeSnap.data();
 
-                // Fetch latest payroll record
+                // Fetch all payroll records for this employee
                 const payrollQuery = query(
                     collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                    where("employeeDocId", "==", employeeDocId),
-                    orderBy("payrollDate", "desc"),
-                    limit(1)
+                    where("employeeDocId", "==", employeeDocId)
                 );
                 const payrollSnapshot = await getDocs(payrollQuery);
-                const payrollData = payrollSnapshot.empty ? {} : payrollSnapshot.docs[0].data();
+                let allPayrollRecords = [];
+                payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
+                // Sort in memory to find the latest
+                allPayrollRecords.sort((a, b) => {
+                    const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                    const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                    return dateB - dateA;
+                });
+                const payrollData = allPayrollRecords.length > 0 ? allPayrollRecords[0] : {};
 
-                // Fetch latest deduction record
+
+                // Fetch all deduction records for this employee
                 const deductionQuery = query(
                     collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                    where("employeeDocId", "==", employeeDocId),
-                    orderBy("deductionDate", "desc"),
-                    limit(1)
+                    where("employeeDocId", "==", employeeDocId)
                 );
                 const deductionSnapshot = await getDocs(deductionQuery);
-                const deductionData = deductionSnapshot.empty ? {} : deductionSnapshot.docs[0].data();
+                let allDeductionRecords = [];
+                deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
+                // Sort in memory to find the latest
+                allDeductionRecords.sort((a, b) => {
+                    const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
+                    const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
+                    return dateB - dateA;
+                });
+                const deductionData = allDeductionRecords.length > 0 ? allDeductionRecords[0] : {};
 
                 // Populate payslip modal fields
                 payslipPeriod.textContent = payrollData.payrollDate ? `Period: ${new Date(payrollData.payrollDate.seconds * 1000).toLocaleDateString()}` : 'No recent payroll data';
@@ -2427,190 +2506,4 @@
                         console.log("Site added successfully!");
                         addSiteModal.classList.add('hidden'); // Hide modal after submission
                         addSiteForm.reset(); // Clear the form
-                    } catch (e) {
-                        console.error("Error adding site: ", e);
-                    }
-                });
-            }
-
-            // Event listeners for payroll input fields to trigger calculation
-            workingDaysInput.addEventListener('input', calculatePayroll);
-            overtimeHrsInput.addEventListener('input', calculatePayroll);
-            sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
-            nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
-            nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
-
-            // Event listener for closing payroll input modal
-            if (cancelPayrollInputButton) {
-                cancelPayrollInputButton.addEventListener('click', () => {
-                    payrollInputModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for saving payroll data
-            if (payrollInputForm) {
-                payrollInputForm.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Prevent default form submission
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save payroll record.");
-                        return;
-                    }
-
-                    // Re-calculate to ensure latest values are used before saving
-                    calculatePayroll(); 
-
-                    const employeeDocId = payrollEmployeeDocIdInput.value;
-                    const payrollRecordDocId = payrollRecordDocIdInput.value; // Get the record ID
-                    const employeeName = payrollEmployeeNameSpan.textContent;
-                    const employeeId = payrollEmployeeIdSpan.textContent;
-                    const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
-
-                    const payrollRecordData = {
-                        employeeDocId: employeeDocId,
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        salaryRate: salaryRate,
-                        workingDays: parseFloat(workingDaysInput.value || 0),
-                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
-                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
-                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
-                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
-                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        payrollDate: new Date(),
-                        processedByUserId: userId
-                    };
-
-                    try {
-                        if (payrollRecordDocId) {
-                            // Update existing record
-                            const payrollRecordRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, payrollRecordDocId);
-                            await updateDoc(payrollRecordRef, payrollRecordData);
-                            console.log("Payroll record updated successfully!");
-                        } else {
-                            // Add new record
-                            await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecordData);
-                            console.log("New payroll record added successfully!");
-                        }
-                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
-                    } catch (e) {
-                        console.error("Error saving payroll record: ", e);
-                    }
-                });
-            }
-
-            // Event listeners for deduction input fields to trigger calculation
-            // Now also listen to changes on hidden inputs if they were to be changed by other means (though not expected here)
-            govtLoanInput.addEventListener('input', calculateDeductions);
-            coopShareInput.addEventListener('input', calculateDeductions);
-            withholdingTaxInput.addEventListener('input', calculateDeductions);
-            unpaidLoanInput.addEventListener('input', calculateDeductions);
-            coop2025Input.addEventListener('input', calculateDeductions);
-            caVoucherInput.addEventListener('input', calculateDeductions);
-            dailyValeInput.addEventListener('input', calculateDeductions);
-            othersDeductionInput.addEventListener('input', calculateDeductions);
-            hiddenSssContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
-            hiddenPhContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
-            hiddenPagibigContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
-
-
-            // Event listener for closing deductions input modal
-            if (cancelDeductionsInputButton) {
-                cancelDeductionsInputButton.addEventListener('click', () => {
-                    deductionsInputModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for saving deductions data
-            if (deductionsInputForm) {
-                deductionsInputForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save deduction record.");
-                        return;
-                    }
-
-                    calculateDeductions(); // Re-calculate to ensure latest values are used before saving
-
-                    const employeeDocId = deductionsEmployeeDocIdInput.value;
-                    const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
-                    const deductionRecordDocId = deductionsRecordDocIdInput.value; // Get the deduction record ID
-                    const employeeName = deductionsEmployeeNameSpan.textContent;
-                    const employeeId = deductionsEmployeeIdSpan.textContent;
-                    const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
-
-                    const deductionRecordData = {
-                        employeeDocId: employeeDocId,
-                        payrollDocId: payrollDocId, // Link to the specific payroll record
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        grossPay: grossPay,
-                        // Include government contributions from hidden inputs
-                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
-                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
-                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
-                        govtLoan: parseFloat(govtLoanInput.value || 0),
-                        coopShare: parseFloat(coopShareInput.value || 0),
-                        withholdingTax: parseFloat(withholdingTaxInput.value || 0),
-                        unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
-                        coop2025: parseFloat(coop2025Input.value || 0),
-                        caVoucher: parseFloat(caVoucherInput.value || 0),
-                        dailyVale: parseFloat(dailyValeInput.value || 0),
-                        othersDeduction: parseFloat(othersDeductionInput.value || 0),
-                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        deductionDate: new Date(),
-                        processedByUserId: userId
-                    };
-
-                    try {
-                        if (deductionRecordDocId) {
-                            // Update existing record
-                            const deductionRecordRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
-                            await updateDoc(deductionRecordRef, deductionRecordData);
-                            console.log("Deduction record updated successfully!");
-                        } else {
-                            // Add new record
-                            await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionRecordData);
-                            console.log("New deduction record added successfully!");
-                        }
-                        deductionsInputModal.classList.add('hidden');
-                    } catch (e) {
-                        console.error("Error saving deduction record: ", e);
-                    }
-                });
-            }
-
-            // Event listener for closing summary detail modal
-            if (closeSummaryDetailModalButton) {
-                closeSummaryDetailModalButton.addEventListener('click', () => {
-                    payrollSummaryDetailModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for closing payslip view modal
-            if (closePayslipViewModalButton) {
-                closePayslipViewModalButton.addEventListener('click', () => {
-                    payslipViewModal.classList.add('hidden');
-                });
-            }
-
-
-            // Add console.log to confirm button clicks
-            navButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
-                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
-                    showContent(targetId);
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+                  
