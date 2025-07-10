@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLV Electrical Services Co. Payroll System</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -56,7 +54,6 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Left Navigation Bar -->
     <nav class="w-64 bg-gray-800 text-white p-6 flex flex-col shadow-lg rounded-r-lg">
         <div class="text-2xl font-bold mb-8 text-center">
             DLV Payroll
@@ -69,23 +66,27 @@
                 </button>
             </li>
             <li>
-                <button class="nav-button w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="manage-employee">
+                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="manage-employee">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.129-.007-.257-.02-.385m-1.993 0A5.002 5.002 0 0012 18a5.002 5.002 0 00-3.986-1.995M12 12h.01M12 7a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z"></path></svg>
                     Manage Employee
                 </button>
             </li>
             <li>
-                <button class="nav-button w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="site">
+                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="site">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     Site
                 </button>
             </li>
         </ul>
+        <div class="mt-auto pt-4 border-t border-gray-700">
+            <button id="activate-admin-mode-button" class="w-full flex items-center px-4 py-2 rounded-lg text-left bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                Activate Admin Mode
+            </button>
+        </div>
     </nav>
 
-    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col bg-gray-100 rounded-l-lg overflow-hidden">
-        <!-- Header -->
         <header class="bg-white p-4 shadow-md flex items-center justify-between rounded-tl-lg">
             <h1 class="text-2xl font-semibold text-gray-800" id="current-page-title">Dashboard</h1>
             <div class="flex items-center space-x-4">
@@ -95,13 +96,10 @@
             </div>
         </header>
 
-        <!-- Content Display Area -->
         <div class="flex-1 p-6 overflow-y-auto content-area">
-            <!-- Dashboard Content -->
             <div id="dashboard-content" class="page-content active">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Overview</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Card 1: Total Employees -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Total Employees</h3>
@@ -111,7 +109,6 @@
                         <p class="text-sm text-gray-500 mt-2">Active employees this month</p>
                     </div>
 
-                    <!-- Card 2: Payroll Processed -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Payroll Processed</h3>
@@ -121,7 +118,6 @@
                         <p class="text-sm text-gray-500 mt-2">Total amount disbursed</p>
                     </div>
 
-                    <!-- Card 3: Active Sites -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Active Sites</h3>
@@ -135,18 +131,16 @@
                 <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Payroll Activities</h3>
                     <ul class="divide-y divide-gray-200" id="recent-activities-list">
-                        <!-- Recent payroll activities will be dynamically loaded here -->
-                    </ul>
+                        </ul>
                 </div>
             </div>
 
-            <!-- Manage Employee Content -->
             <div id="manage-employee-content" class="page-content hidden">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Employees</h2>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-gray-800">Employee List</h3>
-                        <button id="add-employee-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        <button id="add-employee-button" class="admin-feature-only bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                             Add New Employee
                         </button>
                     </div>
@@ -165,20 +159,18 @@
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 text-sm font-light" id="employee-list-body">
-                                <!-- Employee data will be dynamically loaded here -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- Site Content -->
             <div id="site-content" class="page-content hidden">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Sites</h2>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-gray-800">Project Sites List</h3>
-                        <button id="add-site-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        <button id="add-site-button" class="admin-feature-only bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                             Add New Site
                         </button>
                     </div>
@@ -194,8 +186,7 @@
                                 </tr>
                             </thead>
                             <tbody class="text-gray-600 text-sm font-light" id="site-list-body">
-                                <!-- Site data will be dynamically loaded here -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -203,7 +194,6 @@
         </div>
     </main>
 
-    <!-- Add Employee Modal -->
     <div id="add-employee-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Employee</h2>
@@ -232,8 +222,7 @@
                     <label for="department-site-dropdown" class="block text-sm font-medium text-gray-700">Department/Site</label>
                     <select id="department-site-dropdown" name="departmentSite" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
                         <option value="">Select Department/Site</option>
-                        <!-- Options will be dynamically populated from added sites -->
-                    </select>
+                        </select>
                 </div>
                 <div>
                     <label for="salary-rate" class="block text-sm font-medium text-gray-700">Salary Rate (PHP)</label>
@@ -263,7 +252,6 @@
         </div>
     </div>
 
-    <!-- Add Site Modal -->
     <div id="add-site-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Site</h2>
@@ -302,6 +290,27 @@
         </div>
     </div>
 
+    <div id="admin-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Activate Admin Mode</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="admin-password-input" class="block text-sm font-medium text-gray-700">Admin Password</label>
+                    <input type="password" id="admin-password-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                    <span id="admin-error-message" class="text-red-500 text-sm mt-1 block"></span>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-admin-modal-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="button" id="activate-admin-modal-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        Activate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -328,6 +337,13 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // Admin Mode variables
+        let isAdminMode = false;
+        // **WARNING:** Hardcoding passwords in client-side code is highly insecure.
+        // For a real application, implement proper Firebase Authentication for admin users
+        // and check custom claims or roles for authorization.
+        const ADMIN_PASSWORD = "dlvadmin"; 
+
         // --- Global element references ---
         const totalEmployeesCard = document.getElementById('total-employees');
         const payrollProcessedCard = document.getElementById('payroll-processed');
@@ -337,6 +353,15 @@
         const departmentSiteDropdown = document.getElementById('department-site-dropdown');
         const siteListBody = document.getElementById('site-list-body');
         const displayUserIdSpan = document.getElementById('display-user-id');
+
+        // New admin mode related elements
+        const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); // Select all elements with this class
+        const activateAdminModeButton = document.getElementById('activate-admin-mode-button');
+        const adminModal = document.getElementById('admin-modal');
+        const adminPasswordInput = document.getElementById('admin-password-input');
+        const activateAdminModalButton = document.getElementById('activate-admin-modal-button');
+        const cancelAdminModalButton = document.getElementById('cancel-admin-modal-button');
+        const adminErrorMessage = document.getElementById('admin-error-message');
 
 
         // Function to populate the Department/Site dropdown from Firestore sites
@@ -558,6 +583,61 @@
         });
 
 
+        // Function to update UI based on admin mode status
+        const updateAdminUI = () => {
+            adminFeatureElements.forEach(el => {
+                if (isAdminMode) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            if (activateAdminModeButton) {
+                if (isAdminMode) {
+                    activateAdminModeButton.classList.add('hidden'); // Hide activate button once activated
+                } else {
+                    activateAdminModeButton.classList.remove('hidden');
+                }
+            }
+        };
+
+        // Admin mode activation logic
+        if (activateAdminModeButton) {
+            activateAdminModeButton.addEventListener('click', () => {
+                if (adminModal) {
+                    adminModal.classList.remove('hidden');
+                    if (adminPasswordInput) adminPasswordInput.value = ''; // Clear previous input
+                    if (adminErrorMessage) adminErrorMessage.textContent = ''; // Clear previous error
+                }
+            });
+        }
+
+        if (cancelAdminModalButton) {
+            cancelAdminModalButton.addEventListener('click', () => {
+                if (adminModal) adminModal.classList.add('hidden');
+            });
+        }
+
+        if (activateAdminModalButton) {
+            activateAdminModalButton.addEventListener('click', () => {
+                if (adminPasswordInput && adminErrorMessage) {
+                    const enteredPassword = adminPasswordInput.value;
+                    if (enteredPassword === ADMIN_PASSWORD) {
+                        isAdminMode = true;
+                        sessionStorage.setItem('isAdminMode', 'true'); // Persist admin mode for the session
+                        if (adminModal) adminModal.classList.add('hidden');
+                        updateAdminUI();
+                        showContent('dashboard'); // Re-show dashboard to ensure correct active tab
+                        console.log("Admin mode activated!");
+                    } else {
+                        adminErrorMessage.textContent = "Incorrect password.";
+                    }
+                }
+            });
+        }
+
+
         document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const pageContents = document.querySelectorAll('.page-content');
@@ -578,6 +658,15 @@
             const addSiteForm = document.getElementById('add-site-form');
             const siteIdInput = document.getElementById('site-id');
             
+            // Check if admin mode was previously activated in this session
+            isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
+
+            // Set initial UI state based on admin mode
+            updateAdminUI();
+            
+            // Always show dashboard on initial load (or if admin mode isn't active)
+            showContent('dashboard'); 
+
 
             // Function to generate unique employee ID
             const generateEmployeeId = () => {
@@ -630,11 +719,13 @@
 
 
             // Event listener for "Add New Employee" button
-            addEmployeeButton.addEventListener('click', () => {
-                employeeIdInput.value = generateEmployeeId(); // Generate and set ID
-                populateDepartmentSiteDropdown(); // Populate dropdown before showing modal
-                addEmployeeModal.classList.remove('hidden');
-            });
+            if (addEmployeeButton) { // Ensure button exists before adding listener
+                addEmployeeButton.addEventListener('click', () => {
+                    employeeIdInput.value = generateEmployeeId(); // Generate and set ID
+                    populateDepartmentSiteDropdown(); // Populate dropdown before showing modal
+                    addEmployeeModal.classList.remove('hidden');
+                });
+            }
 
             // Event listener for "Cancel" button in the employee modal
             cancelAddEmployee.addEventListener('click', () => {
@@ -678,10 +769,12 @@
             });
 
             // Event listener for "Add New Site" button
-            addSiteButton.addEventListener('click', () => {
-                siteIdInput.value = generateSiteId(); // Generate and set ID
-                addSiteModal.classList.remove('hidden');
-            });
+            if (addSiteButton) { // Ensure button exists before adding listener
+                addSiteButton.addEventListener('click', () => {
+                    siteIdInput.value = generateSiteId(); // Generate and set ID
+                    addSiteModal.classList.remove('hidden');
+                });
+            }
 
             // Event listener for "Cancel" button in the site modal
             cancelAddSite.addEventListener('click', () => {
@@ -726,9 +819,6 @@
                     showContent(targetId);
                 });
             });
-
-            // Initially show the Dashboard content and fetch data
-            showContent('dashboard');
         });
     </script>
 </body>
