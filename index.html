@@ -41,7 +41,7 @@
             align-items: center;
             z-index: 1000;
         }
-        /* Standard Modal content */
+        /* Modal content */
         .modal-content {
             background-color: #fff;
             padding: 2rem;
@@ -51,49 +51,6 @@
             max-width: 700px; /* Increased max-width for more content */
             max-height: 90vh; /* Limit height to prevent overflow */
             overflow-y: auto; /* Enable scrolling for modal content */
-        }
-
-        /* Payslip Modal specific styling */
-        .payslip-modal-content {
-            background-color: #fff;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 250px; /* Approx coin envelope width */
-            height: 400px; /* Approx coin envelope height (portrait) */
-            overflow-y: auto; /* Allow scrolling if content overflows */
-            font-family: 'Inter', sans-serif;
-            font-size: 0.75rem; /* Smaller font for compact look */
-            line-height: 1.2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Push close button to bottom */
-        }
-
-        .payslip-modal-content h3 {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            text-align: center;
-        }
-
-        .payslip-modal-content p {
-            margin-bottom: 0.2rem;
-        }
-
-        .payslip-modal-content .section-title {
-            font-weight: 700;
-            margin-top: 0.75rem;
-            margin-bottom: 0.2rem;
-            border-bottom: 1px dashed #e5e7eb;
-            padding-bottom: 0.2rem;
-        }
-
-        .payslip-modal-content .total-row {
-            font-weight: 700;
-            margin-top: 0.5rem;
-            padding-top: 0.2rem;
-            border-top: 1px dashed #e5e7eb;
         }
     </style>
 </head>
@@ -141,13 +98,6 @@
                 <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payroll-summary">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     Payroll Summary
-                </button>
-            </li>
-            <!-- New Payslips Navigation Button -->
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payslips">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                    Payslips
                 </button>
             </li>
         </ul>
@@ -337,29 +287,6 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Payroll Summary</h2>
                 <div id="payroll-summary-container" class="space-y-8">
                     <!-- Payroll summary data will be dynamically loaded here -->
-                </div>
-            </div>
-
-            <!-- Payslips Content -->
-            <div id="payslips-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Generated Payslips</h2>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Select Employee to View Payslip</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
-                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
-                                    <th class="py-3 px-6 text-left">Name</th>
-                                    <th class="py-3 px-6 text-left">Department/Site</th>
-                                    <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="payslip-employee-list-body">
-                                <!-- Employee list for payslips will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
         </div>
@@ -723,71 +650,31 @@
         </div>
     </div>
 
-    <!-- Payslip View Modal -->
-    <div id="payslip-view-modal" class="modal-backdrop hidden">
-        <div class="payslip-modal-content">
-            <div class="text-center mb-2">
-                <h3 class="text-base font-bold text-gray-900">DLV Electrical Services Co.</h3>
-                <p class="text-xs text-gray-600">Employee Payslip</p>
-                <p class="text-xs text-gray-600" id="payslip-period"></p>
-            </div>
-
-            <div class="border-t border-b border-gray-300 py-2 mb-2">
-                <p><strong>Employee ID:</strong> <span id="payslip-employee-id-display"></span></p>
-                <p><strong>Name:</strong> <span id="payslip-employee-name-display"></span></p>
-                <p><strong>Position:</strong> <span id="payslip-employee-position-display"></span></p>
-                <p><strong>Daily Rate:</strong> ₱ <span id="payslip-employee-salary-rate-display"></span></p>
-            </div>
-
-            <div class="flex-1 overflow-y-auto pr-2"> <!-- Scrollable area for earnings/deductions -->
-                <p class="section-title">Earnings</p>
-                <p class="flex justify-between"><span>Basic Pay:</span> <span>₱ <span id="payslip-basic-pay">0.00</span></span></p>
-                <p class="flex justify-between"><span>Overtime Pay:</span> <span>₱ <span id="payslip-overtime-pay">0.00</span></span></p>
-                <p class="flex justify-between"><span>Sun/Holiday Pay:</span> <span>₱ <span id="payslip-sunday-holiday-pay">0.00</span></span></p>
-                <p class="flex justify-between"><span>Night Diff:</span> <span>₱ <span id="payslip-night-shift-differential">0.00</span></span></p>
-                <p class="flex justify-between"><span>Night OT Pay:</span> <span>₱ <span id="payslip-night-shift-overtime-pay">0.00</span></span></p>
-                <p class="total-row flex justify-between"><span>GROSS PAY:</span> <span>₱ <span id="payslip-gross-pay">0.00</span></span></p>
-
-                <p class="section-title mt-4">Deductions</p>
-                <p class="flex justify-between"><span>SSS Contribution:</span> <span>₱ <span id="payslip-sss-contribution">0.00</span></span></p>
-                <p class="flex justify-between"><span>PhilHealth Contrib.:</span> <span>₱ <span id="payslip-ph-contribution">0.00</span></span></p>
-                <p class="flex justify-between"><span>Pag-IBIG Contrib.:</span> <span>₱ <span id="payslip-pagibig-contribution">0.00</span></span></p>
-                <p class="flex justify-between"><span>Govt Loan:</span> <span>₱ <span id="payslip-govt-loan">0.00</span></span></p>
-                <p class="flex justify-between"><span>Coop Share:</span> <span>₱ <span id="payslip-coop-share">0.00</span></span></p>
-                <p class="flex justify-between"><span>Withholding Tax:</span> <span>₱ <span id="payslip-withholding-tax">0.00</span></span></p>
-                <p class="flex justify-between"><span>Unpaid Loan:</span> <span>₱ <span id="payslip-unpaid-loan">0.00</span></span></p>
-                <p class="flex justify-between"><span>Coop 2025:</span> <span>₱ <span id="payslip-coop-2025">0.00</span></span></p>
-                <p class="flex justify-between"><span>C/A Voucher:</span> <span>₱ <span id="payslip-ca-voucher">0.00</span></span></p>
-                <p class="flex justify-between"><span>Daily Vale:</span> <span>₱ <span id="payslip-daily-vale">0.00</span></span></p>
-                <p class="flex justify-between"><span>Others:</span> <span>₱ <span id="payslip-others-deduction">0.00</span></span></p>
-                <p class="total-row flex justify-between"><span>TOTAL DEDUCTIONS:</span> <span>₱ <span id="payslip-total-deductions">0.00</span></span></p>
-            </div>
-
-            <div class="border-t border-gray-300 pt-2 mt-2 text-center">
-                <p class="text-base font-bold text-gray-900">NET PAY: ₱ <span id="payslip-net-pay">0.00</span></p>
-            </div>
-
-            <div class="flex justify-center mt-4">
-                <button type="button" id="close-payslip-view-modal" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200 text-sm">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-
-
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Declare Firebase variables at a higher scope
-        let app;
-        let db;
-        let auth;
+        // Firebase configuration (provided by the user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYpApEwrgAsso-dJ-uTAX3AI4yRZBn9JU",
+            authDomain: "payroll-aef73.firebaseapp.com",
+            projectId: "payroll-aef73",
+            storageBucket: "payroll-aef73.firebasestorage.app",
+            messagingSenderId: "717714854870",
+            appId: "1:717714854870:web:b1e7eb0dc82cd61dbc8a77",
+            measurementId: "G-F31PSMN7RD"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
         let userId = null;
-        let appId = null; // Will be set in DOMContentLoaded
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Admin Mode variables
         let isAdminMode = false;
@@ -922,37 +809,6 @@
         const summaryDetailContent = document.getElementById('summary-detail-content');
         const closeSummaryDetailModalButton = document.getElementById('close-summary-detail-modal');
 
-        // Payslip elements
-        const payslipEmployeeListBody = document.getElementById('payslip-employee-list-body');
-        const payslipViewModal = document.getElementById('payslip-view-modal');
-        const closePayslipViewModalButton = document.getElementById('close-payslip-view-modal');
-
-        const payslipPeriod = document.getElementById('payslip-period');
-        const payslipEmployeeIdDisplay = document.getElementById('payslip-employee-id-display');
-        const payslipEmployeeNameDisplay = document.getElementById('payslip-employee-name-display');
-        const payslipEmployeePositionDisplay = document.getElementById('payslip-employee-position-display');
-        const payslipEmployeeSalaryRateDisplay = document.getElementById('payslip-employee-salary-rate-display');
-        const payslipBasicPay = document.getElementById('payslip-basic-pay');
-        const payslipOvertimePay = document.getElementById('payslip-overtime-pay');
-        const payslipSundayHolidayPay = document.getElementById('payslip-sunday-holiday-pay');
-        const payslipNightShiftDifferential = document.getElementById('payslip-night-shift-differential');
-        const payslipNightShiftOvertimePay = document.getElementById('payslip-night-shift-overtime-pay');
-        const payslipGrossPay = document.getElementById('payslip-gross-pay');
-        const payslipSssContribution = document.getElementById('payslip-sss-contribution');
-        const payslipPhContribution = document.getElementById('payslip-ph-contribution');
-        const payslipPagibigContribution = document.getElementById('payslip-pagibig-contribution');
-        const payslipGovtLoan = document.getElementById('payslip-govt-loan');
-        const payslipCoopShare = document.getElementById('payslip-coop-share');
-        const payslipWithholdingTax = document.getElementById('payslip-withholding-tax');
-        const payslipUnpaidLoan = document.getElementById('payslip-unpaid-loan');
-        const payslipCoop2025 = document.getElementById('payslip-coop-2025');
-        const payslipCaVoucher = document.getElementById('payslip-ca-voucher'); // Corrected line
-        const payslipDailyVale = document.getElementById('payslip-daily-vale');
-        const payslipOthersDeduction = document.getElementById('payslip-others-deduction');
-        const payslipTotalDeductions = document.getElementById('payslip-total-deductions');
-        const payslipNetPay = document.getElementById('payslip-net-pay');
-
-
         // Function to generate unique employee ID
         const generateEmployeeId = () => {
             const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
@@ -977,8 +833,8 @@
             });
 
             try {
-                if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                    console.warn("Firebase not initialized or user not authenticated. Cannot fetch sites for dropdown.");
+                if (!userId) {
+                    console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
                     return;
                 }
                 const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
@@ -1002,8 +858,8 @@
 
         // Function to open the Edit Employee Modal
         const openEditEmployeeModal = async (docId) => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot edit employee.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot edit employee.");
                 return;
             }
             try {
@@ -1041,7 +897,7 @@
         // Function to open the Delete Confirmation Modal (generic for employee, payroll, deduction)
         const openDeleteConfirmationModal = (docId, type) => {
             recordToDeleteDocId = docId; // Store the ID
-            recordTypeToDelete = type; // Store the type ('employee', 'payroll', or 'deduction')
+            recordTypeToDelete = type; // Store the type ('employee', 'payroll', 'deduction')
             deleteConfirmationModal.classList.remove('hidden');
         };
 
@@ -1091,8 +947,8 @@
 
         // Function to open the Payroll Input Modal (for both add and edit)
         const openPayrollInputModal = async (employeeDocId, payrollRecordDocId = null) => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot open payroll input.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot open payroll input.");
                 return;
             }
             try {
@@ -1152,27 +1008,15 @@
 
         // Fetch and Display Payroll Records
         const fetchAndDisplayPayrollRecords = () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch payroll records.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch payroll records.");
                 return;
             }
-            // Fetch all payroll records without orderBy
-            const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`));
+            const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`), orderBy("payrollDate", "desc"));
             onSnapshot(q, (querySnapshot) => {
-                let payrollRecords = [];
-                querySnapshot.forEach((doc) => {
-                    payrollRecords.push({ id: doc.id, ...doc.data() });
-                });
-
-                // Sort records by payrollDate in descending order in memory
-                payrollRecords.sort((a, b) => {
-                    const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                    const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                    return dateB - dateA;
-                });
-
                 payrollRecordsListBody.innerHTML = ''; // Clear current list
-                payrollRecords.forEach((record) => {
+                querySnapshot.forEach((doc) => {
+                    const record = doc.data();
                     const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
                     const newRow = payrollRecordsListBody.insertRow();
                     newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1183,10 +1027,10 @@
                         <td class="py-3 px-6 text-left">${payrollDate}</td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${record.id}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-payroll-record-btn" data-record-id="${record.id}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-payroll-record-btn" data-record-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
@@ -1226,8 +1070,8 @@
 
         // Function to open the Deductions Input Modal (for both add and edit)
         const openDeductionsModal = async (employeeDocId, deductionRecordDocId = null) => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot open deductions input.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot open deductions input.");
                 return;
             }
             try {
@@ -1252,27 +1096,21 @@
                     hiddenPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0);
 
 
-                    // Fetch all payroll records for this employee to find the latest gross pay
+                    // Fetch the latest gross pay from payroll_records
                     const payrollRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                        where("employeeDocId", "==", employeeDocId)
+                        where("employeeDocId", "==", employeeDocId),
+                        orderBy("payrollDate", "desc"),
+                        limit(1)
                     );
                     const payrollSnapshot = await getDocs(payrollRecordsQuery);
                     let latestGrossPay = 0;
                     let latestPayrollDocId = null;
 
                     if (!payrollSnapshot.empty) {
-                        const allPayrollRecords = [];
-                        payrollSnapshot.forEach(doc => allPayrollRecords.push({ id: doc.id, ...doc.data() }));
-                        // Sort in memory to find the latest
-                        allPayrollRecords.sort((a, b) => {
-                            const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                            const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                            return dateB - dateA;
-                        });
-                        const latestPayrollRecord = allPayrollRecords[0];
+                        const latestPayrollRecord = payrollSnapshot.docs[0].data();
                         latestGrossPay = latestPayrollRecord.grossPay || 0;
-                        latestPayrollDocId = latestPayrollRecord.id;
+                        latestPayrollDocId = payrollSnapshot.docs[0].id;
                     } else {
                         console.warn(`No payroll records found for employee ${employeeData.fullName}. Gross Pay set to 0.`);
                     }
@@ -1336,27 +1174,15 @@
 
         // Fetch and Display Deduction Records
         const fetchAndDisplayDeductionRecords = () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch deduction records.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch deduction records.");
                 return;
             }
-            // Fetch all deduction records without orderBy
-            const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`));
+            const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`), orderBy("deductionDate", "desc"));
             onSnapshot(q, (querySnapshot) => {
-                let deductionRecords = [];
-                querySnapshot.forEach((doc) => {
-                    deductionRecords.push({ id: doc.id, ...doc.data() });
-                });
-
-                // Sort records by deductionDate in descending order in memory
-                deductionRecords.sort((a, b) => {
-                    const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
-                    const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
-                    return dateB - dateA;
-                });
-
                 deductionRecordsListBody.innerHTML = ''; // Clear current list
-                deductionRecords.forEach((record) => {
+                querySnapshot.forEach((doc) => {
+                    const record = doc.data();
                     const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
                     const newRow = deductionRecordsListBody.insertRow();
                     newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1368,10 +1194,10 @@
                         <td class="py-3 px-6 text-left">${deductionDate}</td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${record.id}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-deduction-record-btn" data-record-id="${record.id}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-deduction-record-btn" data-record-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
@@ -1386,8 +1212,8 @@
 
         // Fetch and Display Payroll Summary
         const fetchAndDisplayPayrollSummary = async () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch payroll summary.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch payroll summary.");
                 return;
             }
             if (!isAdminMode) {
@@ -1398,14 +1224,8 @@
             payrollSummaryContainer.innerHTML = ''; // Clear previous content
 
             try {
-                // Fetch all employees without orderBy
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
-                const employeeRawSnapshot = await getDocs(employeesQuery);
-                let employees = [];
-                employeeRawSnapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
-
-                // Sort employees by fullName in memory
-                employees.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("fullName"));
+                const employeeSnapshot = await getDocs(employeesQuery);
 
                 let reportHtml = `
                     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -1432,49 +1252,38 @@
                                 <tbody class="text-gray-600 text-sm font-light">
                 `;
 
-                if (employees.length === 0) {
+                if (employeeSnapshot.empty) {
                     reportHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No employee records found.</td></tr>`;
                 } else {
-                    for (const employeeData of employees) {
-                        const employeeDocId = employeeData.id;
+                    for (const employeeDoc of employeeSnapshot.docs) {
+                        const employeeData = employeeDoc.data();
+                        const employeeDocId = employeeDoc.id;
 
-                        // Fetch all payroll records for this employee
+                        // Fetch latest payroll record for gross pay
                         const payrollQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                            where("employeeDocId", "==", employeeDocId)
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("payrollDate", "desc"),
+                            limit(1)
                         );
                         const payrollSnapshot = await getDocs(payrollQuery);
-                        let allPayrollRecords = [];
-                        payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
-                        // Sort in memory to find the latest
-                        allPayrollRecords.sort((a, b) => {
-                            const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                            const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                            return dateB - dateA;
-                        });
-                        const latestGrossPay = allPayrollRecords.length > 0 ? allPayrollRecords[0].grossPay || 0 : 0;
+                        const latestGrossPay = payrollSnapshot.empty ? 0 : payrollSnapshot.docs[0].data().grossPay || 0;
 
-                        // Fetch all deduction records for this employee
+                        // Fetch latest deduction record for net pay and other deductions
                         const deductionQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                            where("employeeDocId", "==", employeeDocId)
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("deductionDate", "desc"),
+                            limit(1)
                         );
                         const deductionSnapshot = await getDocs(deductionQuery);
-                        let allDeductionRecords = [];
-                        deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
-                        // Sort in memory to find the latest
-                        allDeductionRecords.sort((a, b) => {
-                            const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
-                            const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
-                            return dateB - dateA;
-                        });
                         
                         let latestTotalDeductions = 0;
                         let latestNetPay = latestGrossPay; // Default net pay to gross pay if no deductions
                         let otherDeductionsSum = 0; // Sum of non-govt deductions
 
-                        if (allDeductionRecords.length > 0) {
-                            const latestDeductionRecord = allDeductionRecords[0];
+                        if (!deductionSnapshot.empty) {
+                            const latestDeductionRecord = deductionSnapshot.docs[0].data();
                             latestTotalDeductions = latestDeductionRecord.totalDeductions || 0;
                             latestNetPay = latestDeductionRecord.netPay || latestGrossPay;
 
@@ -1531,11 +1340,10 @@
             }
         };
 
-
         // Function to open the Payroll Summary Detail Modal
         const openPayrollSummaryDetailModal = async (employeeDocId) => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot open summary detail.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot open summary detail.");
                 return;
             }
             try {
@@ -1564,17 +1372,10 @@
                     // Fetch all payroll records for this employee
                     const payrollRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                        where("employeeDocId", "==", employeeDocId)
+                        where("employeeDocId", "==", employeeDocId),
+                        orderBy("payrollDate", "desc")
                     );
                     const payrollSnapshot = await getDocs(payrollRecordsQuery);
-                    let allPayrollRecords = [];
-                    payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
-                    // Sort in memory for display
-                    allPayrollRecords.sort((a, b) => {
-                        const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                        const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                        return dateB - dateA;
-                    });
 
                     contentHtml += `
                         <div class="bg-gray-100 p-4 rounded-md mb-4">
@@ -1599,10 +1400,11 @@
                                     </thead>
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
-                    if (allPayrollRecords.length === 0) {
+                    if (payrollSnapshot.empty) {
                         contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
                     } else {
-                        allPayrollRecords.forEach(record => {
+                        payrollSnapshot.forEach(recordDoc => {
+                            const record = recordDoc.data();
                             const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
                             contentHtml += `
                                 <tr>
@@ -1632,17 +1434,10 @@
                     // Fetch all deduction records for this employee
                     const deductionRecordsQuery = query(
                         collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                        where("employeeDocId", "==", employeeDocId)
+                        where("employeeDocId", "==", employeeDocId),
+                        orderBy("deductionDate", "desc")
                     );
                     const deductionSnapshot = await getDocs(deductionRecordsQuery);
-                    let allDeductionRecords = [];
-                    deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
-                    // Sort in memory for display
-                    allDeductionRecords.sort((a, b) => {
-                        const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
-                        const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
-                        return dateB - dateA;
-                    });
 
                     contentHtml += `
                         <div class="bg-gray-100 p-4 rounded-md">
@@ -1670,10 +1465,11 @@
                                     </thead>
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
-                    if (allDeductionRecords.length === 0) {
+                    if (deductionSnapshot.empty) {
                         contentHtml += `<tr><td colspan="15" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
                     } else {
-                        allDeductionRecords.forEach(record => {
+                        deductionSnapshot.forEach(recordDoc => {
+                            const record = recordDoc.data();
                             const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
                             contentHtml += `
                                 <tr>
@@ -1720,31 +1516,24 @@
 
         // Fetch and display Employees for Manage Employee, Process Payroll, and Deductions tables
         const fetchEmployees = () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch employees.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch employees.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
             onSnapshot(q, (querySnapshot) => {
-                let employees = [];
-                querySnapshot.forEach(doc => {
-                    employees.push({ docId: doc.id, ...doc.data() });
-                });
-
-                // Sort employees by fullName in memory
-                employees.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
-
                 employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
                 processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
                 deductionsTablesContainer.innerHTML = ''; // Clear current list for Deductions
-                payslipEmployeeListBody.innerHTML = ''; // Clear current list for Payslips
 
                 let totalEmployees = 0;
                 let totalPayroll = 0;
                 const groupedEmployees = {}; // Object to group employees by department/site
 
-                employees.forEach((employee) => {
+                querySnapshot.forEach((doc) => {
                     totalEmployees++;
+                    const employee = doc.data();
+                    const employeeId = doc.id; 
                     totalPayroll += parseFloat(employee.salaryRate || 0);
 
                     // Add employee to the groupedEmployees object
@@ -1752,13 +1541,13 @@
                     if (!groupedEmployees[departmentSite]) {
                         groupedEmployees[departmentSite] = [];
                     }
-                    groupedEmployees[departmentSite].push(employee);
+                    groupedEmployees[departmentSite].push({ ...employee, docId: doc.id });
 
                     // Row for Manage Employee table
                     const manageRow = employeeListBody.insertRow();
                     manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
                     manageRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employee.docId}</td>
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
                         <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.position || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
@@ -1767,27 +1556,13 @@
                         <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
                         <td class="py-3 px-6 text-center">
                             <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${employee.docId}">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${employee.docId}">
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
-                        </td>
-                    `;
-
-                    // Row for Payslip employee list table
-                    const payslipRow = payslipEmployeeListBody.insertRow();
-                    payslipRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                    payslipRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employee.docId}</td>
-                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
-                        <td class="py-3 px-6 text-center">
-                            <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-payslip-btn" data-id="${employee.docId}">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </button>
                         </td>
                     `;
                 });
@@ -1960,18 +1735,13 @@
             document.querySelectorAll('#payroll-summary-container .generate-report-btn').forEach(button => {
                 button.onclick = (e) => alert("Generate Report functionality coming soon!"); // Placeholder
             });
-
-            // For Payslip employee list
-            document.querySelectorAll('#payslip-employee-list-body .view-payslip-btn').forEach(button => {
-                button.onclick = (e) => openPayslipViewModal(e.currentTarget.dataset.id);
-            });
         };
 
 
         // Fetch and display Sites
         const fetchSites = () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch sites.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch sites.");
                 return;
             }
             const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
@@ -2015,8 +1785,8 @@
 
         // Update Dashboard Counts
         const updateDashboardCounts = async () => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot update dashboard counts.");
+            if (!userId) {
+                console.warn("User not authenticated. Cannot update dashboard counts.");
                 return;
             }
             try {
@@ -2094,10 +1864,53 @@
                 updateDashboardCounts();
             } else if (targetId === 'payroll-summary') {
                 fetchAndDisplayPayrollSummary(); // Fetch and display summary data
-            } else if (targetId === 'payslips') { // New payslips content load
-                fetchEmployees(); // To populate the employee list for payslips
             }
         };
+
+
+        // Authenticate user
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("Authenticated with Firebase UID:", userId);
+            } else {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser.uid;
+                        console.log("Signed in with custom token. User ID:", userId);
+                    } else {
+                        // If no initialAuthToken, try anonymous sign-in
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
+                        console.log("Signed in anonymously (no custom token). User ID:", userId);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed, attempting fallback to anonymous:", error);
+                    try {
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
+                        console.log("Signed in anonymously after initial auth failure. User ID:", userId);
+                    } catch (anonError) {
+                        console.error("Anonymous sign-in also failed:", anonError);
+                        // Fallback to random UUID if all Firebase auth fails
+                        userId = crypto.randomUUID();
+                        console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
+                    }
+                }
+            }
+
+            // After all authentication attempts, ensure userId is set and then fetch data
+            if (userId) {
+                console.log("Final User ID for data operations:", userId);
+                displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
+                fetchEmployees();
+                fetchSites();
+                updateDashboardCounts();
+            } else {
+                console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
+            }
+        });
 
 
         // Function to update UI based on admin mode status
@@ -2173,192 +1986,16 @@
         }
 
 
-        // Function to open the Payslip View Modal
-        const openPayslipViewModal = async (employeeDocId) => {
-            if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot view payslip.");
-                return;
-            }
-            try {
-                // Fetch employee data
-                const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, employeeDocId);
-                const employeeSnap = await getDoc(employeeRef);
-
-                if (!employeeSnap.exists()) {
-                    console.error("Employee not found for payslip!");
-                    return;
-                }
-                const employeeData = employeeSnap.data();
-
-                // Fetch all payroll records for this employee
-                const payrollQuery = query(
-                    collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                    where("employeeDocId", "==", employeeDocId)
-                );
-                const payrollSnapshot = await getDocs(payrollQuery);
-                let allPayrollRecords = [];
-                payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
-                // Sort in memory to find the latest
-                allPayrollRecords.sort((a, b) => {
-                    const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                    const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                    return dateB - dateA;
-                });
-                const payrollData = allPayrollRecords.length > 0 ? allPayrollRecords[0] : {};
-
-
-                // Fetch all deduction records for this employee
-                const deductionQuery = query(
-                    collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                    where("employeeDocId", "==", employeeDocId)
-                );
-                const deductionSnapshot = await getDocs(deductionQuery);
-                let allDeductionRecords = [];
-                deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
-                // Sort in memory to find the latest
-                allDeductionRecords.sort((a, b) => {
-                    const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
-                    const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
-                    return dateB - dateA;
-                });
-                const deductionData = allDeductionRecords.length > 0 ? allDeductionRecords[0] : {};
-
-                // Populate payslip modal fields
-                payslipPeriod.textContent = payrollData.payrollDate ? `Period: ${new Date(payrollData.payrollDate.seconds * 1000).toLocaleDateString()}` : 'No recent payroll data';
-                payslipEmployeeIdDisplay.textContent = employeeData.employeeId || 'N/A';
-                payslipEmployeeNameDisplay.textContent = employeeData.fullName || 'N/A';
-                payslipEmployeePositionDisplay.textContent = employeeData.position || 'N/A';
-                payslipEmployeeSalaryRateDisplay.textContent = parseFloat(employeeData.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-                // Earnings
-                payslipBasicPay.textContent = parseFloat(payrollData.basicPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipOvertimePay.textContent = parseFloat(payrollData.overtimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipSundayHolidayPay.textContent = parseFloat(payrollData.sundayHolidayPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipNightShiftDifferential.textContent = parseFloat(payrollData.nightShiftDifferential || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipNightShiftOvertimePay.textContent = parseFloat(payrollData.nightShiftOvertimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipGrossPay.textContent = parseFloat(payrollData.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-                // Deductions
-                payslipSssContribution.textContent = parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipPhContribution.textContent = parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipPagibigContribution.textContent = parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipGovtLoan.textContent = parseFloat(deductionData.govtLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipCoopShare.textContent = parseFloat(deductionData.coopShare || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipWithholdingTax.textContent = parseFloat(deductionData.withholdingTax || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipUnpaidLoan.textContent = parseFloat(deductionData.unpaidLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipCoop2025.textContent = parseFloat(deductionData.coop2025 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipCaVoucher.textContent = parseFloat(deductionData.caVoucher || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipDailyVale.textContent = parseFloat(deductionData.dailyVale || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipOthersDeduction.textContent = parseFloat(deductionData.othersDeduction || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipTotalDeductions.textContent = parseFloat(deductionData.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                payslipNetPay.textContent = parseFloat(deductionData.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-                payslipViewModal.classList.remove('hidden');
-            } catch (e) {
-                console.error("Error fetching payslip data: ", e);
-                // Optionally, display an error message in the modal
-                payslipPeriod.textContent = 'Error loading payslip data.';
-                payslipEmployeeIdDisplay.textContent = '';
-                payslipEmployeeNameDisplay.textContent = '';
-                payslipEmployeePositionDisplay.textContent = '';
-                payslipEmployeeSalaryRateDisplay.textContent = '';
-                payslipGrossPay.textContent = '0.00';
-                payslipTotalDeductions.textContent = '0.00';
-                payslipNetPay.textContent = '0.00';
-                payslipViewModal.classList.remove('hidden');
-            }
-        };
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Firebase inside DOMContentLoaded
-            let firebaseConfig = {};
-            try {
-                // Attempt to parse __firebase_config, provide a fallback if undefined or invalid
-                firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                // Basic check for projectId, though a full config validation might be better
-                if (!firebaseConfig.projectId) {
-                    console.error("Firebase config is missing 'projectId'. Using a dummy config. Data persistence will not work.");
-                    firebaseConfig = {
-                        apiKey: "dummy-api-key",
-                        authDomain: "dummy-auth-domain",
-                        projectId: "dummy-project-id",
-                        storageBucket: "dummy-storage-bucket",
-                        messagingSenderId: "dummy-messaging-sender-id",
-                        appId: "dummy-app-id"
-                    };
-                }
-            } catch (e) {
-                console.error("Error parsing __firebase_config. Using a dummy config. Data persistence will not work.", e);
-                firebaseConfig = {
-                    apiKey: "dummy-api-key",
-                    authDomain: "dummy-auth-domain",
-                    projectId: "dummy-project-id",
-                    storageBucket: "dummy-storage-bucket",
-                    messagingSenderId: "dummy-messaging-sender-id",
-                    appId: "dummy-app-id"
-                };
-            }
-            
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            // Authenticate user
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    console.log("Authenticated with Firebase UID:", userId);
-                } else {
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                            userId = auth.currentUser.uid;
-                            console.log("Signed in with custom token. User ID:", userId);
-                        } else {
-                            // If no initialAuthToken, try anonymous sign-in
-                            await signInAnonymously(auth);
-                            userId = auth.currentUser.uid;
-                            console.log("Signed in anonymously (no custom token). User ID:", userId);
-                        }
-                    } catch (error) {
-                        console.error("Authentication failed, attempting fallback to anonymous:", error);
-                        try {
-                            await signInAnonymously(auth);
-                            userId = auth.currentUser.uid;
-                            console.log("Signed in anonymously after initial auth failure. User ID:", userId);
-                        } catch (anonError) {
-                            console.error("Anonymous sign-in also failed:", anonError);
-                            // Fallback to random UUID if all Firebase auth fails
-                            userId = crypto.randomUUID();
-                            console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
-                        }
-                    }
-                }
-
-                // After all authentication attempts, ensure userId is set and then fetch data
-                if (userId) {
-                    console.log("Final User ID for data operations:", userId);
-                    displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
-                    // Move initial data fetches here to ensure Firebase is ready
-                    fetchEmployees();
-                    fetchSites();
-                    updateDashboardCounts();
-                    showContent('dashboard'); // Show dashboard after initial data is loaded
-                } else {
-                    console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
-                }
-            });
-
-
             // Check if admin mode was previously activated in this session
             isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
 
             // Set initial UI state based on admin mode
             updateAdminUI();
             
+            // Always show dashboard on initial load (or if admin mode isn't active)
+            showContent('dashboard'); 
+
             // Event listener for "Add New Employee" button
             if (addEmployeeButton) { // Ensure button exists before adding listener
                 addEmployeeButton.addEventListener('click', () => {
@@ -2378,8 +2015,8 @@
             addEmployeeForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
-                if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                    console.error("Firebase not initialized or user not authenticated. Cannot save employee.");
+                if (!userId) {
+                    console.error("User not authenticated. Cannot save employee.");
                     return;
                 }
 
@@ -2422,8 +2059,8 @@
                 editEmployeeForm.addEventListener('submit', async (event) => {
                     event.preventDefault();
 
-                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                        console.error("Firebase not initialized or user not authenticated. Cannot update employee.");
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot update employee.");
                         return;
                     }
 
@@ -2466,8 +2103,8 @@
             // Event listener for "Confirm Delete" button in the delete confirmation modal
             if (confirmDeleteButton) {
                 confirmDeleteButton.addEventListener('click', async () => {
-                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                        console.error("Firebase not initialized or user not authenticated. Cannot delete record.");
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot delete record.");
                         return;
                     }
                     if (recordToDeleteDocId && recordTypeToDelete) {
@@ -2516,8 +2153,8 @@
                 addSiteForm.addEventListener('submit', async (event) => {
                     event.preventDefault(); // Prevent default form submission
 
-                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                        console.error("Firebase not initialized or user not authenticated. Cannot save site.");
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save site.");
                         return;
                     }
 
@@ -2542,72 +2179,79 @@
                 });
             }
 
-            // Event listeners for Payroll Input Modal calculations
+            // Event listeners for payroll input fields to trigger calculation
             workingDaysInput.addEventListener('input', calculatePayroll);
             overtimeHrsInput.addEventListener('input', calculatePayroll);
             sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
             nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
             nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
 
-            // Event listener for Payroll Input Modal form submission
-            payrollInputForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                    console.error("Firebase not initialized or user not authenticated. Cannot save payroll.");
-                    return;
-                }
-
-                const employeeDocId = payrollEmployeeDocIdInput.value;
-                const payrollRecordDocId = payrollRecordDocIdInput.value; // Get the ID for editing
-                const employeeId = payrollEmployeeIdSpan.textContent;
-                const employeeName = payrollEmployeeNameSpan.textContent;
-
-                // Recalculate to ensure latest values are used
-                calculatePayroll(); 
-
-                const payrollData = {
-                    employeeDocId: employeeDocId,
-                    employeeId: employeeId,
-                    employeeName: employeeName,
-                    workingDays: parseFloat(workingDaysInput.value || 0),
-                    overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
-                    sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
-                    nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
-                    nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
-                    basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    payrollDate: new Date()
-                };
-
-                try {
-                    if (payrollRecordDocId) {
-                        // Update existing payroll record
-                        const payrollRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, payrollRecordDocId);
-                        await updateDoc(payrollRef, payrollData);
-                        console.log("Payroll record updated successfully!");
-                    } else {
-                        // Add new payroll record
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollData);
-                        console.log("Payroll record added successfully!");
-                    }
+            // Event listener for closing payroll input modal
+            if (cancelPayrollInputButton) {
+                cancelPayrollInputButton.addEventListener('click', () => {
                     payrollInputModal.classList.add('hidden');
-                    payrollInputForm.reset();
-                } catch (e) {
-                    console.error("Error saving payroll record: ", e);
-                }
-            });
+                });
+            }
 
-            cancelPayrollInputButton.addEventListener('click', () => {
-                payrollInputModal.classList.add('hidden');
-                payrollInputForm.reset();
-            });
+            // Event listener for saving payroll data
+            if (payrollInputForm) {
+                payrollInputForm.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Prevent default form submission
 
-            // Event listeners for Deductions Input Modal calculations
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save payroll record.");
+                        return;
+                    }
+
+                    // Re-calculate to ensure latest values are used before saving
+                    calculatePayroll(); 
+
+                    const employeeDocId = payrollEmployeeDocIdInput.value;
+                    const payrollRecordDocId = payrollRecordDocIdInput.value; // Get the record ID
+                    const employeeName = payrollEmployeeNameSpan.textContent;
+                    const employeeId = payrollEmployeeIdSpan.textContent;
+                    const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
+
+                    const payrollRecordData = {
+                        employeeDocId: employeeDocId,
+                        employeeId: employeeId,
+                        employeeName: employeeName,
+                        salaryRate: salaryRate,
+                        workingDays: parseFloat(workingDaysInput.value || 0),
+                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
+                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
+                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
+                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
+                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        payrollDate: new Date(),
+                        processedByUserId: userId
+                    };
+
+                    try {
+                        if (payrollRecordDocId) {
+                            // Update existing record
+                            const payrollRecordRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, payrollRecordDocId);
+                            await updateDoc(payrollRecordRef, payrollRecordData);
+                            console.log("Payroll record updated successfully!");
+                        } else {
+                            // Add new record
+                            await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecordData);
+                            console.log("New payroll record added successfully!");
+                        }
+                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
+                    } catch (e) {
+                        console.error("Error saving payroll record: ", e);
+                    }
+                });
+            }
+
+            // Event listeners for deduction input fields to trigger calculation
+            // Now also listen to changes on hidden inputs if they were to be changed by other means (though not expected here)
             govtLoanInput.addEventListener('input', calculateDeductions);
             coopShareInput.addEventListener('input', calculateDeductions);
             withholdingTaxInput.addEventListener('input', calculateDeductions);
@@ -2616,85 +2260,93 @@
             caVoucherInput.addEventListener('input', calculateDeductions);
             dailyValeInput.addEventListener('input', calculateDeductions);
             othersDeductionInput.addEventListener('input', calculateDeductions);
+            hiddenSssContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
+            hiddenPhContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
+            hiddenPagibigContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
 
-            // Event listener for Deductions Input Modal form submission
-            deductionsInputForm.addEventListener('submit', async (event) => {
-                event.preventDefault();
 
-                if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                    console.error("Firebase not initialized or user not authenticated. Cannot save deductions.");
-                    return;
-                }
-
-                const employeeDocId = deductionsEmployeeDocIdInput.value;
-                const deductionRecordDocId = deductionsRecordDocIdInput.value; // Get the ID for editing
-                const employeeId = deductionsEmployeeIdSpan.textContent;
-                const employeeName = deductionsEmployeeNameSpan.textContent;
-
-                // Recalculate to ensure latest values are used
-                calculateDeductions();
-
-                const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
-                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
-                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
-                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
-
-                const deductionData = {
-                    employeeDocId: employeeDocId,
-                    employeeId: employeeId,
-                    employeeName: employeeName,
-                    grossPay: grossPay, // Store the gross pay at the time of deduction calculation
-                    sssContribution: sssContribution, // From employee profile
-                    phContribution: phContribution,   // From employee profile
-                    pagibigContribution: pagibigContribution, // From employee profile
-                    govtLoan: parseFloat(govtLoanInput.value || 0),
-                    coopShare: parseFloat(coopShareInput.value || 0),
-                    withholdingTax: parseFloat(withholdingTaxInput.value || 0),
-                    unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
-                    coop2025: parseFloat(coop2025Input.value || 0),
-                    caVoucher: parseFloat(caVoucherInput.value || 0),
-                    dailyVale: parseFloat(dailyValeInput.value || 0),
-                    othersDeduction: parseFloat(othersDeductionInput.value || 0),
-                    totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                    deductionDate: new Date()
-                };
-
-                try {
-                    if (deductionRecordDocId) {
-                        // Update existing deduction record
-                        const deductionRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
-                        await updateDoc(deductionRef, deductionData);
-                        console.log("Deduction record updated successfully!");
-                    } else {
-                        // Add new deduction record
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionData);
-                        console.log("Deduction record added successfully!");
-                    }
+            // Event listener for closing deductions input modal
+            if (cancelDeductionsInputButton) {
+                cancelDeductionsInputButton.addEventListener('click', () => {
                     deductionsInputModal.classList.add('hidden');
-                    deductionsInputForm.reset();
-                } catch (e) {
-                    console.error("Error saving deduction record: ", e);
-                }
-            });
+                });
+            }
 
-            cancelDeductionsInputButton.addEventListener('click', () => {
-                deductionsInputModal.classList.add('hidden');
-                deductionsInputForm.reset();
-            });
+            // Event listener for saving deductions data
+            if (deductionsInputForm) {
+                deductionsInputForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
 
-            closeSummaryDetailModalButton.addEventListener('click', () => {
-                payrollSummaryDetailModal.classList.add('hidden');
-            });
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save deduction record.");
+                        return;
+                    }
 
-            closePayslipViewModalButton.addEventListener('click', () => {
-                payslipViewModal.classList.add('hidden');
-            });
+                    calculateDeductions(); // Re-calculate to ensure latest values are used before saving
 
-            // Add event listeners for navigation buttons
+                    const employeeDocId = deductionsEmployeeDocIdInput.value;
+                    const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
+                    const deductionRecordDocId = deductionsRecordDocIdInput.value; // Get the deduction record ID
+                    const employeeName = deductionsEmployeeNameSpan.textContent;
+                    const employeeId = deductionsEmployeeIdSpan.textContent;
+                    const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
+
+                    const deductionRecordData = {
+                        employeeDocId: employeeDocId,
+                        payrollDocId: payrollDocId, // Link to the specific payroll record
+                        employeeId: employeeId,
+                        employeeName: employeeName,
+                        grossPay: grossPay,
+                        // Include government contributions from hidden inputs
+                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
+                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
+                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
+                        govtLoan: parseFloat(govtLoanInput.value || 0),
+                        coopShare: parseFloat(coopShareInput.value || 0),
+                        withholdingTax: parseFloat(withholdingTaxInput.value || 0),
+                        unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
+                        coop2025: parseFloat(coop2025Input.value || 0),
+                        caVoucher: parseFloat(caVoucherInput.value || 0),
+                        dailyVale: parseFloat(dailyValeInput.value || 0),
+                        othersDeduction: parseFloat(othersDeductionInput.value || 0),
+                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        deductionDate: new Date(),
+                        processedByUserId: userId
+                    };
+
+                    try {
+                        if (deductionRecordDocId) {
+                            // Update existing record
+                            const deductionRecordRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
+                            await updateDoc(deductionRecordRef, deductionRecordData);
+                            console.log("Deduction record updated successfully!");
+                        } else {
+                            // Add new record
+                            await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionRecordData);
+                            console.log("New deduction record added successfully!");
+                        }
+                        deductionsInputModal.classList.add('hidden');
+                    } catch (e) {
+                        console.error("Error saving deduction record: ", e);
+                    }
+                });
+            }
+
+            // Event listener for closing summary detail modal
+            if (closeSummaryDetailModalButton) {
+                closeSummaryDetailModalButton.addEventListener('click', () => {
+                    payrollSummaryDetailModal.classList.add('hidden');
+                });
+            }
+
+
+            // Add console.log to confirm button clicks
             navButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    showContent(button.dataset.target);
+                    const targetId = button.dataset.target;
+                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
+                    showContent(targetId);
                 });
             });
         });
