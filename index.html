@@ -48,7 +48,7 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 90%;
-            max-width: 600px;
+            max-width: 700px; /* Increased max-width for more content */
             max-height: 90vh; /* Limit height to prevent overflow */
             overflow-y: auto; /* Enable scrolling for modal content */
         }
@@ -1319,13 +1319,22 @@
                                         <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
                                             <th class="py-2 px-4 text-left">Date</th>
                                             <th class="py-2 px-4 text-left">Working Days</th>
+                                            <th class="py-2 px-4 text-left">Overtime Hrs</th>
+                                            <th class="py-2 px-4 text-left">Sun/Hol Duty</th>
+                                            <th class="py-2 px-4 text-left">Night Shift Days</th>
+                                            <th class="py-2 px-4 text-left">Night Shift OT</th>
+                                            <th class="py-2 px-4 text-left">Basic Pay</th>
+                                            <th class="py-2 px-4 text-left">Overtime Pay</th>
+                                            <th class="py-2 px-4 text-left">Sun/Hol Pay</th>
+                                            <th class="py-2 px-4 text-left">Night Diff</th>
+                                            <th class="py-2 px-4 text-left">Night OT Pay</th>
                                             <th class="py-2 px-4 text-left">Gross Pay</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
                     if (payrollSnapshot.empty) {
-                        contentHtml += `<tr><td colspan="3" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
+                        contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
                     } else {
                         payrollSnapshot.forEach(recordDoc => {
                             const record = recordDoc.data();
@@ -1334,7 +1343,16 @@
                                 <tr>
                                     <td class="py-3 px-6">${payrollDate}</td>
                                     <td class="py-3 px-6">${record.workingDays || 0}</td>
-                                    <td class="py-3 px-6">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">${record.overtimeHrs || 0}</td>
+                                    <td class="py-3 px-6">${record.sundayHolidayDuty || 0}</td>
+                                    <td class="py-3 px-6">${record.nightShiftWorkDays || 0}</td>
+                                    <td class="py-3 px-6">${record.nightShiftOvertimeHrs || 0}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.basicPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.overtimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.sundayHolidayPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.nightShiftDifferential || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.nightShiftOvertimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                 </tr>
                             `;
                         });
@@ -1362,6 +1380,15 @@
                                     <thead>
                                         <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
                                             <th class="py-2 px-4 text-left">Date</th>
+                                            <th class="py-2 px-4 text-left">Gross Pay</th>
+                                            <th class="py-2 px-4 text-left">Govt Loan</th>
+                                            <th class="py-2 px-4 text-left">Coop Share</th>
+                                            <th class="py-2 px-4 text-left">W/Tax</th>
+                                            <th class="py-2 px-4 text-left">Unpaid Loan</th>
+                                            <th class="py-2 px-4 text-left">Coop 2025</th>
+                                            <th class="py-2 px-4 text-left">C/A Voucher</th>
+                                            <th class="py-2 px-4 text-left">Daily Vale</th>
+                                            <th class="py-2 px-4 text-left">Others</th>
                                             <th class="py-2 px-4 text-left">Total Deductions</th>
                                             <th class="py-2 px-4 text-left">Net Pay</th>
                                         </tr>
@@ -1369,7 +1396,7 @@
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
                     if (deductionSnapshot.empty) {
-                        contentHtml += `<tr><td colspan="3" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
+                        contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
                     } else {
                         deductionSnapshot.forEach(recordDoc => {
                             const record = recordDoc.data();
@@ -1377,8 +1404,17 @@
                             contentHtml += `
                                 <tr>
                                     <td class="py-3 px-6">${deductionDate}</td>
-                                    <td class="py-3 px-6">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-6">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.govtLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.coopShare || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.withholdingTax || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.unpaidLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.coop2025 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.caVoucher || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.dailyVale || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.othersDeduction || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                 </tr>
                             `;
                         });
