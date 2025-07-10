@@ -782,17 +782,12 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase configuration (provided by the user)
-        const firebaseConfig = JSON.parse(__firebase_config);
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
+        // Declare Firebase variables at a higher scope
+        let app;
+        let db;
+        let auth;
         let userId = null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        let appId = null; // Will be set in DOMContentLoaded
 
         // Admin Mode variables
         let isAdminMode = false;
@@ -982,8 +977,8 @@
             });
 
             try {
-                if (!userId) {
-                    console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
+                if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                    console.warn("Firebase not initialized or user not authenticated. Cannot fetch sites for dropdown.");
                     return;
                 }
                 const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
@@ -1007,8 +1002,8 @@
 
         // Function to open the Edit Employee Modal
         const openEditEmployeeModal = async (docId) => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot edit employee.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot edit employee.");
                 return;
             }
             try {
@@ -1096,8 +1091,8 @@
 
         // Function to open the Payroll Input Modal (for both add and edit)
         const openPayrollInputModal = async (employeeDocId, payrollRecordDocId = null) => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot open payroll input.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot open payroll input.");
                 return;
             }
             try {
@@ -1157,8 +1152,8 @@
 
         // Fetch and Display Payroll Records
         const fetchAndDisplayPayrollRecords = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch payroll records.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot fetch payroll records.");
                 return;
             }
             // Fetch all payroll records without orderBy
@@ -1231,8 +1226,8 @@
 
         // Function to open the Deductions Input Modal (for both add and edit)
         const openDeductionsModal = async (employeeDocId, deductionRecordDocId = null) => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot open deductions input.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot open deductions input.");
                 return;
             }
             try {
@@ -1341,8 +1336,8 @@
 
         // Fetch and Display Deduction Records
         const fetchAndDisplayDeductionRecords = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch deduction records.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot fetch deduction records.");
                 return;
             }
             // Fetch all deduction records without orderBy
@@ -1391,8 +1386,8 @@
 
         // Fetch and Display Payroll Summary
         const fetchAndDisplayPayrollSummary = async () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch payroll summary.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot fetch payroll summary.");
                 return;
             }
             if (!isAdminMode) {
@@ -1539,8 +1534,8 @@
 
         // Function to open the Payroll Summary Detail Modal
         const openPayrollSummaryDetailModal = async (employeeDocId) => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot open summary detail.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot open summary detail.");
                 return;
             }
             try {
@@ -1725,8 +1720,8 @@
 
         // Fetch and display Employees for Manage Employee, Process Payroll, and Deductions tables
         const fetchEmployees = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch employees.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot fetch employees.");
                 return;
             }
             const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
@@ -1975,8 +1970,8 @@
 
         // Fetch and display Sites
         const fetchSites = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch sites.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot fetch sites.");
                 return;
             }
             const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
@@ -2020,8 +2015,8 @@
 
         // Update Dashboard Counts
         const updateDashboardCounts = async () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot update dashboard counts.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot update dashboard counts.");
                 return;
             }
             try {
@@ -2105,51 +2100,6 @@
         };
 
 
-        // Authenticate user
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("Authenticated with Firebase UID:", userId);
-            } else {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in with custom token. User ID:", userId);
-                    } else {
-                        // If no initialAuthToken, try anonymous sign-in
-                        await signInAnonymously(auth);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in anonymously (no custom token). User ID:", userId);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed, attempting fallback to anonymous:", error);
-                    try {
-                        await signInAnonymously(auth);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in anonymously after initial auth failure. User ID:", userId);
-                    } catch (anonError) {
-                        console.error("Anonymous sign-in also failed:", anonError);
-                        // Fallback to random UUID if all Firebase auth fails
-                        userId = crypto.randomUUID();
-                        console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
-                    }
-                }
-            }
-
-            // After all authentication attempts, ensure userId is set and then fetch data
-            if (userId) {
-                console.log("Final User ID for data operations:", userId);
-                displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
-                fetchEmployees();
-                fetchSites();
-                updateDashboardCounts();
-            } else {
-                console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
-            }
-        });
-
-
         // Function to update UI based on admin mode status
         const updateAdminUI = () => {
             adminFeatureElements.forEach(el => {
@@ -2225,8 +2175,8 @@
 
         // Function to open the Payslip View Modal
         const openPayslipViewModal = async (employeeDocId) => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot view payslip.");
+            if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                console.warn("Firebase not initialized or user not authenticated. Cannot view payslip.");
                 return;
             }
             try {
@@ -2320,6 +2270,60 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Firebase inside DOMContentLoaded
+            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // Authenticate user
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Authenticated with Firebase UID:", userId);
+                } else {
+                    try {
+                        if (initialAuthToken) {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                            userId = auth.currentUser.uid;
+                            console.log("Signed in with custom token. User ID:", userId);
+                        } else {
+                            // If no initialAuthToken, try anonymous sign-in
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser.uid;
+                            console.log("Signed in anonymously (no custom token). User ID:", userId);
+                        }
+                    } catch (error) {
+                        console.error("Authentication failed, attempting fallback to anonymous:", error);
+                        try {
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser.uid;
+                            console.log("Signed in anonymously after initial auth failure. User ID:", userId);
+                        } catch (anonError) {
+                            console.error("Anonymous sign-in also failed:", anonError);
+                            // Fallback to random UUID if all Firebase auth fails
+                            userId = crypto.randomUUID();
+                            console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
+                        }
+                    }
+                }
+
+                // After all authentication attempts, ensure userId is set and then fetch data
+                if (userId) {
+                    console.log("Final User ID for data operations:", userId);
+                    displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
+                    fetchEmployees();
+                    fetchSites();
+                    updateDashboardCounts();
+                } else {
+                    console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
+                }
+            });
+
+
             // Check if admin mode was previously activated in this session
             isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
 
@@ -2348,8 +2352,8 @@
             addEmployeeForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
-                if (!userId) {
-                    console.error("User not authenticated. Cannot save employee.");
+                if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                    console.error("Firebase not initialized or user not authenticated. Cannot save employee.");
                     return;
                 }
 
@@ -2392,8 +2396,8 @@
                 editEmployeeForm.addEventListener('submit', async (event) => {
                     event.preventDefault();
 
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot update employee.");
+                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                        console.error("Firebase not initialized or user not authenticated. Cannot update employee.");
                         return;
                     }
 
@@ -2436,8 +2440,8 @@
             // Event listener for "Confirm Delete" button in the delete confirmation modal
             if (confirmDeleteButton) {
                 confirmDeleteButton.addEventListener('click', async () => {
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot delete record.");
+                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                        console.error("Firebase not initialized or user not authenticated. Cannot delete record.");
                         return;
                     }
                     if (recordToDeleteDocId && recordTypeToDelete) {
@@ -2486,8 +2490,8 @@
                 addSiteForm.addEventListener('submit', async (event) => {
                     event.preventDefault(); // Prevent default form submission
 
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save site.");
+                    if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                        console.error("Firebase not initialized or user not authenticated. Cannot save site.");
                         return;
                     }
 
@@ -2506,4 +2510,171 @@
                         console.log("Site added successfully!");
                         addSiteModal.classList.add('hidden'); // Hide modal after submission
                         addSiteForm.reset(); // Clear the form
-                  
+                    } catch (e) {
+                        console.error("Error adding site: ", e);
+                    }
+                });
+            }
+
+            // Event listeners for Payroll Input Modal calculations
+            workingDaysInput.addEventListener('input', calculatePayroll);
+            overtimeHrsInput.addEventListener('input', calculatePayroll);
+            sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
+            nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
+            nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
+
+            // Event listener for Payroll Input Modal form submission
+            payrollInputForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                    console.error("Firebase not initialized or user not authenticated. Cannot save payroll.");
+                    return;
+                }
+
+                const employeeDocId = payrollEmployeeDocIdInput.value;
+                const payrollRecordDocId = payrollRecordDocIdInput.value; // Get the ID for editing
+                const employeeId = payrollEmployeeIdSpan.textContent;
+                const employeeName = payrollEmployeeNameSpan.textContent;
+
+                // Recalculate to ensure latest values are used
+                calculatePayroll(); 
+
+                const payrollData = {
+                    employeeDocId: employeeDocId,
+                    employeeId: employeeId,
+                    employeeName: employeeName,
+                    workingDays: parseFloat(workingDaysInput.value || 0),
+                    overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
+                    sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
+                    nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
+                    nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
+                    basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    payrollDate: new Date()
+                };
+
+                try {
+                    if (payrollRecordDocId) {
+                        // Update existing payroll record
+                        const payrollRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, payrollRecordDocId);
+                        await updateDoc(payrollRef, payrollData);
+                        console.log("Payroll record updated successfully!");
+                    } else {
+                        // Add new payroll record
+                        await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollData);
+                        console.log("Payroll record added successfully!");
+                    }
+                    payrollInputModal.classList.add('hidden');
+                    payrollInputForm.reset();
+                } catch (e) {
+                    console.error("Error saving payroll record: ", e);
+                }
+            });
+
+            cancelPayrollInputButton.addEventListener('click', () => {
+                payrollInputModal.classList.add('hidden');
+                payrollInputForm.reset();
+            });
+
+            // Event listeners for Deductions Input Modal calculations
+            govtLoanInput.addEventListener('input', calculateDeductions);
+            coopShareInput.addEventListener('input', calculateDeductions);
+            withholdingTaxInput.addEventListener('input', calculateDeductions);
+            unpaidLoanInput.addEventListener('input', calculateDeductions);
+            coop2025Input.addEventListener('input', calculateDeductions);
+            caVoucherInput.addEventListener('input', calculateDeductions);
+            dailyValeInput.addEventListener('input', calculateDeductions);
+            othersDeductionInput.addEventListener('input', calculateDeductions);
+
+            // Event listener for Deductions Input Modal form submission
+            deductionsInputForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (!userId || !db || !appId) { // Ensure Firebase is initialized
+                    console.error("Firebase not initialized or user not authenticated. Cannot save deductions.");
+                    return;
+                }
+
+                const employeeDocId = deductionsEmployeeDocIdInput.value;
+                const deductionRecordDocId = deductionsRecordDocIdInput.value; // Get the ID for editing
+                const employeeId = deductionsEmployeeIdSpan.textContent;
+                const employeeName = deductionsEmployeeNameSpan.textContent;
+
+                // Recalculate to ensure latest values are used
+                calculateDeductions();
+
+                const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
+                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
+                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
+                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
+
+                const deductionData = {
+                    employeeDocId: employeeDocId,
+                    employeeId: employeeId,
+                    employeeName: employeeName,
+                    grossPay: grossPay, // Store the gross pay at the time of deduction calculation
+                    sssContribution: sssContribution, // From employee profile
+                    phContribution: phContribution,   // From employee profile
+                    pagibigContribution: pagibigContribution, // From employee profile
+                    govtLoan: parseFloat(govtLoanInput.value || 0),
+                    coopShare: parseFloat(coopShareInput.value || 0),
+                    withholdingTax: parseFloat(withholdingTaxInput.value || 0),
+                    unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
+                    coop2025: parseFloat(coop2025Input.value || 0),
+                    caVoucher: parseFloat(caVoucherInput.value || 0),
+                    dailyVale: parseFloat(dailyValeInput.value || 0),
+                    othersDeduction: parseFloat(othersDeductionInput.value || 0),
+                    totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                    deductionDate: new Date()
+                };
+
+                try {
+                    if (deductionRecordDocId) {
+                        // Update existing deduction record
+                        const deductionRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
+                        await updateDoc(deductionRef, deductionData);
+                        console.log("Deduction record updated successfully!");
+                    } else {
+                        // Add new deduction record
+                        await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionData);
+                        console.log("Deduction record added successfully!");
+                    }
+                    deductionsInputModal.classList.add('hidden');
+                    deductionsInputForm.reset();
+                } catch (e) {
+                    console.error("Error saving deduction record: ", e);
+                }
+            });
+
+            cancelDeductionsInputButton.addEventListener('click', () => {
+                deductionsInputModal.classList.add('hidden');
+                deductionsInputForm.reset();
+            });
+
+            closeSummaryDetailModalButton.addEventListener('click', () => {
+                payrollSummaryDetailModal.classList.add('hidden');
+            });
+
+            closePayslipViewModalButton.addEventListener('click', () => {
+                payslipViewModal.classList.add('hidden');
+            });
+
+            // Initial display of dashboard (after Firebase is initialized and UI is ready)
+            showContent('dashboard');
+
+            // Add event listeners for navigation buttons
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    showContent(button.dataset.target);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
