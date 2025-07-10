@@ -327,6 +327,196 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
+        // --- Global function declarations (moved from inside DOMContentLoaded) ---
+
+        // Dashboard elements
+        const totalEmployeesCard = document.getElementById('total-employees');
+        const payrollProcessedCard = document.getElementById('payroll-processed');
+        const activeSitesCard = document.getElementById('active-sites');
+        const recentActivitiesList = document.getElementById('recent-activities-list');
+
+        // Employee Management elements
+        const employeeListBody = document.getElementById('employee-list-body');
+        const departmentSiteDropdown = document.getElementById('department-site-dropdown');
+
+        // Site Management elements
+        const siteListBody = document.getElementById('site-list-body');
+
+
+        // Function to populate the Department/Site dropdown from Firestore sites
+        const populateDepartmentSiteDropdown = async () => {
+            departmentSiteDropdown.innerHTML = '<option value="">Select Department/Site</option>'; // Clear existing options
+            try {
+                if (!userId) {
+                    console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+                const querySnapshot = await getDocs(q); // Use getDocs for a one-time fetch
+                querySnapshot.forEach((doc) => {
+                    const site = doc.data();
+                    const option = document.createElement('option');
+                    option.value = site.siteName;
+                    option.textContent = `Site: ${site.siteName} (${site.siteLocation})`;
+                    departmentSiteDropdown.appendChild(option);
+                });
+            } catch (e) {
+                console.error("Error populating department/site dropdown: ", e);
+            }
+        };
+
+        // Fetch and display Employees
+        const fetchEmployees = () => {
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch employees.");
+                return;
+            }
+            const q = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+            onSnapshot(q, (querySnapshot) => {
+                employeeListBody.innerHTML = ''; // Clear current list
+                let totalEmployees = 0;
+                let totalPayroll = 0;
+                querySnapshot.forEach((doc) => {
+                    totalEmployees++;
+                    const employee = doc.data();
+                    const employeeId = doc.id; // Use Firestore document ID as Employee ID
+                    const newRow = employeeListBody.insertRow();
+                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    totalPayroll += parseFloat(employee.salaryRate || 0);
+
+                    newRow.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
+                        <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center space-x-2">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                });
+                totalEmployeesCard.textContent = totalEmployees;
+                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }, (error) => {
+                console.error("Error fetching employees: ", error);
+            });
+        };
+
+        // Fetch and display Sites
+        const fetchSites = () => {
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch sites.");
+                return;
+            }
+            const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+            onSnapshot(q, (querySnapshot) => {
+                siteListBody.innerHTML = ''; // Clear current list
+                let activeSitesCount = 0;
+                querySnapshot.forEach((doc) => {
+                    const site = doc.data();
+                    if (site.siteStatus === 'Ongoing') {
+                        activeSitesCount++;
+                    }
+                    const newRow = siteListBody.insertRow();
+                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+
+                    let statusColorClass = '';
+                    switch(site.siteStatus) {
+                        case 'Ongoing':
+                            statusColorClass = 'bg-blue-200 text-blue-600';
+                            break;
+                        case 'Completed':
+                            statusColorClass = 'bg-green-200 text-green-600';
+                            break;
+                        case 'Delayed':
+                            statusColorClass = 'bg-red-200 text-red-600';
+                            break;
+                        case 'On Hold':
+                            statusColorClass = 'bg-yellow-200 text-yellow-600';
+                            break;
+                        default:
+                            statusColorClass = 'bg-gray-200 text-gray-600';
+                    }
+
+                    newRow.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
+                        <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
+                        <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
+                        <td class="py-3 px-6 text-left"><span class="${statusColorClass} py-1 px-3 rounded-full text-xs">${site.siteStatus || ''}</span></td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center space-x-2">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                });
+                activeSitesCard.textContent = activeSitesCount;
+                populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
+            }, (error) => {
+                console.error("Error fetching sites: ", error);
+            });
+        };
+
+        // Update Dashboard Counts
+        const updateDashboardCounts = async () => {
+            if (!userId) {
+                console.warn("User not authenticated. Cannot update dashboard counts.");
+                return;
+            }
+            try {
+                // Employees
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+                const employeeSnapshot = await getDocs(employeesQuery);
+                let totalEmployees = employeeSnapshot.size;
+                let totalPayroll = 0;
+                employeeSnapshot.forEach(doc => {
+                    const employee = doc.data();
+                    totalPayroll += parseFloat(employee.salaryRate || 0);
+                });
+                totalEmployeesCard.textContent = totalEmployees;
+                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                // Sites
+                const sitesQuery = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+                const siteSnapshot = await getDocs(sitesQuery);
+                let activeSitesCount = 0;
+                siteSnapshot.forEach(doc => {
+                    const site = doc.data();
+                    if (site.siteStatus === 'Ongoing') {
+                        activeSitesCount++;
+                    }
+                });
+                activeSitesCard.textContent = activeSitesCount;
+
+                // Recent Activities (placeholder for now, you'd populate this with actual activity data)
+                recentActivitiesList.innerHTML = `
+                    <li class="py-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-gray-900">No recent activities.</p>
+                        </div>
+                    </li>
+                `;
+
+            } catch (error) {
+                console.error("Error updating dashboard counts:", error);
+            }
+        };
+
+
         // Authenticate user
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -381,21 +571,13 @@
             const pageContents = document.querySelectorAll('.page-content');
             const currentPageTitle = document.getElementById('current-page-title');
 
-            // Dashboard elements
-            const totalEmployeesCard = document.getElementById('total-employees');
-            const payrollProcessedCard = document.getElementById('payroll-processed');
-            const activeSitesCard = document.getElementById('active-sites');
-            const recentActivitiesList = document.getElementById('recent-activities-list');
-
-
             // Employee Management elements
             const addEmployeeButton = document.getElementById('add-employee-button');
             const addEmployeeModal = document.getElementById('add-employee-modal');
             const cancelAddEmployee = document.getElementById('cancel-add-employee');
             const addEmployeeForm = document.getElementById('add-employee-form');
             const employeeIdInput = document.getElementById('employee-id');
-            const employeeListBody = document.getElementById('employee-list-body');
-            const departmentSiteDropdown = document.getElementById('department-site-dropdown');
+            
 
             // Site Management elements
             const addSiteButton = document.getElementById('add-site-button');
@@ -403,7 +585,7 @@
             const cancelAddSite = document.getElementById('cancel-add-site');
             const addSiteForm = document.getElementById('add-site-form');
             const siteIdInput = document.getElementById('site-id');
-            const siteListBody = document.getElementById('site-list-body');
+            
 
             // Function to generate unique employee ID
             const generateEmployeeId = () => {
@@ -415,28 +597,6 @@
             const generateSiteId = () => {
                 const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
                 return `DLV-SITE-${randomNumbers}`;
-            };
-
-            // Function to populate the Department/Site dropdown from Firestore sites
-            const populateDepartmentSiteDropdown = async () => {
-                departmentSiteDropdown.innerHTML = '<option value="">Select Department/Site</option>'; // Clear existing options
-                try {
-                    if (!userId) {
-                        console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
-                        return;
-                    }
-                    const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-                    const querySnapshot = await getDocs(q); // Use getDocs for a one-time fetch
-                    querySnapshot.forEach((doc) => {
-                        const site = doc.data();
-                        const option = document.createElement('option');
-                        option.value = site.siteName;
-                        option.textContent = `Site: ${site.siteName} (${site.siteLocation})`;
-                        departmentSiteDropdown.appendChild(option);
-                    });
-                } catch (e) {
-                    console.error("Error populating department/site dropdown: ", e);
-                }
             };
 
             // Function to show the selected content and update the title
@@ -473,159 +633,6 @@
                     fetchSites();
                 } else if (targetId === 'dashboard') {
                     updateDashboardCounts();
-                }
-            };
-
-            // --- Firebase Data Operations ---
-
-            // Fetch and display Employees
-            const fetchEmployees = () => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot fetch employees.");
-                    return;
-                }
-                const q = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
-                onSnapshot(q, (querySnapshot) => {
-                    employeeListBody.innerHTML = ''; // Clear current list
-                    let totalEmployees = 0;
-                    let totalPayroll = 0;
-                    querySnapshot.forEach((doc) => {
-                        totalEmployees++;
-                        const employee = doc.data();
-                        const employeeId = doc.id; // Use Firestore document ID as Employee ID
-                        const newRow = employeeListBody.insertRow();
-                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        totalPayroll += parseFloat(employee.salaryRate || 0);
-
-                        newRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
-                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
-                            <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    });
-                    totalEmployeesCard.textContent = totalEmployees;
-                    payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                }, (error) => {
-                    console.error("Error fetching employees: ", error);
-                });
-            };
-
-            // Fetch and display Sites
-            const fetchSites = () => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot fetch sites.");
-                    return;
-                }
-                const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-                onSnapshot(q, (querySnapshot) => {
-                    siteListBody.innerHTML = ''; // Clear current list
-                    let activeSitesCount = 0;
-                    querySnapshot.forEach((doc) => {
-                        const site = doc.data();
-                        if (site.siteStatus === 'Ongoing') {
-                            activeSitesCount++;
-                        }
-                        const newRow = siteListBody.insertRow();
-                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-
-                        let statusColorClass = '';
-                        switch(site.siteStatus) {
-                            case 'Ongoing':
-                                statusColorClass = 'bg-blue-200 text-blue-600';
-                                break;
-                            case 'Completed':
-                                statusColorClass = 'bg-green-200 text-green-600';
-                                break;
-                            case 'Delayed':
-                                statusColorClass = 'bg-red-200 text-red-600';
-                                break;
-                            case 'On Hold':
-                                statusColorClass = 'bg-yellow-200 text-yellow-600';
-                                break;
-                            default:
-                                statusColorClass = 'bg-gray-200 text-gray-600';
-                        }
-
-                        newRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
-                            <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
-                            <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
-                            <td class="py-3 px-6 text-left"><span class="${statusColorClass} py-1 px-3 rounded-full text-xs">${site.siteStatus || ''}</span></td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    });
-                    activeSitesCard.textContent = activeSitesCount;
-                    populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
-                }, (error) => {
-                    console.error("Error fetching sites: ", error);
-                });
-            };
-
-            // Update Dashboard Counts
-            const updateDashboardCounts = async () => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot update dashboard counts.");
-                    return;
-                }
-                try {
-                    // Employees
-                    const employeesQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
-                    const employeeSnapshot = await getDocs(employeesQuery);
-                    let totalEmployees = employeeSnapshot.size;
-                    let totalPayroll = 0;
-                    employeeSnapshot.forEach(doc => {
-                        const employee = doc.data();
-                        totalPayroll += parseFloat(employee.salaryRate || 0);
-                    });
-                    totalEmployeesCard.textContent = totalEmployees;
-                    payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-                    // Sites
-                    const sitesQuery = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-                    const siteSnapshot = await getDocs(sitesQuery);
-                    let activeSitesCount = 0;
-                    siteSnapshot.forEach(doc => {
-                        const site = doc.data();
-                        if (site.siteStatus === 'Ongoing') {
-                            activeSitesCount++;
-                        }
-                    });
-                    activeSitesCard.textContent = activeSitesCount;
-
-                    // Recent Activities (placeholder for now, you'd populate this with actual activity data)
-                    recentActivitiesList.innerHTML = `
-                        <li class="py-3 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-900">No recent activities.</p>
-                            </div>
-                        </li>
-                    `;
-
-                } catch (error) {
-                    console.error("Error updating dashboard counts:", error);
                 }
             };
 
