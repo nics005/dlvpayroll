@@ -411,6 +411,8 @@
             <div class="mb-4">
                 <p class="text-lg font-semibold text-gray-700">Name: <span id="payroll-employee-name" class="font-normal"></span></p>
                 <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="payroll-employee-id" class="font-normal"></span></p>
+                <!-- Hidden input to store the employee's Firestore document ID -->
+                <input type="hidden" id="payroll-employee-doc-id">
                 <input type="hidden" id="payroll-employee-salary-rate">
             </div>
             <form id="payroll-input-form" class="space-y-4">
@@ -465,9 +467,9 @@
                     <button type="button" id="cancel-payroll-input" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
                         Close
                     </button>
-                    <!-- <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                    <button type="submit" id="save-payroll-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                         Save Payroll
-                    </button> -->
+                    </button>
                 </div>
             </form>
         </div>
@@ -544,7 +546,7 @@
         const cancelEditEmployee = document.getElementById('cancel-edit-employee');
         const editEmployeeForm = document.getElementById('edit-employee-form');
         const editEmployeeDocIdInput = document.getElementById('edit-employee-doc-id');
-        const editEmployeeIdInput = document.getElementById('edit-employee-id');
+        const editEmployeeIdInput = document = document.getElementById('edit-employee-id');
         const editFullNameInput = document.getElementById('edit-full-name');
         const editPositionInput = document.getElementById('edit-position');
         const editAddressInput = document.getElementById('edit-address');
@@ -573,6 +575,7 @@
         const cancelPayrollInputButton = document.getElementById('cancel-payroll-input');
         const payrollEmployeeNameSpan = document.getElementById('payroll-employee-name');
         const payrollEmployeeIdSpan = document.getElementById('payroll-employee-id');
+        const payrollEmployeeDocIdInput = document.getElementById('payroll-employee-doc-id'); // New hidden input for doc ID
         const payrollEmployeeSalaryRateInput = document.getElementById('payroll-employee-salary-rate');
         const workingDaysInput = document.getElementById('working-days');
         const overtimeHrsInput = document.getElementById('overtime-hrs');
@@ -585,6 +588,7 @@
         const calculatedNightShiftDifferentialSpan = document.getElementById('calculated-night-shift-differential');
         const calculatedNightShiftOvertimePaySpan = document.getElementById('calculated-night-shift-overtime-pay');
         const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay');
+        const payrollInputForm = document.getElementById('payroll-input-form'); // Reference to the form
 
 
         // Function to populate the Department/Site dropdown from Firestore sites
@@ -1319,6 +1323,7 @@
                         const employeeData = employeeSnap.data();
                         payrollEmployeeNameSpan.textContent = employeeData.fullName || '';
                         payrollEmployeeIdSpan.textContent = employeeData.employeeId || docId;
+                        payrollEmployeeDocIdInput.value = docId; // Store the employee's Firestore doc ID
                         payrollEmployeeSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0);
 
                         // Reset input fields and calculations
@@ -1349,6 +1354,57 @@
             if (cancelPayrollInputButton) {
                 cancelPayrollInputButton.addEventListener('click', () => {
                     payrollInputModal.classList.add('hidden');
+                });
+            }
+
+            // Event listener for saving payroll data
+            if (payrollInputForm) {
+                payrollInputForm.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Prevent default form submission
+
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save payroll record.");
+                        return;
+                    }
+
+                    // Re-calculate to ensure latest values are used before saving
+                    calculatePayroll(); 
+
+                    const employeeDocId = payrollEmployeeDocIdInput.value;
+                    const employeeName = payrollEmployeeNameSpan.textContent;
+                    const employeeId = payrollEmployeeIdSpan.textContent;
+                    const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
+
+                    const payrollRecord = {
+                        employeeDocId: employeeDocId,
+                        employeeId: employeeId,
+                        employeeName: employeeName,
+                        salaryRate: salaryRate,
+                        workingDays: parseFloat(workingDaysInput.value || 0),
+                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
+                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
+                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
+                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
+                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        payrollDate: new Date(),
+                        processedByUserId: userId
+                    };
+
+                    try {
+                        // Save the payroll record to a new collection
+                        await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecord);
+                        console.log("Payroll record saved successfully!", payrollRecord);
+                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
+                        // Optionally, show a success message to the user
+                    } catch (e) {
+                        console.error("Error saving payroll record: ", e);
+                        // Optionally, show an error message to the user
+                    }
                 });
             }
 
