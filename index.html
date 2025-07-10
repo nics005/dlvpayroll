@@ -395,11 +395,11 @@
             <p class="text-gray-700 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
             <div class="flex justify-end space-x-3 mt-6">
                 <button type="button" id="cancel-delete-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                    Cancel
-                </button>
+                        Cancel
+                    </button>
                 <button type="button" id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200">
-                    Delete
-                </button>
+                        Delete
+                    </button>
             </div>
         </div>
     </div>
@@ -1262,21 +1262,31 @@
                 const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0);
                 const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
 
-                // Assuming 22 working days in a month and 8 hours per day for calculations
-                const monthlyWorkingDays = 22;
-                const dailyWorkingHours = 8;
-
-                const dailyRate = salaryRate / monthlyWorkingDays;
+                // Assuming salaryRate is the DAILY rate based on your example (700 * 6 = 4200)
+                const dailyRate = salaryRate;
+                const dailyWorkingHours = 8; // Assuming 8 hours per day
                 const hourlyRate = dailyRate / dailyWorkingHours;
 
                 // Calculations
                 const basicPay = dailyRate * workingDays;
+                console.log(`Basic Pay Calculation: Daily Rate (${dailyRate}) * Working Days (${workingDays}) = ${basicPay}`);
+
                 const overtimePay = overtimeHrs * hourlyRate * 1.25; // 125% for regular overtime
+                console.log(`Overtime Pay Calculation: Overtime Hrs (${overtimeHrs}) * Hourly Rate (${hourlyRate}) * 1.25 = ${overtimePay}`);
+
                 const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30; // 130% for Sunday/Holiday (simplified)
+                console.log(`Sunday/Holiday Pay Calculation: Sunday/Holiday Duty (${sundayHolidayDuty}) * Hourly Rate (${hourlyRate}) * 1.30 = ${sundayHolidayPay}`);
+
                 const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10; // 10% of hourly rate for night shift hours
+                console.log(`Night Shift Differential Calculation: Night Shift Work Days (${nightShiftWorkDays}) * Daily Working Hours (${dailyWorkingHours}) * Hourly Rate (${hourlyRate}) * 0.10 = ${nightShiftDifferential}`);
+
                 const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375; // 125% of (hourly + 10% night diff)
+                console.log(`Night Shift Overtime Pay Calculation: Night Shift Overtime Hrs (${nightShiftOvertimeHrs}) * Hourly Rate (${hourlyRate}) * 1.375 = ${nightShiftOvertimePay}`);
+
 
                 const grossPay = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
+                console.log(`Gross Pay Calculation: Basic Pay (${basicPay}) + Overtime Pay (${overtimePay}) + Sunday/Holiday Pay (${sundayHolidayPay}) + Night Shift Differential (${nightShiftDifferential}) + Night Shift Overtime Pay (${nightShiftOvertimePay}) = ${grossPay}`);
+
 
                 // Update display
                 calculatedBasicPaySpan.textContent = `₱ ${basicPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
