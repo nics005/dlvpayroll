@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLV Electrical Services Co. Payroll System</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -54,6 +56,7 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
+    <!-- Left Navigation Bar -->
     <nav class="w-64 bg-gray-800 text-white p-6 flex flex-col shadow-lg rounded-r-lg">
         <div class="text-2xl font-bold mb-8 text-center">
             DLV Payroll
@@ -86,7 +89,9 @@
         </div>
     </nav>
 
+    <!-- Main Content Area -->
     <main class="flex-1 flex flex-col bg-gray-100 rounded-l-lg overflow-hidden">
+        <!-- Header -->
         <header class="bg-white p-4 shadow-md flex items-center justify-between rounded-tl-lg">
             <h1 class="text-2xl font-semibold text-gray-800" id="current-page-title">Dashboard</h1>
             <div class="flex items-center space-x-4">
@@ -96,10 +101,13 @@
             </div>
         </header>
 
+        <!-- Content Display Area -->
         <div class="flex-1 p-6 overflow-y-auto content-area">
+            <!-- Dashboard Content -->
             <div id="dashboard-content" class="page-content active">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Overview</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1: Total Employees -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Total Employees</h3>
@@ -109,6 +117,7 @@
                         <p class="text-sm text-gray-500 mt-2">Active employees this month</p>
                     </div>
 
+                    <!-- Card 2: Payroll Processed -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Payroll Processed</h3>
@@ -118,6 +127,7 @@
                         <p class="text-sm text-gray-500 mt-2">Total amount disbursed</p>
                     </div>
 
+                    <!-- Card 3: Active Sites -->
                     <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-medium text-gray-700">Active Sites</h3>
@@ -363,6 +373,11 @@
         const cancelAdminModalButton = document.getElementById('cancel-admin-modal-button');
         const adminErrorMessage = document.getElementById('admin-error-message');
 
+        // Global references for navigation and page content
+        const navButtons = document.querySelectorAll('.nav-button');
+        const pageContents = document.querySelectorAll('.page-content');
+        const currentPageTitle = document.getElementById('current-page-title');
+
 
         // Function to populate the Department/Site dropdown from Firestore sites
         const populateDepartmentSiteDropdown = async () => {
@@ -537,6 +552,43 @@
             }
         };
 
+        // Function to show the selected content and update the title
+        const showContent = (targetId) => {
+            pageContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('active');
+            });
+
+            const targetContent = document.getElementById(targetId + '-content');
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+                targetContent.classList.add('active');
+            }
+
+            const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
+            currentPageTitle.textContent = buttonText;
+
+            navButtons.forEach(button => {
+                if (button.dataset.target === targetId) {
+                    button.classList.add('bg-gray-700', 'text-white');
+                    button.classList.remove('text-gray-300', 'hover:bg-gray-700');
+                } else {
+                    button.classList.remove('bg-gray-700', 'text-white');
+                    button.classList.add('text-gray-300', 'hover:bg-gray-700');
+                }
+            });
+
+            // Re-fetch data when switching to relevant tabs
+            if (targetId === 'manage-employee') {
+                fetchEmployees();
+                populateDepartmentSiteDropdown();
+            } else if (targetId === 'site') {
+                fetchSites();
+            } else if (targetId === 'dashboard') {
+                updateDashboardCounts();
+            }
+        };
+
 
         // Authenticate user
         onAuthStateChanged(auth, async (user) => {
@@ -639,10 +691,6 @@
 
 
         document.addEventListener('DOMContentLoaded', () => {
-            const navButtons = document.querySelectorAll('.nav-button');
-            const pageContents = document.querySelectorAll('.page-content');
-            const currentPageTitle = document.getElementById('current-page-title');
-
             // Employee Management elements
             const addEmployeeButton = document.getElementById('add-employee-button');
             const addEmployeeModal = document.getElementById('add-employee-modal');
@@ -679,44 +727,6 @@
                 const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
                 return `DLV-SITE-${randomNumbers}`;
             };
-
-            // Function to show the selected content and update the title
-            const showContent = (targetId) => {
-                pageContents.forEach(content => {
-                    content.classList.add('hidden');
-                    content.classList.remove('active');
-                });
-
-                const targetContent = document.getElementById(targetId + '-content');
-                if (targetContent) {
-                    targetContent.classList.remove('hidden');
-                    targetContent.classList.add('active');
-                }
-
-                const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
-                currentPageTitle.textContent = buttonText;
-
-                navButtons.forEach(button => {
-                    if (button.dataset.target === targetId) {
-                        button.classList.add('bg-gray-700', 'text-white');
-                        button.classList.remove('text-gray-300', 'hover:bg-gray-700');
-                    } else {
-                        button.classList.remove('bg-gray-700', 'text-white');
-                        button.classList.add('text-gray-300', 'hover:bg-gray-700');
-                    }
-                });
-
-                // Re-fetch data when switching to relevant tabs
-                if (targetId === 'manage-employee') {
-                    fetchEmployees();
-                    populateDepartmentSiteDropdown();
-                } else if (targetId === 'site') {
-                    fetchSites();
-                } else if (targetId === 'dashboard') {
-                    updateDashboardCounts();
-                }
-            };
-
 
             // Event listener for "Add New Employee" button
             if (addEmployeeButton) { // Ensure button exists before adding listener
