@@ -80,11 +80,21 @@
                     Site
                 </button>
             </li>
+            <li>
+                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="process-payroll">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Process Payroll
+                </button>
+            </li>
         </ul>
         <div class="mt-auto pt-4 border-t border-gray-700">
             <button id="activate-admin-mode-button" class="w-full flex items-center px-4 py-2 rounded-lg text-left bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
                 Activate Admin Mode
+            </button>
+            <button id="deactivate-admin-mode-button" class="admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left bg-red-600 text-white hover:bg-red-700 transition-colors duration-200 mt-2">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Deactivate Admin Mode
             </button>
         </div>
     </nav>
@@ -201,6 +211,31 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Process Payroll Content -->
+            <div id="process-payroll-content" class="page-content hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Process Payroll</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Employee List for Payroll</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg">
+                            <thead>
+                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
+                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
+                                    <th class="py-3 px-6 text-left">Name</th>
+                                    <th class="py-3 px-6 text-left">Position</th>
+                                    <th class="py-3 px-6 text-left">Department/Site</th>
+                                    <th class="py-3 px-6 text-left">Status</th>
+                                    <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light" id="process-payroll-employee-list-body">
+                                <!-- Employee data for payroll will be dynamically loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -256,6 +291,65 @@
                     </button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                         Save Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="edit-employee-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Employee Details</h2>
+            <form id="edit-employee-form" class="space-y-4">
+                <input type="hidden" id="edit-employee-doc-id" name="docId">
+                <div>
+                    <label for="edit-employee-id" class="block text-sm font-medium text-gray-700">Employee ID</label>
+                    <input type="text" id="edit-employee-id" name="employeeId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
+                </div>
+                <div>
+                    <label for="edit-full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="edit-full-name" name="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="edit-position" class="block text-sm font-medium text-gray-700">Position</label>
+                    <input type="text" id="edit-position" name="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="edit-address" class="block text-sm font-medium text-gray-700">Address</label>
+                    <input type="text" id="edit-address" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="edit-contact-no" class="block text-sm font-medium text-gray-700">Contact No.</label>
+                    <input type="text" id="edit-contact-no" name="contactNo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="edit-department-site-dropdown" class="block text-sm font-medium text-gray-700">Department/Site</label>
+                    <select id="edit-department-site-dropdown" name="departmentSite" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                        <option value="">Select Department/Site</option>
+                        </select>
+                </div>
+                <div>
+                    <label for="edit-salary-rate" class="block text-sm font-medium text-gray-700">Salary Rate (PHP)</label>
+                    <input type="number" id="edit-salary-rate" name="salaryRate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" required>
+                </div>
+                <div>
+                    <label for="edit-sss-contribution" class="block text-sm font-medium text-gray-700">SSS Contribution</label>
+                    <input type="number" id="edit-sss-contribution" name="sssContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
+                </div>
+                <div>
+                    <label for="edit-ph-contribution" class="block text-sm font-medium text-gray-700">PhilHealth Contribution</label>
+                    <input type="number" id="edit-ph-contribution" name="phContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
+                </div>
+                <div>
+                    <label for="edit-pagibig-contribution" class="block text-sm font-medium text-gray-700">Pag-IBIG Contribution</label>
+                    <input type="number" id="edit-pagibig-contribution" name="pagibigContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-edit-employee" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        Update Employee
                     </button>
                 </div>
             </form>
@@ -321,11 +415,27 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirmation-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Confirm Deletion</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" id="cancel-delete-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Firebase configuration (provided by the user)
         const firebaseConfig = {
@@ -359,14 +469,17 @@
         const payrollProcessedCard = document.getElementById('payroll-processed');
         const activeSitesCard = document.getElementById('active-sites');
         const recentActivitiesList = document.getElementById('recent-activities-list');
-        const employeeListBody = document.getElementById('employee-list-body');
+        const employeeListBody = document.getElementById('employee-list-body'); // For Manage Employee tab
+        const processPayrollEmployeeListBody = document.getElementById('process-payroll-employee-list-body'); // For Process Payroll tab
         const departmentSiteDropdown = document.getElementById('department-site-dropdown');
+        const editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown'); // For Edit Employee Modal
         const siteListBody = document.getElementById('site-list-body');
         const displayUserIdSpan = document.getElementById('display-user-id');
 
-        // New admin mode related elements
-        const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); // Select all elements with this class
+        // Admin mode related elements
+        const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); 
         const activateAdminModeButton = document.getElementById('activate-admin-mode-button');
+        const deactivateAdminModeButton = document.getElementById('deactivate-admin-mode-button'); 
         const adminModal = document.getElementById('admin-modal');
         const adminPasswordInput = document.getElementById('admin-password-input');
         const activateAdminModalButton = document.getElementById('activate-admin-modal-button');
@@ -378,10 +491,53 @@
         const pageContents = document.querySelectorAll('.page-content');
         const currentPageTitle = document.getElementById('current-page-title');
 
+        // Employee Modals
+        const addEmployeeButton = document.getElementById('add-employee-button');
+        const addEmployeeModal = document.getElementById('add-employee-modal');
+        const cancelAddEmployee = document.getElementById('cancel-add-employee');
+        const addEmployeeForm = document.getElementById('add-employee-form');
+        const employeeIdInput = document.getElementById('employee-id');
+
+        const editEmployeeModal = document.getElementById('edit-employee-modal');
+        const cancelEditEmployee = document.getElementById('cancel-edit-employee');
+        const editEmployeeForm = document.getElementById('edit-employee-form');
+        const editEmployeeDocIdInput = document.getElementById('edit-employee-doc-id');
+        const editEmployeeIdInput = document.getElementById('edit-employee-id');
+        const editFullNameInput = document.getElementById('edit-full-name');
+        const editPositionInput = document.getElementById('edit-position');
+        const editAddressInput = document.getElementById('edit-address');
+        const editContactNoInput = document.getElementById('edit-contact-no');
+        const editSalaryRateInput = document.getElementById('edit-salary-rate');
+        const editSssContributionInput = document.getElementById('edit-sss-contribution');
+        const editPhilhealthContributionInput = document.getElementById('edit-ph-contribution');
+        const editPagibigContributionInput = document.getElementById('edit-pagibig-contribution');
+
+
+        // Site Modals
+        const addSiteButton = document.getElementById('add-site-button');
+        const addSiteModal = document.getElementById('add-site-modal');
+        const cancelAddSite = document.getElementById('cancel-add-site');
+        const addSiteForm = document.getElementById('add-site-form');
+        const siteIdInput = document.getElementById('site-id');
+
+        // Delete Confirmation Modal
+        const deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+        let employeeToDeleteDocId = null; // To store the ID of the employee to be deleted
+
 
         // Function to populate the Department/Site dropdown from Firestore sites
         const populateDepartmentSiteDropdown = async () => {
-            departmentSiteDropdown.innerHTML = '<option value="">Select Department/Site</option>'; // Clear existing options
+            const dropdowns = [departmentSiteDropdown, editDepartmentSiteDropdown];
+            
+            // Clear existing options in both dropdowns
+            dropdowns.forEach(dropdown => {
+                if (dropdown) {
+                    dropdown.innerHTML = '<option value="">Select Department/Site</option>'; 
+                }
+            });
+
             try {
                 if (!userId) {
                     console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
@@ -394,35 +550,42 @@
                     const option = document.createElement('option');
                     option.value = site.siteName;
                     option.textContent = `Site: ${site.siteName} (${site.siteLocation})`;
-                    departmentSiteDropdown.appendChild(option);
+                    
+                    dropdowns.forEach(dropdown => {
+                        if (dropdown) {
+                            dropdown.appendChild(option.cloneNode(true)); // Clone to add to both
+                        }
+                    });
                 });
             } catch (e) {
                 console.error("Error populating department/site dropdown: ", e);
             }
         };
 
-        // Fetch and display Employees
+        // Fetch and display Employees for both Manage Employee and Process Payroll tables
         const fetchEmployees = () => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch employees.");
                 return;
             }
-            // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
-            // Employee data is now stored in a public collection
             const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
             onSnapshot(q, (querySnapshot) => {
-                employeeListBody.innerHTML = ''; // Clear current list
+                employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
+                processPayrollEmployeeListBody.innerHTML = ''; // Clear current list for Process Payroll
+
                 let totalEmployees = 0;
                 let totalPayroll = 0;
+
                 querySnapshot.forEach((doc) => {
                     totalEmployees++;
                     const employee = doc.data();
-                    const employeeId = doc.id; // Use Firestore document ID as Employee ID
-                    const newRow = employeeListBody.insertRow();
-                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    const employeeId = doc.id; 
                     totalPayroll += parseFloat(employee.salaryRate || 0);
 
-                    newRow.innerHTML = `
+                    // Row for Manage Employee table
+                    const manageRow = employeeListBody.insertRow();
+                    manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    manageRow.innerHTML = `
                         <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
                         <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
                         <td class="py-3 px-6 text-left">${employee.position || ''}</td>
@@ -441,13 +604,58 @@
                             </div>
                         </td>
                     `;
+
+                    // Row for Process Payroll table (simplified view)
+                    const payrollRow = processPayrollEmployeeListBody.insertRow();
+                    payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    payrollRow.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
+                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center space-x-2">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
                 });
                 totalEmployeesCard.textContent = totalEmployees;
                 payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                // Attach event listeners after content is loaded
+                attachEmployeeActionListeners();
+
             }, (error) => {
                 console.error("Error fetching employees: ", error);
             });
         };
+
+        // Function to attach event listeners for edit/delete buttons
+        const attachEmployeeActionListeners = () => {
+            // For Manage Employee tab
+            document.querySelectorAll('#employee-list-body .edit-employee-btn').forEach(button => {
+                button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
+            });
+            document.querySelectorAll('#employee-list-body .delete-employee-btn').forEach(button => {
+                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
+            });
+
+            // For Process Payroll tab
+            document.querySelectorAll('#process-payroll-employee-list-body .edit-employee-btn-payroll').forEach(button => {
+                button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
+            });
+            document.querySelectorAll('#process-payroll-employee-list-body .delete-employee-btn-payroll').forEach(button => {
+                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
+            });
+        };
+
 
         // Fetch and display Sites
         const fetchSites = () => {
@@ -517,7 +725,6 @@
             }
             try {
                 // Employees
-                // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
                 const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
                 const employeeSnapshot = await getDocs(employeesQuery);
                 let totalEmployees = employeeSnapshot.size;
@@ -582,8 +789,8 @@
             });
 
             // Re-fetch data when switching to relevant tabs
-            if (targetId === 'manage-employee') {
-                fetchEmployees();
+            if (targetId === 'manage-employee' || targetId === 'process-payroll') {
+                fetchEmployees(); // Will populate both tables
                 populateDepartmentSiteDropdown();
             } else if (targetId === 'site') {
                 fetchSites();
@@ -655,6 +862,13 @@
                     activateAdminModeButton.classList.remove('hidden');
                 }
             }
+            if (deactivateAdminModeButton) { // Control visibility of deactivate button
+                if (isAdminMode) {
+                    deactivateAdminModeButton.classList.remove('hidden');
+                } else {
+                    deactivateAdminModeButton.classList.add('hidden');
+                }
+            }
         };
 
         // Admin mode activation logic
@@ -692,6 +906,17 @@
             });
         }
 
+        // Admin mode deactivation (logout) logic
+        if (deactivateAdminModeButton) {
+            deactivateAdminModeButton.addEventListener('click', () => {
+                isAdminMode = false;
+                sessionStorage.removeItem('isAdminMode'); // Remove admin mode from session storage
+                updateAdminUI(); // Update UI to hide admin features
+                showContent('dashboard'); // Redirect to dashboard
+                console.log("Admin mode deactivated!");
+            });
+        }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             // Employee Management elements
@@ -706,7 +931,7 @@
             const addSiteButton = document.getElementById('add-site-button');
             const addSiteModal = document.getElementById('add-site-modal');
             const cancelAddSite = document.getElementById('cancel-add-site');
-            const addSiteForm = document.getElementById('add-site-form');
+            const addSiteForm = document = document.getElementById('add-site-form');
             const siteIdInput = document.getElementById('site-id');
             
             // Check if admin mode was previously activated in this session
@@ -740,13 +965,13 @@
                 });
             }
 
-            // Event listener for "Cancel" button in the employee modal
+            // Event listener for "Cancel" button in the add employee modal
             cancelAddEmployee.addEventListener('click', () => {
                 addEmployeeModal.classList.add('hidden');
                 addEmployeeForm.reset(); // Clear the form
             });
 
-            // Event listener for employee form submission
+            // Event listener for add employee form submission
             addEmployeeForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); // Prevent default form submission
 
@@ -772,7 +997,6 @@
                 };
 
                 try {
-                    // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
                     await addDoc(collection(db, `/artifacts/${appId}/public/data/employees`), employeeData);
                     console.log("Employee added successfully!");
                     addEmployeeModal.classList.add('hidden'); // Hide modal after submission
@@ -781,6 +1005,124 @@
                     console.error("Error adding employee: ", e);
                 }
             });
+
+            // Event listener for "Cancel" button in the edit employee modal
+            if (cancelEditEmployee) {
+                cancelEditEmployee.addEventListener('click', () => {
+                    editEmployeeModal.classList.add('hidden');
+                    editEmployeeForm.reset();
+                });
+            }
+
+            // Event listener for edit employee form submission
+            if (editEmployeeForm) {
+                editEmployeeForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot update employee.");
+                        return;
+                    }
+
+                    const docId = editEmployeeDocIdInput.value;
+                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, docId);
+
+                    const formData = new FormData(editEmployeeForm);
+                    const updatedData = {
+                        fullName: formData.get('fullName'),
+                        position: formData.get('position'),
+                        address: formData.get('address'),
+                        contactNo: formData.get('contactNo'),
+                        departmentSite: formData.get('departmentSite'),
+                        salaryRate: parseFloat(formData.get('salaryRate')),
+                        sssContribution: parseFloat(formData.get('sssContribution')),
+                        phContribution: parseFloat(formData.get('phContribution')),
+                        pagibigContribution: parseFloat(formData.get('pagibigContribution')),
+                    };
+
+                    try {
+                        await updateDoc(employeeRef, updatedData);
+                        console.log("Employee updated successfully!");
+                        editEmployeeModal.classList.add('hidden');
+                        editEmployeeForm.reset();
+                    } catch (e) {
+                        console.error("Error updating employee: ", e);
+                    }
+                });
+            }
+
+            // Function to open the Edit Employee Modal
+            window.openEditEmployeeModal = async (docId) => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot edit employee.");
+                    return;
+                }
+                try {
+                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, docId);
+                    const employeeSnap = await getDoc(employeeRef);
+
+                    if (employeeSnap.exists()) {
+                        const employeeData = employeeSnap.data();
+                        editEmployeeDocIdInput.value = docId;
+                        editEmployeeIdInput.value = employeeData.employeeId || docId;
+                        editFullNameInput.value = employeeData.fullName || '';
+                        editPositionInput.value = employeeData.position || '';
+                        editAddressInput.value = employeeData.address || '';
+                        editContactNoInput.value = employeeData.contactNo || '';
+                        editSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0).toFixed(2);
+                        editSssContributionInput.value = parseFloat(employeeData.sssContribution || 0).toFixed(2);
+                        editPhilhealthContributionInput.value = parseFloat(employeeData.phContribution || 0).toFixed(2);
+                        editPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0).toFixed(2);
+                        
+                        // Populate and select the correct option in the department/site dropdown
+                        await populateDepartmentSiteDropdown(); // Ensure dropdown is populated first
+                        if (editDepartmentSiteDropdown) {
+                            editDepartmentSiteDropdown.value = employeeData.departmentSite || '';
+                        }
+
+                        editEmployeeModal.classList.remove('hidden');
+                    } else {
+                        console.error("No such employee document!");
+                    }
+                } catch (e) {
+                    console.error("Error fetching employee for edit: ", e);
+                }
+            };
+
+            // Function to open the Delete Confirmation Modal
+            window.openDeleteConfirmationModal = (docId) => {
+                employeeToDeleteDocId = docId; // Store the ID
+                deleteConfirmationModal.classList.remove('hidden');
+            };
+
+            // Event listener for "Cancel" button in the delete confirmation modal
+            if (cancelDeleteButton) {
+                cancelDeleteButton.addEventListener('click', () => {
+                    deleteConfirmationModal.classList.add('hidden');
+                    employeeToDeleteDocId = null; // Clear the stored ID
+                });
+            }
+
+            // Event listener for "Confirm Delete" button in the delete confirmation modal
+            if (confirmDeleteButton) {
+                confirmDeleteButton.addEventListener('click', async () => {
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot delete employee.");
+                        return;
+                    }
+                    if (employeeToDeleteDocId) {
+                        try {
+                            await deleteDoc(doc(db, `/artifacts/${appId}/public/data/employees`, employeeToDeleteDocId));
+                            console.log("Employee deleted successfully!");
+                            deleteConfirmationModal.classList.add('hidden');
+                            employeeToDeleteDocId = null; // Clear the stored ID
+                        } catch (e) {
+                            console.error("Error deleting employee: ", e);
+                        }
+                    }
+                });
+            }
+
 
             // Event listener for "Add New Site" button
             if (addSiteButton) { // Ensure button exists before adding listener
@@ -797,33 +1139,35 @@
             });
 
             // Event listener for site form submission
-            addSiteForm.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Prevent default form submission
+            if (addSiteForm) {
+                addSiteForm.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Prevent default form submission
 
-                if (!userId) {
-                    console.error("User not authenticated. Cannot save site.");
-                    return;
-                }
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save site.");
+                        return;
+                    }
 
-                const formData = new FormData(addSiteForm);
-                const siteData = {
-                    siteId: formData.get('siteId'),
-                    siteName: formData.get('siteName'),
-                    siteLocation: formData.get('siteLocation'),
-                    siteStatus: formData.get('siteStatus'),
-                    createdAt: new Date()
-                };
+                    const formData = new FormData(addSiteForm);
+                    const siteData = {
+                        siteId: formData.get('siteId'),
+                        siteName: formData.get('siteName'),
+                        siteLocation: formData.get('siteLocation'),
+                        siteStatus: formData.get('siteStatus'),
+                        createdAt: new Date()
+                    };
 
-                try {
-                    // Sites are public data, so they are stored in a public collection
-                    await addDoc(collection(db, `/artifacts/${appId}/public/data/sites`), siteData);
-                    console.log("Site added successfully!");
-                    addSiteModal.classList.add('hidden'); // Hide modal after submission
-                    addSiteForm.reset(); // Clear the form
-                } catch (e) {
-                    console.error("Error adding site: ", e);
-                }
-            });
+                    try {
+                        // Sites are public data, so they are stored in a public collection
+                        await addDoc(collection(db, `/artifacts/${appId}/public/data/sites`), siteData);
+                        console.log("Site added successfully!");
+                        addSiteModal.classList.add('hidden'); // Hide modal after submission
+                        addSiteForm.reset(); // Clear the form
+                    } catch (e) {
+                        console.error("Error adding site: ", e);
+                    }
+                });
+            }
 
             // Add console.log to confirm button clicks
             navButtons.forEach(button => {
