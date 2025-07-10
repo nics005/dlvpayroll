@@ -28,6 +28,30 @@
         .content-area::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        /* Modal backdrop */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        /* Modal content */
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh; /* Limit height to prevent overflow */
+            overflow-y: auto; /* Enable scrolling for modal content */
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -82,7 +106,7 @@
                             <h3 class="text-lg font-medium text-gray-700">Total Employees</h3>
                             <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.129-.007-.257-.02-.385m-1.993 0A5.002 5.002 0 0012 18a5.002 5.002 0 00-3.986-1.995M12 12h.01M12 7a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z"></path></svg>
                         </div>
-                        <p class="text-4xl font-bold text-gray-900">125</p>
+                        <p class="text-4xl font-bold text-gray-900" id="total-employees">0</p>
                         <p class="text-sm text-gray-500 mt-2">Active employees this month</p>
                     </div>
 
@@ -92,7 +116,7 @@
                             <h3 class="text-lg font-medium text-gray-700">Payroll Processed</h3>
                             <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
-                        <p class="text-4xl font-bold text-gray-900">₱ 5,300,000</p>
+                        <p class="text-4xl font-bold text-gray-900" id="payroll-processed">₱ 0</p>
                         <p class="text-sm text-gray-500 mt-2">Total amount disbursed</p>
                     </div>
 
@@ -102,35 +126,15 @@
                             <h3 class="text-lg font-medium text-gray-700">Active Sites</h3>
                             <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         </div>
-                        <p class="text-4xl font-bold text-gray-900">18</p>
+                        <p class="text-4xl font-bold text-gray-900" id="active-sites">0</p>
                         <p class="text-sm text-gray-500 mt-2">Ongoing projects</p>
                     </div>
                 </div>
 
                 <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Payroll Activities</h3>
-                    <ul class="divide-y divide-gray-200">
-                        <li class="py-3 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-900">Payroll for June 2025</p>
-                                <p class="text-sm text-gray-600">Processed by Jane Doe</p>
-                            </div>
-                            <span class="text-sm text-gray-500">2025-06-30</span>
-                        </li>
-                        <li class="py-3 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-900">Employee onboarding: John Smith</p>
-                                <p class="text-sm text-gray-600">New hire in Electrical Dept.</p>
-                            </div>
-                            <span class="text-sm text-gray-500">2025-07-05</span>
-                        </li>
-                        <li class="py-3 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-900">Site update: New Manila Project</p>
-                                <p class="text-sm text-gray-600">Phase 2 started</p>
-                            </div>
-                            <span class="text-sm text-gray-500">2025-07-08</span>
-                        </li>
+                    <ul class="divide-y divide-gray-200" id="recent-activities-list">
+                        <!-- Recent payroll activities will be dynamically loaded here -->
                     </ul>
                 </div>
             </div>
@@ -141,7 +145,7 @@
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-gray-800">Employee List</h3>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        <button id="add-employee-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                             Add New Employee
                         </button>
                     </div>
@@ -152,59 +156,15 @@
                                     <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
                                     <th class="py-3 px-6 text-left">Name</th>
                                     <th class="py-3 px-6 text-left">Position</th>
+                                    <th class="py-3 px-6 text-left">Department/Site</th>
+                                    <th class="py-3 px-6 text-left">Contact No.</th>
+                                    <th class="py-3 px-6 text-left">Salary Rate</th>
                                     <th class="py-3 px-6 text-left">Status</th>
                                     <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 text-sm font-light">
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-EMP-001</td>
-                                    <td class="py-3 px-6 text-left">Juan Dela Cruz</td>
-                                    <td class="py-3 px-6 text-left">Senior Electrician</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-EMP-002</td>
-                                    <td class="py-3 px-6 text-left">Maria Santos</td>
-                                    <td class="py-3 px-6 text-left">Project Manager</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-EMP-003</td>
-                                    <td class="py-3 px-6 text-left">Peter Lim</td>
-                                    <td class="py-3 px-6 text-left">Apprentice Electrician</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-yellow-200 text-yellow-600 py-1 px-3 rounded-full text-xs">On Leave</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody class="text-gray-600 text-sm font-light" id="employee-list-body">
+                                <!-- Employee data will be dynamically loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -217,7 +177,7 @@
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-xl font-semibold text-gray-800">Project Sites List</h3>
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        <button id="add-site-button" class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
                             Add New Site
                         </button>
                     </div>
@@ -232,55 +192,8 @@
                                     <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 text-sm font-light">
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-SITE-001</td>
-                                    <td class="py-3 px-6 text-left">Makati Business Park</td>
-                                    <td class="py-3 px-6 text-left">Makati City</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-blue-200 text-blue-600 py-1 px-3 rounded-full text-xs">Ongoing</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-SITE-002</td>
-                                    <td class="py-3 px-6 text-left">Quezon City Condo Project</td>
-                                    <td class="py-3 px-6 text-left">Quezon City</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Completed</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-200 hover:bg-gray-100">
-                                    <td class="py-3 px-6 text-left whitespace-nowrap">DLV-SITE-003</td>
-                                    <td class="py-3 px-6 text-left">BGC Commercial Building</td>
-                                    <td class="py-3 px-6 text-left">Taguig City</td>
-                                    <td class="py-3 px-6 text-left"><span class="bg-red-200 text-red-600 py-1 px-3 rounded-full text-xs">Delayed</span></td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center space-x-2">
-                                            <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                            <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tbody class="text-gray-600 text-sm font-light" id="site-list-body">
+                                <!-- Site data will be dynamically loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -289,32 +202,259 @@
         </div>
     </main>
 
-    <script>
+    <!-- Add Employee Modal -->
+    <div id="add-employee-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Employee</h2>
+            <form id="add-employee-form" class="space-y-4">
+                <div>
+                    <label for="employee-id" class="block text-sm font-medium text-gray-700">Employee ID</label>
+                    <input type="text" id="employee-id" name="employeeId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
+                </div>
+                <div>
+                    <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input type="text" id="full-name" name="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
+                    <input type="text" id="position" name="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                    <input type="text" id="address" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="contact-no" class="block text-sm font-medium text-gray-700">Contact No.</label>
+                    <input type="text" id="contact-no" name="contactNo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="department-site-dropdown" class="block text-sm font-medium text-gray-700">Department/Site</label>
+                    <select id="department-site-dropdown" name="departmentSite" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                        <option value="">Select Department/Site</option>
+                        <!-- Options will be dynamically populated from added sites -->
+                    </select>
+                </div>
+                <div>
+                    <label for="salary-rate" class="block text-sm font-medium text-gray-700">Salary Rate (PHP)</label>
+                    <input type="number" id="salary-rate" name="salaryRate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00" required>
+                </div>
+                <div>
+                    <label for="sss-contribution" class="block text-sm font-medium text-gray-700">SSS Contribution</label>
+                    <input type="number" id="sss-contribution" name="sssContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
+                </div>
+                <div>
+                    <label for="ph-contribution" class="block text-sm font-medium text-gray-700">PhilHealth Contribution</label>
+                    <input type="number" id="ph-contribution" name="phContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
+                </div>
+                <div>
+                    <label for="pagibig-contribution" class="block text-sm font-medium text-gray-700">Pag-IBIG Contribution</label>
+                    <input type="number" id="pagibig-contribution" name="pagibigContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-add-employee" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        Save Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div id="add-site-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Site</h2>
+            <form id="add-site-form" class="space-y-4">
+                <div>
+                    <label for="site-id" class="block text-sm font-medium text-gray-700">Site ID</label>
+                    <input type="text" id="site-id" name="siteId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
+                </div>
+                <div>
+                    <label for="site-name" class="block text-sm font-medium text-gray-700">Site Name</label>
+                    <input type="text" id="site-name" name="siteName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="site-location" class="block text-sm font-medium text-gray-700">Location</label>
+                    <input type="text" id="site-location" name="siteLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                </div>
+                <div>
+                    <label for="site-status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select id="site-status" name="siteStatus" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
+                        <option value="">Select Status</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Delayed">Delayed</option>
+                        <option value="On Hold">On Hold</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" id="cancel-add-site" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
+                        Save Site
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase configuration (provided by the user)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYpApEwrgAsso-dJ-uTAX3AI4yRZBn9JU",
+            authDomain: "payroll-aef73.firebaseapp.com",
+            projectId: "payroll-aef73",
+            storageBucket: "payroll-aef73.firebasestorage.app",
+            messagingSenderId: "717714854870",
+            appId: "1:717714854870:web:b1e7eb0dc82cd61dbc8a77",
+            measurementId: "G-F31PSMN7RD"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let userId = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Authenticate user
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                console.log("Authenticated with Firebase UID:", userId);
+                // Fetch and display data once authenticated
+                fetchEmployees();
+                fetchSites();
+                updateDashboardCounts();
+            } else {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser?.uid;
+                        console.log("Signed in with custom token. User ID:", userId);
+                    } catch (error) {
+                        console.error("Error with custom token, attempting anonymous sign-in:", error);
+                        // Fallback to anonymous sign-in if custom token fails
+                        try {
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser?.uid || crypto.randomUUID();
+                            console.log("Signed in anonymously after custom token failure. User ID:", userId);
+                        } catch (anonError) {
+                            console.error("Error signing in anonymously:", anonError);
+                        }
+                    }
+                } else {
+                    // No custom token provided, sign in anonymously directly
+                    try {
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser?.uid || crypto.randomUUID();
+                        console.log("Signed in anonymously (no custom token). User ID:", userId);
+                    } catch (anonError) {
+                        console.error("Error signing in anonymously:", anonError);
+                    }
+                }
+
+                // Only proceed to fetch data if userId is successfully set
+                if (userId) {
+                    fetchEmployees();
+                    fetchSites();
+                    updateDashboardCounts();
+                } else {
+                    console.error("Failed to obtain a user ID after all sign-in attempts.");
+                }
+            }
+        });
+
+
         document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const pageContents = document.querySelectorAll('.page-content');
             const currentPageTitle = document.getElementById('current-page-title');
 
+            // Dashboard elements
+            const totalEmployeesCard = document.getElementById('total-employees');
+            const payrollProcessedCard = document.getElementById('payroll-processed');
+            const activeSitesCard = document.getElementById('active-sites');
+            const recentActivitiesList = document.getElementById('recent-activities-list');
+
+
+            // Employee Management elements
+            const addEmployeeButton = document.getElementById('add-employee-button');
+            const addEmployeeModal = document.getElementById('add-employee-modal');
+            const cancelAddEmployee = document.getElementById('cancel-add-employee');
+            const addEmployeeForm = document.getElementById('add-employee-form');
+            const employeeIdInput = document.getElementById('employee-id');
+            const employeeListBody = document.getElementById('employee-list-body');
+            const departmentSiteDropdown = document.getElementById('department-site-dropdown');
+
+            // Site Management elements
+            const addSiteButton = document.getElementById('add-site-button');
+            const addSiteModal = document.getElementById('add-site-modal');
+            const cancelAddSite = document.getElementById('cancel-add-site');
+            const addSiteForm = document.getElementById('add-site-form');
+            const siteIdInput = document.getElementById('site-id');
+            const siteListBody = document.getElementById('site-list-body');
+
+            // Function to generate unique employee ID
+            const generateEmployeeId = () => {
+                const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
+                return `DLV-${randomNumbers}`;
+            };
+
+            // Function to generate unique site ID
+            const generateSiteId = () => {
+                const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
+                return `DLV-SITE-${randomNumbers}`;
+            };
+
+            // Function to populate the Department/Site dropdown from Firestore sites
+            const populateDepartmentSiteDropdown = async () => {
+                departmentSiteDropdown.innerHTML = '<option value="">Select Department/Site</option>'; // Clear existing options
+                try {
+                    if (!userId) {
+                        console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
+                        return;
+                    }
+                    const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+                    const querySnapshot = await getDocs(q); // Use getDocs for a one-time fetch
+                    querySnapshot.forEach((doc) => {
+                        const site = doc.data();
+                        const option = document.createElement('option');
+                        option.value = site.siteName;
+                        option.textContent = `Site: ${site.siteName} (${site.siteLocation})`;
+                        departmentSiteDropdown.appendChild(option);
+                    });
+                } catch (e) {
+                    console.error("Error populating department/site dropdown: ", e);
+                }
+            };
+
             // Function to show the selected content and update the title
             const showContent = (targetId) => {
-                // Hide all content sections
                 pageContents.forEach(content => {
                     content.classList.add('hidden');
                     content.classList.remove('active');
                 });
 
-                // Show the target content section
                 const targetContent = document.getElementById(targetId + '-content');
                 if (targetContent) {
                     targetContent.classList.remove('hidden');
                     targetContent.classList.add('active');
                 }
 
-                // Update the header title
                 const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
                 currentPageTitle.textContent = buttonText;
 
-                // Update active state for nav buttons
                 navButtons.forEach(button => {
                     if (button.dataset.target === targetId) {
                         button.classList.add('bg-gray-700', 'text-white');
@@ -324,17 +464,271 @@
                         button.classList.add('text-gray-300', 'hover:bg-gray-700');
                     }
                 });
+
+                // Re-fetch data when switching to relevant tabs
+                if (targetId === 'manage-employee') {
+                    fetchEmployees();
+                    populateDepartmentSiteDropdown();
+                } else if (targetId === 'site') {
+                    fetchSites();
+                } else if (targetId === 'dashboard') {
+                    updateDashboardCounts();
+                }
             };
 
-            // Add click event listeners to navigation buttons
+            // --- Firebase Data Operations ---
+
+            // Fetch and display Employees
+            const fetchEmployees = () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot fetch employees.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+                onSnapshot(q, (querySnapshot) => {
+                    employeeListBody.innerHTML = ''; // Clear current list
+                    let totalEmployees = 0;
+                    let totalPayroll = 0;
+                    querySnapshot.forEach((doc) => {
+                        totalEmployees++;
+                        const employee = doc.data();
+                        const employeeId = doc.id; // Use Firestore document ID as Employee ID
+                        const newRow = employeeListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        totalPayroll += parseFloat(employee.salaryRate || 0);
+
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
+                            <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                    totalEmployeesCard.textContent = totalEmployees;
+                    payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                }, (error) => {
+                    console.error("Error fetching employees: ", error);
+                });
+            };
+
+            // Fetch and display Sites
+            const fetchSites = () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot fetch sites.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+                onSnapshot(q, (querySnapshot) => {
+                    siteListBody.innerHTML = ''; // Clear current list
+                    let activeSitesCount = 0;
+                    querySnapshot.forEach((doc) => {
+                        const site = doc.data();
+                        if (site.siteStatus === 'Ongoing') {
+                            activeSitesCount++;
+                        }
+                        const newRow = siteListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+
+                        let statusColorClass = '';
+                        switch(site.siteStatus) {
+                            case 'Ongoing':
+                                statusColorClass = 'bg-blue-200 text-blue-600';
+                                break;
+                            case 'Completed':
+                                statusColorClass = 'bg-green-200 text-green-600';
+                                break;
+                            case 'Delayed':
+                                statusColorClass = 'bg-red-200 text-red-600';
+                                break;
+                            case 'On Hold':
+                                statusColorClass = 'bg-yellow-200 text-yellow-600';
+                                break;
+                            default:
+                                statusColorClass = 'bg-gray-200 text-gray-600';
+                        }
+
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
+                            <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
+                            <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
+                            <td class="py-3 px-6 text-left"><span class="${statusColorClass} py-1 px-3 rounded-full text-xs">${site.siteStatus || ''}</span></td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                    activeSitesCard.textContent = activeSitesCount;
+                    populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
+                }, (error) => {
+                    console.error("Error fetching sites: ", error);
+                });
+            };
+
+            // Update Dashboard Counts
+            const updateDashboardCounts = async () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot update dashboard counts.");
+                    return;
+                }
+                try {
+                    // Employees
+                    const employeesQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+                    const employeeSnapshot = await getDocs(employeesQuery);
+                    let totalEmployees = employeeSnapshot.size;
+                    let totalPayroll = 0;
+                    employeeSnapshot.forEach(doc => {
+                        const employee = doc.data();
+                        totalPayroll += parseFloat(employee.salaryRate || 0);
+                    });
+                    totalEmployeesCard.textContent = totalEmployees;
+                    payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                    // Sites
+                    const sitesQuery = query(collection(db, `/artifacts/${appId}/public/data/sites`));
+                    const siteSnapshot = await getDocs(sitesQuery);
+                    let activeSitesCount = 0;
+                    siteSnapshot.forEach(doc => {
+                        const site = doc.data();
+                        if (site.siteStatus === 'Ongoing') {
+                            activeSitesCount++;
+                        }
+                    });
+                    activeSitesCard.textContent = activeSitesCount;
+
+                    // Recent Activities (placeholder for now, you'd populate this with actual activity data)
+                    recentActivitiesList.innerHTML = `
+                        <li class="py-3 flex justify-between items-center">
+                            <div>
+                                <p class="font-medium text-gray-900">No recent activities.</p>
+                            </div>
+                        </li>
+                    `;
+
+                } catch (error) {
+                    console.error("Error updating dashboard counts:", error);
+                }
+            };
+
+
+            // Event listener for "Add New Employee" button
+            addEmployeeButton.addEventListener('click', () => {
+                employeeIdInput.value = generateEmployeeId(); // Generate and set ID
+                populateDepartmentSiteDropdown(); // Populate dropdown before showing modal
+                addEmployeeModal.classList.remove('hidden');
+            });
+
+            // Event listener for "Cancel" button in the employee modal
+            cancelAddEmployee.addEventListener('click', () => {
+                addEmployeeModal.classList.add('hidden');
+                addEmployeeForm.reset(); // Clear the form
+            });
+
+            // Event listener for employee form submission
+            addEmployeeForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                if (!userId) {
+                    console.error("User not authenticated. Cannot save employee.");
+                    return;
+                }
+
+                const formData = new FormData(addEmployeeForm);
+                const employeeData = {
+                    employeeId: formData.get('employeeId'),
+                    fullName: formData.get('fullName'),
+                    position: formData.get('position'),
+                    address: formData.get('address'),
+                    contactNo: formData.get('contactNo'),
+                    departmentSite: formData.get('departmentSite'),
+                    salaryRate: parseFloat(formData.get('salaryRate')),
+                    sssContribution: parseFloat(formData.get('sssContribution')),
+                    phContribution: parseFloat(formData.get('phContribution')),
+                    pagibigContribution: parseFloat(formData.get('pagibigContribution')),
+                    status: 'Active', // Default status
+                    createdAt: new Date()
+                };
+
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/employees`), employeeData);
+                    console.log("Employee added successfully!");
+                    addEmployeeModal.classList.add('hidden'); // Hide modal after submission
+                    addEmployeeForm.reset(); // Clear the form
+                } catch (e) {
+                    console.error("Error adding employee: ", e);
+                }
+            });
+
+            // Event listener for "Add New Site" button
+            addSiteButton.addEventListener('click', () => {
+                siteIdInput.value = generateSiteId(); // Generate and set ID
+                addSiteModal.classList.remove('hidden');
+            });
+
+            // Event listener for "Cancel" button in the site modal
+            cancelAddSite.addEventListener('click', () => {
+                addSiteModal.classList.add('hidden');
+                addSiteForm.reset(); // Clear the form
+            });
+
+            // Event listener for site form submission
+            addSiteForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default form submission
+
+                if (!userId) {
+                    console.error("User not authenticated. Cannot save site.");
+                    return;
+                }
+
+                const formData = new FormData(addSiteForm);
+                const siteData = {
+                    siteId: formData.get('siteId'),
+                    siteName: formData.get('siteName'),
+                    siteLocation: formData.get('siteLocation'),
+                    siteStatus: formData.get('siteStatus'),
+                    createdAt: new Date()
+                };
+
+                try {
+                    // Sites are public data, so they are stored in a public collection
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/sites`), siteData);
+                    console.log("Site added successfully!");
+                    addSiteModal.classList.add('hidden'); // Hide modal after submission
+                    addSiteForm.reset(); // Clear the form
+                } catch (e) {
+                    console.error("Error adding site: ", e);
+                }
+            });
+
+            // Add console.log to confirm button clicks
             navButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetId = button.dataset.target;
+                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
                     showContent(targetId);
                 });
             });
 
-            // Initially show the Dashboard content
+            // Initially show the Dashboard content and fetch data
             showContent('dashboard');
         });
     </script>
