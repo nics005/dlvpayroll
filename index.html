@@ -730,7 +730,7 @@
                 event.preventDefault(); // Prevent default form submission
 
                 if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
-                    console.error("Firebase not ready or user/app ID not authenticated.");
+                    console.error("Firebase not ready or user/app ID not authenticated. isAuthReady:", window.fb.isAuthReady, "userId:", window.fb.userId, "appId:", window.fb.appId);
                     // Using a custom message box instead of alert()
                     const messageBox = document.createElement('div');
                     messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
@@ -745,7 +745,7 @@
                 }
 
                 const employeeData = {
-                    id: employeeIdInput.value,
+                    id: document.getElementById('employee-id').value, // Use the generated ID from the input
                     name: document.getElementById('employee-name').value,
                     department: document.getElementById('employee-department').value,
                     position: document.getElementById('employee-position').value,
@@ -804,7 +804,7 @@
                 event.preventDefault(); // Prevent default form submission
 
                 if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
-                    console.error("Firebase not ready or user/app ID not authenticated.");
+                    console.error("Firebase not ready or user/app ID not authenticated. isAuthReady:", window.fb.isAuthReady, "userId:", window.fb.userId, "appId:", window.fb.appId);
                     // Using a custom message box instead of alert()
                     const messageBox = document.createElement('div');
                     messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
@@ -890,7 +890,7 @@
                     confirmBox.remove(); // Close confirmation box
 
                     if (!window.fb.isAuthReady || !window.fb.userId || !window.fb.appId) {
-                        console.error("Firebase not ready or user/app ID not authenticated.");
+                        console.error("Firebase not ready or user/app ID not authenticated. isAuthReady:", window.fb.isAuthReady, "userId:", window.fb.userId, "appId:", window.fb.appId);
                         // Using a custom message box instead of alert()
                         const messageBox = document.createElement('div');
                         messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
@@ -954,12 +954,14 @@
                 const appId = window.fb.appId;
                 const userId = window.fb.userId;
 
+                console.log("FirebaseReady event fired. AppId:", appId, "UserId:", userId);
+
                 if (userId && appId) {
                     // Listen for employees data
                     window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/employees`), (snapshot) => {
                         employeesData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
                         renderEmployees();
-                        console.log("Employees data updated:", employeesData);
+                        console.log("Employees data updated from Firestore:", employeesData);
                     }, (error) => {
                         console.error("Error fetching employees:", error);
                         employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-red-500">Error loading employees. Check console for permissions.</td></tr>`;
@@ -969,7 +971,7 @@
                     window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/departments`), (snapshot) => {
                         departmentsData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
                         renderDepartments();
-                        console.log("Departments data updated:", departmentsData);
+                        console.log("Departments data updated from Firestore:", departmentsData);
                     }, (error) => {
                         console.error("Error fetching departments:", error);
                         departmentsList.innerHTML = `<li>Error loading departments. Check console for permissions.</li>`;
@@ -979,13 +981,13 @@
                     window.fb.onSnapshot(window.fb.collection(window.fb.db, `artifacts/${appId}/users/${userId}/sites`), (snapshot) => {
                         sitesData = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
                         renderSites();
-                        console.log("Sites data updated:", sitesData);
+                        console.log("Sites data updated from Firestore:", sitesData);
                     }, (error) => {
                         console.error("Error fetching sites:", error);
                         sitesList.innerHTML = `<li>Error loading sites. Check console for permissions.</li>`;
                     });
                 } else {
-                    console.warn("Firebase not fully initialized. User ID or App ID is missing. Cannot fetch Firestore data.");
+                    console.warn("Firebase not fully initialized during firebaseReady event. User ID or App ID is missing. Cannot fetch Firestore data.");
                     employeesTableBody.innerHTML = `<tr><td colspan="6" class="py-4 text-center text-gray-500">Firebase not ready. Please ensure authentication is set up.</td></tr>`;
                     departmentsList.innerHTML = `<li>Firebase not ready.</li>`;
                     sitesList.innerHTML = `<li>Firebase not ready.</li>`;
