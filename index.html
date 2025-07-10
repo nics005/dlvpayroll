@@ -566,6 +566,23 @@
                     <p class="text-2xl font-bold text-gray-900" id="deductions-gross-pay">₱ 0.00</p>
                 </div>
 
+                <!-- Display SSS, PhilHealth, Pag-IBIG from employee profile -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700">SSS Contribution (from profile):</p>
+                    <p class="text-lg font-bold text-gray-900" id="deductions-sss-profile">₱ 0.00</p>
+                    <input type="hidden" id="hidden-sss-contribution" value="0">
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-700">PhilHealth Contribution (from profile):</p>
+                    <p class="text-lg font-bold text-gray-900" id="deductions-ph-profile">₱ 0.00</p>
+                    <input type="hidden" id="hidden-ph-contribution" value="0">
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution (from profile):</p>
+                    <p class="text-lg font-bold text-gray-900" id="deductions-pagibig-profile">₱ 0.00</p>
+                    <input type="hidden" id="hidden-pagibig-contribution" value="0">
+                </div>
+
                 <div>
                     <label for="govt-loan" class="block text-sm font-medium text-gray-700">Government Loan</label>
                     <input type="number" id="govt-loan" name="govtLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
@@ -763,6 +780,15 @@
         const deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
         const deductionsRecordDocIdInput = document.getElementById('deductions-record-doc-id'); // New hidden input for deduction record ID
         const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
+        
+        // New elements for displaying SSS, PhilHealth, Pag-IBIG from employee profile
+        const deductionsSssProfileSpan = document.getElementById('deductions-sss-profile');
+        const deductionsPhProfileSpan = document.getElementById('deductions-ph-profile');
+        const deductionsPagibigProfileSpan = document.getElementById('deductions-pagibig-profile');
+        const hiddenSssContributionInput = document.getElementById('hidden-sss-contribution');
+        const hiddenPhContributionInput = document.getElementById('hidden-ph-contribution');
+        const hiddenPagibigContributionInput = document.getElementById('hidden-pagibig-contribution');
+
         const govtLoanInput = document.getElementById('govt-loan');
         const coopShareInput = document.getElementById('coop-share');
         const withholdingTaxInput = document.getElementById('withholding-tax');
@@ -1020,6 +1046,12 @@
         // Deductions Calculation Logic
         const calculateDeductions = () => {
             const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
+            
+            // Get government contributions from hidden inputs (populated from employee profile)
+            const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
+            const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
+            const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
+
             const govtLoan = parseFloat(govtLoanInput.value || 0);
             const coopShare = parseFloat(coopShareInput.value || 0);
             const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
@@ -1029,7 +1061,7 @@
             const dailyVale = parseFloat(dailyValeInput.value || 0);
             const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
-            const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
+            const totalDeductions = sssContribution + phContribution + pagibigContribution + govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
             const netPay = grossPay - totalDeductions;
 
             calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1052,6 +1084,17 @@
                     deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
                     deductionsEmployeeDocIdInput.value = employeeDocId;
                     deductionsRecordDocIdInput.value = deductionRecordDocId; // Set the deduction record ID
+
+                    // Populate SSS, PhilHealth, Pag-IBIG from employee profile
+                    deductionsSssProfileSpan.textContent = `₱ ${parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    deductionsPhProfileSpan.textContent = `₱ ${parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    deductionsPagibigProfileSpan.textContent = `₱ ${parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                    
+                    // Store these values in hidden inputs for calculation
+                    hiddenSssContributionInput.value = parseFloat(employeeData.sssContribution || 0);
+                    hiddenPhContributionInput.value = parseFloat(employeeData.phContribution || 0);
+                    hiddenPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0);
+
 
                     // Fetch the latest gross pay from payroll_records
                     const payrollRecordsQuery = query(
@@ -1090,6 +1133,8 @@
                             caVoucherInput.value = deductionData.caVoucher || 0;
                             dailyValeInput.value = deductionData.dailyVale || 0;
                             othersDeductionInput.value = deductionData.othersDeduction || 0;
+                            // Government contributions are pulled from employee profile, not from existing deduction record directly for editing input fields.
+                            // However, they are part of the calculation.
                         } else {
                             console.error("No such deduction record document for editing!");
                             // Fallback to add mode if record not found
@@ -1179,93 +1224,115 @@
             payrollSummaryContainer.innerHTML = ''; // Clear previous content
 
             try {
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("fullName"));
                 const employeeSnapshot = await getDocs(employeesQuery);
 
-                const groupedSummary = {};
-
-                for (const employeeDoc of employeeSnapshot.docs) {
-                    const employeeData = employeeDoc.data();
-                    const employeeDocId = employeeDoc.id;
-                    const departmentSite = employeeData.departmentSite || 'Unassigned';
-
-                    // Fetch latest payroll record for gross pay
-                    const payrollQuery = query(
-                        collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                        where("employeeDocId", "==", employeeDocId),
-                        orderBy("payrollDate", "desc"),
-                        limit(1)
-                    );
-                    const payrollSnapshot = await getDocs(payrollQuery);
-                    const latestGrossPay = payrollSnapshot.empty ? 0 : payrollSnapshot.docs[0].data().grossPay || 0;
-
-                    // Fetch latest deduction record for net pay
-                    const deductionQuery = query(
-                        collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                        where("employeeDocId", "==", employeeDocId),
-                        orderBy("deductionDate", "desc"),
-                        limit(1)
-                    );
-                    const deductionSnapshot = await getDocs(deductionQuery);
-                    const latestNetPay = deductionSnapshot.empty ? latestGrossPay : deductionSnapshot.docs[0].data().netPay || latestGrossPay; // If no deductions, net pay is gross pay
-
-                    if (!groupedSummary[departmentSite]) {
-                        groupedSummary[departmentSite] = [];
-                    }
-                    groupedSummary[departmentSite].push({
-                        docId: employeeDocId,
-                        employeeId: employeeData.employeeId,
-                        fullName: employeeData.fullName,
-                        latestGrossPay: latestGrossPay,
-                        latestNetPay: latestNetPay
-                    });
-                }
-
-                // Render grouped summary
-                for (const siteName in groupedSummary) {
-                    let siteSection = document.createElement('div');
-                    siteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
-                    siteSection.innerHTML = `
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
+                let reportHtml = `
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Payroll Summary Report</h3>
+                        <p class="text-gray-600 mb-4">Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
                         <div class="overflow-x-auto">
                             <table class="min-w-full bg-white rounded-lg border border-gray-200">
                                 <thead>
                                     <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
                                         <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
                                         <th class="py-2 px-4 text-left">Name</th>
+                                        <th class="py-2 px-4 text-left">Department/Site</th>
+                                        <th class="py-2 px-4 text-left">Salary Rate (Daily)</th>
                                         <th class="py-2 px-4 text-left">Latest Gross Pay</th>
-                                        <th class="py-2 px-4 text-left">Latest Net Pay</th>
+                                        <th class="py-2 px-4 text-left">SSS Contrib.</th>
+                                        <th class="py-2 px-4 text-left">PhilHealth Contrib.</th>
+                                        <th class="py-2 px-4 text-left">Pag-IBIG Contrib.</th>
+                                        <th class="py-2 px-4 text-left">Other Deductions</th>
+                                        <th class="py-2 px-4 text-left">Total Deductions</th>
+                                        <th class="py-2 px-4 text-left">Net Pay</th>
                                         <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="text-gray-600 text-sm font-light">
+                `;
+
+                if (employeeSnapshot.empty) {
+                    reportHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No employee records found.</td></tr>`;
+                } else {
+                    for (const employeeDoc of employeeSnapshot.docs) {
+                        const employeeData = employeeDoc.data();
+                        const employeeDocId = employeeDoc.id;
+
+                        // Fetch latest payroll record for gross pay
+                        const payrollQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/payroll_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("payrollDate", "desc"),
+                            limit(1)
+                        );
+                        const payrollSnapshot = await getDocs(payrollQuery);
+                        const latestGrossPay = payrollSnapshot.empty ? 0 : payrollSnapshot.docs[0].data().grossPay || 0;
+
+                        // Fetch latest deduction record for net pay and other deductions
+                        const deductionQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/deduction_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("deductionDate", "desc"),
+                            limit(1)
+                        );
+                        const deductionSnapshot = await getDocs(deductionQuery);
+                        
+                        let latestTotalDeductions = 0;
+                        let latestNetPay = latestGrossPay; // Default net pay to gross pay if no deductions
+                        let otherDeductionsSum = 0; // Sum of non-govt deductions
+
+                        if (!deductionSnapshot.empty) {
+                            const latestDeductionRecord = deductionSnapshot.docs[0].data();
+                            latestTotalDeductions = latestDeductionRecord.totalDeductions || 0;
+                            latestNetPay = latestDeductionRecord.netPay || latestGrossPay;
+
+                            // Calculate other deductions (non-govt)
+                            otherDeductionsSum = (latestDeductionRecord.govtLoan || 0) +
+                                                 (latestDeductionRecord.coopShare || 0) +
+                                                 (latestDeductionRecord.withholdingTax || 0) +
+                                                 (latestDeductionRecord.unpaidLoan || 0) +
+                                                 (latestDeductionRecord.coop2025 || 0) +
+                                                 (latestDeductionRecord.caVoucher || 0) +
+                                                 (latestDeductionRecord.dailyVale || 0) +
+                                                 (latestDeductionRecord.othersDeduction || 0);
+                        }
+
+                        reportHtml += `
+                            <tr>
+                                <td class="py-3 px-6 text-left whitespace-nowrap">${employeeData.employeeId || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">${employeeData.fullName || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">${employeeData.departmentSite || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employeeData.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(latestGrossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(otherDeductionsSum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left font-semibold">₱ ${parseFloat(latestTotalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left font-semibold">₱ ${parseFloat(latestNetPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <div class="flex item-center justify-center space-x-2">
+                                        <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-summary-btn" data-employee-id="${employeeDocId}">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        </button>
+                                        <button class="w-4 mr-2 transform hover:text-green-500 hover:scale-110 generate-report-btn" data-employee-id="${employeeDocId}">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }
+                
+                reportHtml += `
                                 </tbody>
                             </table>
                         </div>
-                    `;
-                    const tbody = siteSection.querySelector('tbody');
-                    groupedSummary[siteName].forEach(employee => {
-                        const row = tbody.insertRow();
-                        row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        row.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || 'N/A'}</td>
-                            <td class="py-3 px-6 text-left">${employee.fullName || 'N/A'}</td>
-                            <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.latestGrossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.latestNetPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-summary-btn" data-employee-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-green-500 hover:scale-110 generate-report-btn" data-employee-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    });
-                    payrollSummaryContainer.appendChild(siteSection);
-                }
+                    </div>
+                `;
+                payrollSummaryContainer.innerHTML = reportHtml;
                 attachEmployeeActionListeners(); // Re-attach listeners for new buttons
             } catch (e) {
                 console.error("Error fetching payroll summary: ", e);
@@ -1381,6 +1448,9 @@
                                         <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
                                             <th class="py-2 px-4 text-left">Date</th>
                                             <th class="py-2 px-4 text-left">Gross Pay</th>
+                                            <th class="py-2 px-4 text-left">SSS</th>
+                                            <th class="py-2 px-4 text-left">PhilHealth</th>
+                                            <th class="py-2 px-4 text-left">Pag-IBIG</th>
                                             <th class="py-2 px-4 text-left">Govt Loan</th>
                                             <th class="py-2 px-4 text-left">Coop Share</th>
                                             <th class="py-2 px-4 text-left">W/Tax</th>
@@ -1396,7 +1466,7 @@
                                     <tbody class="text-gray-600 text-sm font-light">
                     `;
                     if (deductionSnapshot.empty) {
-                        contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
+                        contentHtml += `<tr><td colspan="15" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
                     } else {
                         deductionSnapshot.forEach(recordDoc => {
                             const record = recordDoc.data();
@@ -1405,6 +1475,9 @@
                                 <tr>
                                     <td class="py-3 px-6">${deductionDate}</td>
                                     <td class="py-3 px-6">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                     <td class="py-3 px-6">₱ ${parseFloat(record.govtLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                     <td class="py-3 px-6">₱ ${parseFloat(record.coopShare || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                     <td class="py-3 px-6">₱ ${parseFloat(record.withholdingTax || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -2178,6 +2251,7 @@
             }
 
             // Event listeners for deduction input fields to trigger calculation
+            // Now also listen to changes on hidden inputs if they were to be changed by other means (though not expected here)
             govtLoanInput.addEventListener('input', calculateDeductions);
             coopShareInput.addEventListener('input', calculateDeductions);
             withholdingTaxInput.addEventListener('input', calculateDeductions);
@@ -2186,6 +2260,10 @@
             caVoucherInput.addEventListener('input', calculateDeductions);
             dailyValeInput.addEventListener('input', calculateDeductions);
             othersDeductionInput.addEventListener('input', calculateDeductions);
+            hiddenSssContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
+            hiddenPhContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
+            hiddenPagibigContributionInput.addEventListener('input', calculateDeductions); // Listen to hidden input changes
+
 
             // Event listener for closing deductions input modal
             if (cancelDeductionsInputButton) {
@@ -2219,6 +2297,10 @@
                         employeeId: employeeId,
                         employeeName: employeeName,
                         grossPay: grossPay,
+                        // Include government contributions from hidden inputs
+                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
+                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
+                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
                         govtLoan: parseFloat(govtLoanInput.value || 0),
                         coopShare: parseFloat(coopShareInput.value || 0),
                         withholdingTax: parseFloat(withholdingTaxInput.value || 0),
