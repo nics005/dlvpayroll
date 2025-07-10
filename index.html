@@ -522,46 +522,47 @@
             if (user) {
                 userId = user.uid;
                 console.log("Authenticated with Firebase UID:", userId);
-                // Fetch and display data once authenticated
-                fetchEmployees();
-                fetchSites();
-                updateDashboardCounts();
             } else {
+                // If no user is currently authenticated, try to sign in
                 if (initialAuthToken) {
                     try {
                         await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser?.uid;
+                        userId = auth.currentUser.uid; // If successful, user.uid will be here
                         console.log("Signed in with custom token. User ID:", userId);
                     } catch (error) {
                         console.error("Error with custom token, attempting anonymous sign-in:", error);
                         // Fallback to anonymous sign-in if custom token fails
                         try {
                             await signInAnonymously(auth);
-                            userId = auth.currentUser?.uid || crypto.randomUUID();
+                            userId = auth.currentUser.uid; // If successful, user.uid will be here
                             console.log("Signed in anonymously after custom token failure. User ID:", userId);
                         } catch (anonError) {
                             console.error("Error signing in anonymously:", anonError);
+                            userId = crypto.randomUUID(); // Only use UUID if anonymous sign-in also fails
+                            console.error("No Firebase user ID, using a temporary UUID:", userId);
                         }
                     }
                 } else {
                     // No custom token provided, sign in anonymously directly
                     try {
                         await signInAnonymously(auth);
-                        userId = auth.currentUser?.uid || crypto.randomUUID();
+                        userId = auth.currentUser.uid; // If successful, user.uid will be here
                         console.log("Signed in anonymously (no custom token). User ID:", userId);
                     } catch (anonError) {
                         console.error("Error signing in anonymously:", anonError);
+                        userId = crypto.randomUUID(); // Only use UUID if anonymous sign-in also fails
+                        console.error("No Firebase user ID, using a temporary UUID:", userId);
                     }
                 }
+            }
 
-                // Only proceed to fetch data if userId is successfully set
-                if (userId) {
-                    fetchEmployees();
-                    fetchSites();
-                    updateDashboardCounts();
-                } else {
-                    console.error("Failed to obtain a user ID after all sign-in attempts.");
-                }
+            // After authentication attempts, proceed with data fetching if userId is available
+            if (userId) {
+                fetchEmployees();
+                fetchSites();
+                updateDashboardCounts();
+            } else {
+                console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
             }
         });
 
