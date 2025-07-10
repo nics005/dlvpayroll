@@ -371,9 +371,7 @@
             </button>
         </nav>
 
-        <button id="admin-login-btn" class="admin-button">
-            Administrator Login
-        </button>
+        <!-- Removed Administrator Login Button -->
     </aside>
 
     <!-- Main Content Area -->
@@ -468,17 +466,7 @@
         </section>
     </main>
 
-    <!-- Admin Password Modal -->
-    <div id="admin-modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" data-modal-id="admin-modal">&times;</span>
-            <h3 class="text-xl font-semibold mb-4 text-center">Administrator Login</h3>
-            <p class="text-gray-700 text-center">Please enter the administrator password:</p>
-            <input type="password" id="admin-password-input" placeholder="Enter password" class="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4">
-            <button id="admin-password-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mt-4 transition duration-200">Submit</button>
-            <p id="admin-message" class="text-red-500 mt-2 hidden text-center">Incorrect password. Please try again.</p>
-        </div>
-    </div>
+    <!-- Removed Admin Password Modal -->
 
     <!-- Add New Employee Modal -->
     <div id="add-employee-modal" class="modal">
@@ -572,12 +560,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             const navButtons = document.querySelectorAll('.nav-button');
             const sections = document.querySelectorAll('.section-content');
-            const adminLoginBtn = document.getElementById('admin-login-btn');
-            const adminModal = document.getElementById('admin-modal');
-            const adminCloseBtn = adminModal.querySelector('.modal-close');
-            const adminPasswordInput = document.getElementById('admin-password-input');
-            const adminPasswordSubmit = document.getElementById('admin-password-submit');
-            const adminMessage = document.getElementById('admin-message');
+            // Removed adminLoginBtn, adminModal, adminCloseBtn, adminPasswordInput, adminPasswordSubmit, adminMessage
 
             const addEmployeeBtn = document.getElementById('add-employee-btn');
             const addEmployeeModal = document.getElementById('add-employee-modal');
@@ -680,40 +663,10 @@
             // Show Dashboard by default
             showSection('dashboard-content');
 
-            // Admin Login Modal functionality
-            adminLoginBtn.addEventListener('click', () => {
-                openModal(adminModal);
-                adminPasswordInput.value = ''; // Clear previous input
-                adminMessage.classList.add('hidden'); // Hide previous messages
-            });
-
-            adminCloseBtn.addEventListener('click', () => {
-                closeModal(adminModal);
-            });
-
-            adminPasswordSubmit.addEventListener('click', () => {
-                const password = adminPasswordInput.value;
-                // Simple hardcoded password for demonstration.
-                // In a real application, this would involve secure authentication.
-                if (password === 'admin123') {
-                    // Using a custom message box instead of alert()
-                    const messageBox = document.createElement('div');
-                    messageBox.className = 'fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-[1001]';
-                    messageBox.innerHTML = `
-                        <div class="bg-white p-8 rounded-lg shadow-xl text-center">
-                            <p class="text-lg font-semibold mb-4">Administrator access granted!</p>
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md" onclick="this.parentNode.parentNode.remove()">OK</button>
-                        </div>
-                    `;
-                    document.body.appendChild(messageBox);
-
-                    closeModal(adminModal);
-                    adminMessage.classList.add('hidden');
-                } else {
-                    adminMessage.textContent = 'Incorrect password. Please try again.';
-                    adminMessage.classList.remove('hidden');
-                }
-            });
+            // Removed Admin Login Modal functionality
+            // adminLoginBtn.addEventListener('click', () => { ... });
+            // adminCloseBtn.addEventListener('click', () => { ... });
+            // adminPasswordSubmit.addEventListener('click', () => { ... });
 
             // Add New Employee Modal functionality
             addEmployeeBtn.addEventListener('click', () => {
