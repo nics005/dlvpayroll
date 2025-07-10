@@ -1671,4 +1671,591 @@
             };
 
             // Event listeners for payroll input fields to trigger calculation
-            work
+            workingDaysInput.addEventListener('input', calculatePayroll);
+            overtimeHrsInput.addEventListener('input', calculatePayroll);
+            sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
+            nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
+            nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
+
+            // Event listener for closing payroll input modal
+            if (cancelPayrollInputButton) {
+                cancelPayrollInputButton.addEventListener('click', () => {
+                    payrollInputModal.classList.add('hidden');
+                });
+            }
+
+            // Event listener for saving payroll data
+            if (payrollInputForm) {
+                payrollInputForm.addEventListener('submit', async (event) => {
+                    event.preventDefault(); // Prevent default form submission
+
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save payroll record.");
+                        return;
+                    }
+
+                    // Re-calculate to ensure latest values are used before saving
+                    calculatePayroll(); 
+
+                    const employeeDocId = payrollEmployeeDocIdInput.value;
+                    const payrollRecordDocId = payrollRecordDocIdInput.value; // Get the record ID
+                    const employeeName = payrollEmployeeNameSpan.textContent;
+                    const employeeId = payrollEmployeeIdSpan.textContent;
+                    const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
+
+                    const payrollRecordData = {
+                        employeeDocId: employeeDocId,
+                        employeeId: employeeId,
+                        employeeName: employeeName,
+                        salaryRate: salaryRate,
+                        workingDays: parseFloat(workingDaysInput.value || 0),
+                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
+                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
+                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
+                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
+                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        payrollDate: new Date(),
+                        processedByUserId: userId
+                    };
+
+                    try {
+                        if (payrollRecordDocId) {
+                            // Update existing record
+                            const payrollRecordRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, payrollRecordDocId);
+                            await updateDoc(payrollRecordRef, payrollRecordData);
+                            console.log("Payroll record updated successfully!");
+                        } else {
+                            // Add new record
+                            await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecordData);
+                            console.log("New payroll record added successfully!");
+                        }
+                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
+                    } catch (e) {
+                        console.error("Error saving payroll record: ", e);
+                    }
+                });
+            }
+
+            // Fetch and Display Payroll Records
+            const fetchAndDisplayPayrollRecords = () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot fetch payroll records.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`), orderBy("payrollDate", "desc"));
+                onSnapshot(q, (querySnapshot) => {
+                    payrollRecordsListBody.innerHTML = ''; // Clear current list
+                    querySnapshot.forEach((doc) => {
+                        const record = doc.data();
+                        const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                        const newRow = payrollRecordsListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${record.employeeId || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">${record.employeeName || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">${payrollDate}</td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-payroll-record-btn" data-record-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                    attachEmployeeActionListeners(); // Re-attach listeners for new buttons
+                }, (error) => {
+                    console.error("Error fetching payroll records: ", error);
+                });
+            };
+
+            // Deductions Calculation Logic
+            const calculateDeductions = () => {
+                const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
+                const govtLoan = parseFloat(govtLoanInput.value || 0);
+                const coopShare = parseFloat(coopShareInput.value || 0);
+                const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
+                const unpaidLoan = parseFloat(unpaidLoanInput.value || 0);
+                const coop2025 = parseFloat(coop2025Input.value || 0);
+                const caVoucher = parseFloat(caVoucherInput.value || 0);
+                const dailyVale = parseFloat(dailyValeInput.value || 0);
+                const othersDeduction = parseFloat(othersDeductionInput.value || 0);
+
+                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
+                const netPay = grossPay - totalDeductions;
+
+                calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            };
+
+            // Function to open the Deductions Input Modal (for both add and edit)
+            window.openDeductionsModal = async (employeeDocId, deductionRecordDocId = null) => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot open deductions input.");
+                    return;
+                }
+                try {
+                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, employeeDocId);
+                    const employeeSnap = await getDoc(employeeRef);
+
+                    if (employeeSnap.exists()) {
+                        const employeeData = employeeSnap.data();
+                        deductionsEmployeeNameSpan.textContent = employeeData.fullName || '';
+                        deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
+                        deductionsEmployeeDocIdInput.value = employeeDocId;
+                        deductionsRecordDocIdInput.value = deductionRecordDocId; // Set the deduction record ID
+
+                        // Fetch the latest gross pay from payroll_records
+                        const payrollRecordsQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/payroll_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("payrollDate", "desc"),
+                            limit(1)
+                        );
+                        const payrollSnapshot = await getDocs(payrollRecordsQuery);
+                        let latestGrossPay = 0;
+                        let latestPayrollDocId = null;
+
+                        if (!payrollSnapshot.empty) {
+                            const latestPayrollRecord = payrollSnapshot.docs[0].data();
+                            latestGrossPay = latestPayrollRecord.grossPay || 0;
+                            latestPayrollDocId = payrollSnapshot.docs[0].id;
+                        } else {
+                            console.warn(`No payroll records found for employee ${employeeData.fullName}. Gross Pay set to 0.`);
+                        }
+                        
+                        deductionsGrossPaySpan.textContent = `₱ ${latestGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsEmployeePayrollDocIdInput.value = latestPayrollDocId; // Store the associated payroll record ID
+
+                        if (deductionRecordDocId) {
+                            // Edit mode: Fetch existing deduction record
+                            deductionsModalTitle.textContent = "Edit Deduction Record";
+                            const deductionRecordRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
+                            const deductionRecordSnap = await getDoc(deductionRecordRef);
+                            if (deductionRecordSnap.exists()) {
+                                const deductionData = deductionRecordSnap.data();
+                                govtLoanInput.value = deductionData.govtLoan || 0;
+                                coopShareInput.value = deductionData.coopShare || 0;
+                                withholdingTaxInput.value = deductionData.withholdingTax || 0;
+                                unpaidLoanInput.value = deductionData.unpaidLoan || 0;
+                                coop2025Input.value = deductionData.coop2025 || 0;
+                                caVoucherInput.value = deductionData.caVoucher || 0;
+                                dailyValeInput.value = deductionData.dailyVale || 0;
+                                othersDeductionInput.value = deductionData.othersDeduction || 0;
+                            } else {
+                                console.error("No such deduction record document for editing!");
+                                // Fallback to add mode if record not found
+                                deductionsRecordDocIdInput.value = '';
+                                deductionsModalTitle.textContent = "Deductions Input for Employee";
+                                govtLoanInput.value = 0;
+                                coopShareInput.value = 0;
+                                withholdingTaxInput.value = 0;
+                                unpaidLoanInput.value = 0;
+                                coop2025Input.value = 0;
+                                caVoucherInput.value = 0;
+                                dailyValeInput.value = 0;
+                                othersDeductionInput.value = 0;
+                            }
+                        } else {
+                            // Add mode: Clear fields
+                            deductionsModalTitle.textContent = "Deductions Input for Employee";
+                            govtLoanInput.value = 0;
+                            coopShareInput.value = 0;
+                            withholdingTaxInput.value = 0;
+                            unpaidLoanInput.value = 0;
+                            coop2025Input.value = 0;
+                            caVoucherInput.value = 0;
+                            dailyValeInput.value = 0;
+                            othersDeductionInput.value = 0;
+                        }
+                        
+                        calculateDeductions(); // Initial calculation with current inputs
+                        deductionsInputModal.classList.remove('hidden');
+                    } else {
+                        console.error("No such employee document for deductions input!");
+                    }
+                } catch (e) {
+                    console.error("Error fetching employee or deduction record for input: ", e);
+                }
+            };
+
+            // Event listeners for deduction input fields to trigger calculation
+            govtLoanInput.addEventListener('input', calculateDeductions);
+            coopShareInput.addEventListener('input', calculateDeductions);
+            withholdingTaxInput.addEventListener('input', calculateDeductions);
+            unpaidLoanInput.addEventListener('input', calculateDeductions);
+            coop2025Input.addEventListener('input', calculateDeductions);
+            caVoucherInput.addEventListener('input', calculateDeductions);
+            dailyValeInput.addEventListener('input', calculateDeductions);
+            othersDeductionInput.addEventListener('input', calculateDeductions);
+
+            // Event listener for closing deductions input modal
+            if (cancelDeductionsInputButton) {
+                cancelDeductionsInputButton.addEventListener('click', () => {
+                    deductionsInputModal.classList.add('hidden');
+                });
+            }
+
+            // Event listener for saving deductions data
+            if (deductionsInputForm) {
+                deductionsInputForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+
+                    if (!userId) {
+                        console.error("User not authenticated. Cannot save deduction record.");
+                        return;
+                    }
+
+                    calculateDeductions(); // Re-calculate to ensure latest values are used before saving
+
+                    const employeeDocId = deductionsEmployeeDocIdInput.value;
+                    const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
+                    const deductionRecordDocId = deductionsRecordDocIdInput.value; // Get the deduction record ID
+                    const employeeName = deductionsEmployeeNameSpan.textContent;
+                    const employeeId = deductionsEmployeeIdSpan.textContent;
+                    const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
+
+                    const deductionRecordData = {
+                        employeeDocId: employeeDocId,
+                        payrollDocId: payrollDocId, // Link to the specific payroll record
+                        employeeId: employeeId,
+                        employeeName: employeeName,
+                        grossPay: grossPay,
+                        govtLoan: parseFloat(govtLoanInput.value || 0),
+                        coopShare: parseFloat(coopShareInput.value || 0),
+                        withholdingTax: parseFloat(withholdingTaxInput.value || 0),
+                        unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
+                        coop2025: parseFloat(coop2025Input.value || 0),
+                        caVoucher: parseFloat(caVoucherInput.value || 0),
+                        dailyVale: parseFloat(dailyValeInput.value || 0),
+                        othersDeduction: parseFloat(othersDeductionInput.value || 0),
+                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        deductionDate: new Date(),
+                        processedByUserId: userId
+                    };
+
+                    try {
+                        if (deductionRecordDocId) {
+                            // Update existing record
+                            const deductionRecordRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, deductionRecordDocId);
+                            await updateDoc(deductionRecordRef, deductionRecordData);
+                            console.log("Deduction record updated successfully!");
+                        } else {
+                            // Add new record
+                            await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionRecordData);
+                            console.log("New deduction record added successfully!");
+                        }
+                        deductionsInputModal.classList.add('hidden');
+                    } catch (e) {
+                        console.error("Error saving deduction record: ", e);
+                    }
+                });
+            }
+
+            // Fetch and Display Deduction Records
+            const fetchAndDisplayDeductionRecords = () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot fetch deduction records.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`), orderBy("deductionDate", "desc"));
+                onSnapshot(q, (querySnapshot) => {
+                    deductionRecordsListBody.innerHTML = ''; // Clear current list
+                    querySnapshot.forEach((doc) => {
+                        const record = doc.data();
+                        const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                        const newRow = deductionRecordsListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${record.employeeId || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">${record.employeeName || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">${deductionDate}</td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-employee-id="${record.employeeDocId}" data-record-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-deduction-record-btn" data-record-id="${doc.id}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                    attachEmployeeActionListeners(); // Re-attach listeners for new buttons
+                }, (error) => {
+                    console.error("Error fetching deduction records: ", error);
+                });
+            };
+
+            // Fetch and Display Payroll Summary
+            const fetchAndDisplayPayrollSummary = async () => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot fetch payroll summary.");
+                    return;
+                }
+                if (!isAdminMode) {
+                    payrollSummaryContainer.innerHTML = '<p class="text-red-500">Admin mode is required to view Payroll Summary.</p>';
+                    return;
+                }
+
+                payrollSummaryContainer.innerHTML = ''; // Clear previous content
+
+                try {
+                    const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
+                    const employeeSnapshot = await getDocs(employeesQuery);
+
+                    const groupedSummary = {};
+
+                    for (const employeeDoc of employeeSnapshot.docs) {
+                        const employeeData = employeeDoc.data();
+                        const employeeDocId = employeeDoc.id;
+                        const departmentSite = employeeData.departmentSite || 'Unassigned';
+
+                        // Fetch latest payroll record for gross pay
+                        const payrollQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/payroll_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("payrollDate", "desc"),
+                            limit(1)
+                        );
+                        const payrollSnapshot = await getDocs(payrollQuery);
+                        const latestGrossPay = payrollSnapshot.empty ? 0 : payrollSnapshot.docs[0].data().grossPay || 0;
+
+                        // Fetch latest deduction record for net pay
+                        const deductionQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/deduction_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("deductionDate", "desc"),
+                            limit(1)
+                        );
+                        const deductionSnapshot = await getDocs(deductionQuery);
+                        const latestNetPay = deductionSnapshot.empty ? latestGrossPay : deductionSnapshot.docs[0].data().netPay || latestGrossPay; // If no deductions, net pay is gross pay
+
+                        if (!groupedSummary[departmentSite]) {
+                            groupedSummary[departmentSite] = [];
+                        }
+                        groupedSummary[departmentSite].push({
+                            docId: employeeDocId,
+                            employeeId: employeeData.employeeId,
+                            fullName: employeeData.fullName,
+                            latestGrossPay: latestGrossPay,
+                            latestNetPay: latestNetPay
+                        });
+                    }
+
+                    // Render grouped summary
+                    for (const siteName in groupedSummary) {
+                        let siteSection = document.createElement('div');
+                        siteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
+                        siteSection.innerHTML = `
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                                            <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
+                                            <th class="py-2 px-4 text-left">Name</th>
+                                            <th class="py-2 px-4 text-left">Latest Gross Pay</th>
+                                            <th class="py-2 px-4 text-left">Latest Net Pay</th>
+                                            <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 text-sm font-light">
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+                        const tbody = siteSection.querySelector('tbody');
+                        groupedSummary[siteName].forEach(employee => {
+                            const row = tbody.insertRow();
+                            row.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                            row.innerHTML = `
+                                <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">${employee.fullName || 'N/A'}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.latestGrossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.latestNetPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <div class="flex item-center justify-center space-x-2">
+                                        <button class="w-4 mr-2 transform hover:text-blue-500 hover:scale-110 view-summary-btn" data-employee-id="${employee.docId}">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                        </button>
+                                        <button class="w-4 mr-2 transform hover:text-green-500 hover:scale-110 generate-report-btn" data-employee-id="${employee.docId}">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            `;
+                        });
+                        payrollSummaryContainer.appendChild(siteSection);
+                    }
+                    attachEmployeeActionListeners(); // Re-attach listeners for new buttons
+                } catch (e) {
+                    console.error("Error fetching payroll summary: ", e);
+                    payrollSummaryContainer.innerHTML = '<p class="text-red-500">Error loading payroll summary.</p>';
+                }
+            };
+
+            // Function to open the Payroll Summary Detail Modal
+            window.openPayrollSummaryDetailModal = async (employeeDocId) => {
+                if (!userId) {
+                    console.warn("User not authenticated. Cannot open summary detail.");
+                    return;
+                }
+                try {
+                    summaryDetailContent.innerHTML = '<p>Loading details...</p>'; // Loading indicator
+
+                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, employeeDocId);
+                    const employeeSnap = await getDoc(employeeRef);
+
+                    if (employeeSnap.exists()) {
+                        const employeeData = employeeSnap.data();
+                        summaryDetailEmployeeName.textContent = `Summary for: ${employeeData.fullName || 'N/A'} (ID: ${employeeData.employeeId || employeeDocId})`;
+
+                        let contentHtml = `
+                            <div class="bg-gray-100 p-4 rounded-md mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">Employee Information</h3>
+                                <p><strong>Position:</strong> ${employeeData.position || 'N/A'}</p>
+                                <p><strong>Department/Site:</strong> ${employeeData.departmentSite || 'N/A'}</p>
+                                <p><strong>Contact No.:</strong> ${employeeData.contactNo || 'N/A'}</p>
+                                <p><strong>Salary Rate:</strong> ₱ ${parseFloat(employeeData.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                                <p><strong>SSS Contribution:</strong> ₱ ${parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                                <p><strong>PhilHealth Contribution:</strong> ₱ ${parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                                <p><strong>Pag-IBIG Contribution:</strong> ₱ ${parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            </div>
+                        `;
+
+                        // Fetch all payroll records for this employee
+                        const payrollRecordsQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/payroll_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("payrollDate", "desc")
+                        );
+                        const payrollSnapshot = await getDocs(payrollRecordsQuery);
+
+                        contentHtml += `
+                            <div class="bg-gray-100 p-4 rounded-md mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">Payroll History</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                        <thead>
+                                            <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
+                                                <th class="py-2 px-4 text-left">Date</th>
+                                                <th class="py-2 px-4 text-left">Working Days</th>
+                                                <th class="py-2 px-4 text-left">Gross Pay</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-gray-600 text-sm font-light">
+                        `;
+                        if (payrollSnapshot.empty) {
+                            contentHtml += `<tr><td colspan="3" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
+                        } else {
+                            payrollSnapshot.forEach(recordDoc => {
+                                const record = recordDoc.data();
+                                const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                                contentHtml += `
+                                    <tr>
+                                        <td class="py-3 px-6">${payrollDate}</td>
+                                        <td class="py-3 px-6">${record.workingDays || 0}</td>
+                                        <td class="py-3 px-6">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                        contentHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+
+                        // Fetch all deduction records for this employee
+                        const deductionRecordsQuery = query(
+                            collection(db, `/artifacts/${appId}/public/data/deduction_records`),
+                            where("employeeDocId", "==", employeeDocId),
+                            orderBy("deductionDate", "desc")
+                        );
+                        const deductionSnapshot = await getDocs(deductionRecordsQuery);
+
+                        contentHtml += `
+                            <div class="bg-gray-100 p-4 rounded-md">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">Deduction History</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                        <thead>
+                                            <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
+                                                <th class="py-2 px-4 text-left">Date</th>
+                                                <th class="py-2 px-4 text-left">Total Deductions</th>
+                                                <th class="py-2 px-4 text-left">Net Pay</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="text-gray-600 text-sm font-light">
+                        `;
+                        if (deductionSnapshot.empty) {
+                            contentHtml += `<tr><td colspan="3" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
+                        } else {
+                            deductionSnapshot.forEach(recordDoc => {
+                                const record = recordDoc.data();
+                                const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                                contentHtml += `
+                                    <tr>
+                                        <td class="py-3 px-6">${deductionDate}</td>
+                                        <td class="py-3 px-6">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                        <td class="py-3 px-6">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                        contentHtml += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        `;
+
+                        summaryDetailContent.innerHTML = contentHtml;
+                        payrollSummaryDetailModal.classList.remove('hidden');
+                    } else {
+                        console.error("No such employee document for summary detail!");
+                        summaryDetailContent.innerHTML = '<p class="text-red-500">Employee details not found.</p>';
+                        payrollSummaryDetailModal.classList.remove('hidden');
+                    }
+                } catch (e) {
+                    console.error("Error fetching payroll summary detail: ", e);
+                    summaryDetailContent.innerHTML = '<p class="text-red-500">Error loading summary details.</p>';
+                    payrollSummaryDetailModal.classList.remove('hidden');
+                }
+            };
+
+            // Event listener for closing summary detail modal
+            if (closeSummaryDetailModalButton) {
+                closeSummaryDetailModalButton.addEventListener('click', () => {
+                    payrollSummaryDetailModal.classList.add('hidden');
+                });
+            }
+
+
+            // Add console.log to confirm button clicks
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
+                    showContent(targetId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
