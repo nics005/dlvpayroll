@@ -407,7 +407,9 @@
                 console.warn("User not authenticated. Cannot fetch employees.");
                 return;
             }
-            const q = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+            // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
+            // Employee data is now stored in a public collection
+            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
             onSnapshot(q, (querySnapshot) => {
                 employeeListBody.innerHTML = ''; // Clear current list
                 let totalEmployees = 0;
@@ -515,7 +517,8 @@
             }
             try {
                 // Employees
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/users/${userId}/employees`));
+                // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
                 const employeeSnapshot = await getDocs(employeesQuery);
                 let totalEmployees = employeeSnapshot.size;
                 let totalPayroll = 0;
@@ -769,7 +772,8 @@
                 };
 
                 try {
-                    await addDoc(collection(db, `/artifacts/${appId}/users/${userId}/employees`), employeeData);
+                    // *** MODIFIED PATH FOR SYNCING EMPLOYEES ACROSS DEVICES ***
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/employees`), employeeData);
                     console.log("Employee added successfully!");
                     addEmployeeModal.classList.add('hidden'); // Hide modal after submission
                     addEmployeeForm.reset(); // Clear the form
