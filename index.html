@@ -90,6 +90,7 @@
             <h1 class="text-2xl font-semibold text-gray-800" id="current-page-title">Dashboard</h1>
             <div class="flex items-center space-x-4">
                 <span class="text-gray-600">Welcome, Admin!</span>
+                <span id="display-user-id" class="text-gray-500 text-xs"></span>
                 <img src="https://placehold.co/40x40/cbd5e1/4a5568?text=AD" alt="Admin Avatar" class="w-10 h-10 rounded-full border-2 border-gray-300">
             </div>
         </header>
@@ -327,20 +328,15 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- Global function declarations (moved from inside DOMContentLoaded) ---
-
-        // Dashboard elements
+        // --- Global element references ---
         const totalEmployeesCard = document.getElementById('total-employees');
         const payrollProcessedCard = document.getElementById('payroll-processed');
         const activeSitesCard = document.getElementById('active-sites');
         const recentActivitiesList = document.getElementById('recent-activities-list');
-
-        // Employee Management elements
         const employeeListBody = document.getElementById('employee-list-body');
         const departmentSiteDropdown = document.getElementById('department-site-dropdown');
-
-        // Site Management elements
         const siteListBody = document.getElementById('site-list-body');
+        const displayUserIdSpan = document.getElementById('display-user-id');
 
 
         // Function to populate the Department/Site dropdown from Firestore sites
@@ -523,41 +519,36 @@
                 userId = user.uid;
                 console.log("Authenticated with Firebase UID:", userId);
             } else {
-                // If no user is currently authenticated, try to sign in
-                if (initialAuthToken) {
-                    try {
+                try {
+                    if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid; // If successful, user.uid will be here
+                        userId = auth.currentUser.uid;
                         console.log("Signed in with custom token. User ID:", userId);
-                    } catch (error) {
-                        console.error("Error with custom token, attempting anonymous sign-in:", error);
-                        // Fallback to anonymous sign-in if custom token fails
-                        try {
-                            await signInAnonymously(auth);
-                            userId = auth.currentUser.uid; // If successful, user.uid will be here
-                            console.log("Signed in anonymously after custom token failure. User ID:", userId);
-                        } catch (anonError) {
-                            console.error("Error signing in anonymously:", anonError);
-                            userId = crypto.randomUUID(); // Only use UUID if anonymous sign-in also fails
-                            console.error("No Firebase user ID, using a temporary UUID:", userId);
-                        }
+                    } else {
+                        // If no initialAuthToken, try anonymous sign-in
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
+                        console.log("Signed in anonymously (no custom token). User ID:", userId);
                     }
-                } else {
-                    // No custom token provided, sign in anonymously directly
+                } catch (error) {
+                    console.error("Authentication failed, attempting fallback to anonymous:", error);
                     try {
                         await signInAnonymously(auth);
-                        userId = auth.currentUser.uid; // If successful, user.uid will be here
-                        console.log("Signed in anonymously (no custom token). User ID:", userId);
+                        userId = auth.currentUser.uid;
+                        console.log("Signed in anonymously after initial auth failure. User ID:", userId);
                     } catch (anonError) {
-                        console.error("Error signing in anonymously:", anonError);
-                        userId = crypto.randomUUID(); // Only use UUID if anonymous sign-in also fails
-                        console.error("No Firebase user ID, using a temporary UUID:", userId);
+                        console.error("Anonymous sign-in also failed:", anonError);
+                        // Fallback to random UUID if all Firebase auth fails
+                        userId = crypto.randomUUID();
+                        console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
                     }
                 }
             }
 
-            // After authentication attempts, proceed with data fetching if userId is available
+            // After all authentication attempts, ensure userId is set and then fetch data
             if (userId) {
+                console.log("Final User ID for data operations:", userId);
+                displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
                 fetchEmployees();
                 fetchSites();
                 updateDashboardCounts();
