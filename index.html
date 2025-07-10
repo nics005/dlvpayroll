@@ -946,7 +946,7 @@
         const payslipWithholdingTax = document.getElementById('payslip-withholding-tax');
         const payslipUnpaidLoan = document.getElementById('payslip-unpaid-loan');
         const payslipCoop2025 = document.getElementById('payslip-coop-2025');
-        const payslipCaVoucher = document.getElementById('payslip-ca-voucher');
+        const payslipCaVoucher = document = document.getElementById('payslip-ca-voucher');
         const payslipDailyVale = document.getElementById('payslip-daily-vale');
         const payslipOthersDeduction = document.getElementById('payslip-others-deduction');
         const payslipTotalDeductions = document.getElementById('payslip-total-deductions');
@@ -2271,7 +2271,34 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize Firebase inside DOMContentLoaded
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+            let firebaseConfig = {};
+            try {
+                // Attempt to parse __firebase_config, provide a fallback if undefined or invalid
+                firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+                // Basic check for projectId, though a full config validation might be better
+                if (!firebaseConfig.projectId) {
+                    console.error("Firebase config is missing 'projectId'. Using a dummy config. Data persistence will not work.");
+                    firebaseConfig = {
+                        apiKey: "dummy-api-key",
+                        authDomain: "dummy-auth-domain",
+                        projectId: "dummy-project-id",
+                        storageBucket: "dummy-storage-bucket",
+                        messagingSenderId: "dummy-messaging-sender-id",
+                        appId: "dummy-app-id"
+                    };
+                }
+            } catch (e) {
+                console.error("Error parsing __firebase_config. Using a dummy config. Data persistence will not work.", e);
+                firebaseConfig = {
+                    apiKey: "dummy-api-key",
+                    authDomain: "dummy-auth-domain",
+                    projectId: "dummy-project-id",
+                    storageBucket: "dummy-storage-bucket",
+                    messagingSenderId: "dummy-messaging-sender-id",
+                    appId: "dummy-app-id"
+                };
+            }
+            
             appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -2315,9 +2342,11 @@
                 if (userId) {
                     console.log("Final User ID for data operations:", userId);
                     displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
+                    // Move initial data fetches here to ensure Firebase is ready
                     fetchEmployees();
                     fetchSites();
                     updateDashboardCounts();
+                    showContent('dashboard'); // Show dashboard after initial data is loaded
                 } else {
                     console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
                 }
@@ -2330,9 +2359,6 @@
             // Set initial UI state based on admin mode
             updateAdminUI();
             
-            // Always show dashboard on initial load (or if admin mode isn't active)
-            showContent('dashboard'); 
-
             // Event listener for "Add New Employee" button
             if (addEmployeeButton) { // Ensure button exists before adding listener
                 addEmployeeButton.addEventListener('click', () => {
@@ -2664,9 +2690,6 @@
             closePayslipViewModalButton.addEventListener('click', () => {
                 payslipViewModal.classList.add('hidden');
             });
-
-            // Initial display of dashboard (after Firebase is initialized and UI is ready)
-            showContent('dashboard');
 
             // Add event listeners for navigation buttons
             navButtons.forEach(button => {
