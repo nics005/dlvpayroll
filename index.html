@@ -215,25 +215,8 @@
             <!-- Process Payroll Content -->
             <div id="process-payroll-content" class="page-content hidden">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Process Payroll</h2>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Employee List for Payroll</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
-                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
-                                    <th class="py-3 px-6 text-left">Name</th>
-                                    <th class="py-3 px-6 text-left">Position</th>
-                                    <th class="py-3 px-6 text-left">Department/Site</th>
-                                    <th class="py-3 px-6 text-left">Status</th>
-                                    <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="process-payroll-employee-list-body">
-                                <!-- Employee data for payroll will be dynamically loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div id="process-payroll-tables-container" class="space-y-8">
+                    <!-- Employee data grouped by department/site will be dynamically loaded here -->
                 </div>
             </div>
         </div>
@@ -470,7 +453,7 @@
         const activeSitesCard = document.getElementById('active-sites');
         const recentActivitiesList = document.getElementById('recent-activities-list');
         const employeeListBody = document.getElementById('employee-list-body'); // For Manage Employee tab
-        const processPayrollEmployeeListBody = document.getElementById('process-payroll-employee-list-body'); // For Process Payroll tab
+        const processPayrollTablesContainer = document.getElementById('process-payroll-tables-container'); // Container for grouped tables
         const departmentSiteDropdown = document.getElementById('department-site-dropdown');
         const editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown'); // For Edit Employee Modal
         const siteListBody = document.getElementById('site-list-body');
@@ -572,16 +555,24 @@
             const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
             onSnapshot(q, (querySnapshot) => {
                 employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
-                processPayrollEmployeeListBody.innerHTML = ''; // Clear current list for Process Payroll
+                processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
 
                 let totalEmployees = 0;
                 let totalPayroll = 0;
+                const groupedEmployees = {}; // Object to group employees by department/site
 
                 querySnapshot.forEach((doc) => {
                     totalEmployees++;
                     const employee = doc.data();
                     const employeeId = doc.id; 
                     totalPayroll += parseFloat(employee.salaryRate || 0);
+
+                    // Add employee to the groupedEmployees object
+                    const departmentSite = employee.departmentSite || 'Unassigned';
+                    if (!groupedEmployees[departmentSite]) {
+                        groupedEmployees[departmentSite] = [];
+                    }
+                    groupedEmployees[departmentSite].push({ ...employee, docId: doc.id });
 
                     // Row for Manage Employee table
                     const manageRow = employeeListBody.insertRow();
@@ -605,32 +596,60 @@
                             </div>
                         </td>
                     `;
-
-                    // Row for Process Payroll table (simplified view)
-                    const payrollRow = processPayrollEmployeeListBody.insertRow();
-                    payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                    payrollRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
-                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
-                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    `;
                 });
                 totalEmployeesCard.textContent = totalEmployees;
                 payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-                // Attach event listeners after content is loaded
+                // Dynamically create tables for Process Payroll based on grouped employees
+                for (const siteName in groupedEmployees) {
+                    const siteSection = document.createElement('div');
+                    siteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6'); // Added mb-6 for spacing
+
+                    siteSection.innerHTML += `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                                        <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
+                                        <th class="py-2 px-4 text-left">Name</th>
+                                        <th class="py-2 px-4 text-left">Position</th>
+                                        <th class="py-2 px-4 text-left">Status</th>
+                                        <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light" id="process-payroll-table-${siteName.replace(/\s/g, '-')}-body">
+                                    <!-- Rows for this site -->
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    processPayrollTablesContainer.appendChild(siteSection);
+
+                    const currentSiteTbody = document.getElementById(`process-payroll-table-${siteName.replace(/\s/g, '-')}-body`);
+                    groupedEmployees[siteName].forEach(employee => {
+                        const payrollRow = currentSiteTbody.insertRow();
+                        payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        payrollRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employee.docId}</td>
+                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                    });
+                }
+
+                // Attach event listeners after all content is loaded
                 attachEmployeeActionListeners();
 
             }, (error) => {
@@ -648,11 +667,11 @@
                 button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
             });
 
-            // For Process Payroll tab
-            document.querySelectorAll('#process-payroll-employee-list-body .edit-employee-btn-payroll').forEach(button => {
+            // For Process Payroll tab (buttons inside dynamically generated tables)
+            document.querySelectorAll('#process-payroll-tables-container .edit-employee-btn-payroll').forEach(button => {
                 button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
             });
-            document.querySelectorAll('#process-payroll-employee-list-body .delete-employee-btn-payroll').forEach(button => {
+            document.querySelectorAll('#process-payroll-tables-container .delete-employee-btn-payroll').forEach(button => {
                 button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
             });
         };
