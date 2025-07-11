@@ -1867,6 +1867,7 @@
             deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
             deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
             deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
+
             govtLoanInput = document.getElementById('govt-loan');
             coopShareInput = document.getElementById('coop-share');
             withholdingTaxInput = document.getElementById('withholding-tax');
@@ -2351,10 +2352,7 @@
                 addRow('Gross Pay (After Gov. Contributions)', grossPayAfterGovt);
             };
 
-            /**
-             * Opens the Payroll Input Modal for a specific employee and populates employee details.
-             * @param {string} docId - The Firestore document ID of the employee.
-             */
+            // Function to open the Payroll Input Modal
             window.openPayrollInputModal = async (docId) => {
                 if (!userId) {
                     console.warn("User not authenticated. Cannot open payroll input.");
