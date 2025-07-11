@@ -621,7 +621,8 @@
         let userId = null;
         // __app_id and __initial_auth_token are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
+        // FIX: Changed `initialAuthToken` to `__initial_auth_token` on the right side to avoid ReferenceError
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         // Admin Mode variables
         let isAdminMode = false;
@@ -715,6 +716,7 @@
 
         // New: Payroll Summary Table Body within the modal
         let payrollSummaryTableBody;
+        let payrollInputForm;
 
 
         // Deductions Input Modal elements (now for Other Deductions only)
@@ -1391,55 +1393,6 @@
             }
         };
 
-        // Admin mode activation logic
-        // These listeners are now added inside DOMContentLoaded
-        // if (activateAdminModeButton) {
-        //     activateAdminModeButton.addEventListener('click', () => {
-        //         if (adminModal) {
-        //             adminModal.classList.remove('hidden');
-        //             if (adminPasswordInput) adminPasswordInput.value = ''; // Clear previous input
-        //             if (adminErrorMessage) adminErrorMessage.textContent = ''; // Clear previous error
-        //         }
-        //     });
-        // }
-
-        // if (cancelAdminModalButton) {
-        //     cancelAdminModalButton.addEventListener('click', () => {
-        //         if (adminModal) adminModal.classList.add('hidden');
-        //     });
-        // }
-
-        // if (activateAdminModalButton) {
-        //     activateAdminModalButton.addEventListener('click', () => {
-        //         if (adminPasswordInput && adminErrorMessage) {
-        //             const enteredPassword = adminPasswordInput.value;
-        //             if (enteredPassword === ADMIN_PASSWORD) {
-        //                 isAdminMode = true;
-        //                 sessionStorage.setItem('isAdminMode', 'true'); // Persist admin mode for the session
-        //                 if (adminModal) adminModal.classList.add('hidden');
-        //                 updateAdminUI();
-        //                 showContent('dashboard'); // Re-show dashboard to ensure correct active tab
-        //                 console.log("Admin mode activated!");
-        //             } else {
-        //                 adminErrorMessage.textContent = "Incorrect password.";
-        //             }
-        //         }
-        //     });
-        // }
-
-        // Admin mode deactivation (logout) logic
-        // These listeners are now added inside DOMContentLoaded
-        // if (deactivateAdminModeButton) {
-        //     deactivateAdminModeButton.addEventListener('click', () => {
-        //         isAdminMode = false;
-        //         sessionStorage.removeItem('isAdminMode'); // Remove admin mode from session storage
-        //         updateAdminUI(); // Update UI to hide admin features
-        //         showContent('dashboard'); // Redirect to dashboard
-        //         console.log("Admin mode deactivated!");
-        //     });
-        // }
-
-
         document.addEventListener('DOMContentLoaded', () => {
             // --- Assign all global element references here after DOM is loaded ---
             totalEmployeesCard = document.getElementById('total-employees');
@@ -1514,7 +1467,7 @@
             payrollHiddenPhContributionInput = document.getElementById('payroll-hidden-ph-contribution');
             payrollHiddenPagibigContributionInput = document.getElementById('payroll-hidden-pagibig-contribution');
             payrollSummaryTableBody = document.getElementById('payroll-summary-table-body');
-            payrollInputForm = document.getElementById('payroll-input-form'); // Ensure this is also assigned here
+            payrollInputForm = document.getElementById('payroll-input-form'); 
 
             deductionsInputModal = document.getElementById('deductions-input-modal');
             cancelDeductionsInputButton = document.getElementById('cancel-deductions-input');
@@ -2185,52 +2138,6 @@
                     } catch (e) {
                         console.error("Error saving deduction record: ", e);
                     }
-                });
-            }
-
-            // Admin mode activation logic (moved inside DOMContentLoaded)
-            if (activateAdminModeButton) {
-                activateAdminModeButton.addEventListener('click', () => {
-                    if (adminModal) {
-                        adminModal.classList.remove('hidden');
-                        if (adminPasswordInput) adminPasswordInput.value = ''; // Clear previous input
-                        if (adminErrorMessage) adminErrorMessage.textContent = ''; // Clear previous error
-                    }
-                });
-            }
-
-            if (cancelAdminModalButton) {
-                cancelAdminModalButton.addEventListener('click', () => {
-                    if (adminModal) adminModal.classList.add('hidden');
-                });
-            }
-
-            if (activateAdminModalButton) {
-                activateAdminModalButton.addEventListener('click', () => {
-                    if (adminPasswordInput && adminErrorMessage) {
-                        const enteredPassword = adminPasswordInput.value;
-                        if (enteredPassword === ADMIN_PASSWORD) {
-                            isAdminMode = true;
-                            sessionStorage.setItem('isAdminMode', 'true'); // Persist admin mode for the session
-                            if (adminModal) adminModal.classList.add('hidden');
-                            updateAdminUI();
-                            showContent('dashboard'); // Re-show dashboard to ensure correct active tab
-                            console.log("Admin mode activated!");
-                        } else {
-                            adminErrorMessage.textContent = "Incorrect password.";
-                        }
-                    }
-                });
-            }
-
-            // Admin mode deactivation (logout) logic (moved inside DOMContentLoaded)
-            if (deactivateAdminModeButton) {
-                deactivateAdminModeButton.addEventListener('click', () => {
-                    isAdminMode = false;
-                    sessionStorage.removeItem('isAdminMode'); // Remove admin mode from session storage
-                    updateAdminUI(); // Update UI to hide admin features
-                    showContent('dashboard'); // Redirect to dashboard
-                    console.log("Admin mode deactivated!");
                 });
             }
 
