@@ -231,27 +231,6 @@
                 <div id="process-payroll-tables-container" class="space-y-8">
                     <!-- Employee data grouped by department/site will be dynamically loaded here -->
                 </div>
-
-                <!-- New: Recent Payroll Records Table -->
-                <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Payroll Records</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                    <th class="py-2 px-4 text-left rounded-tl-lg">Date</th>
-                                    <th class="py-2 px-4 text-left">Employee ID</th>
-                                    <th class="py-2 px-4 text-left">Name</th>
-                                    <th class="py-2 px-4 text-right">Gross Pay</th>
-                                    <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="payroll-records-list-body">
-                                <!-- Payroll records will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
 
             <!-- New Deductions Content -->
@@ -259,28 +238,6 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Deductions</h2>
                 <div id="deductions-tables-container" class="space-y-8">
                     <!-- Employee data grouped by department/site will be dynamically loaded here -->
-                </div>
-
-                <!-- New: Recent Deduction Records Table -->
-                <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Deduction Records</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                    <th class="py-2 px-4 text-left rounded-tl-lg">Date</th>
-                                    <th class="py-2 px-4 text-left">Employee ID</th>
-                                    <th class="py-2 px-4 text-left">Name</th>
-                                    <th class="py-2 px-4 text-right">Total Deductions</th>
-                                    <th class="py-2 px-4 text-right">Net Pay</th>
-                                    <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="deduction-records-list-body">
-                                <!-- Deduction records will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
 
@@ -488,7 +445,7 @@
     <div id="delete-confirmation-modal" class="modal-backdrop hidden">
         <div class="modal-content">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Confirm Deletion</h2>
-            <p class="text-gray-700 mb-6" id="delete-confirmation-message">Are you sure you want to delete this record? This action cannot be undone.</p>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
             <div class="flex justify-end space-x-3 mt-6">
                 <button type="button" id="cancel-delete-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
                         Cancel
@@ -639,145 +596,6 @@
         </div>
     </div>
 
-    <!-- Edit Payroll Modal (Duplicated from payroll-input-modal) -->
-    <div id="edit-payroll-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Payroll Record</h2>
-            <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Name: <span id="edit-payroll-employee-name" class="font-normal"></span></p>
-                <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="edit-payroll-employee-id" class="font-normal"></span></p>
-                <input type="hidden" id="edit-payroll-doc-id"> <!-- Hidden input for payroll record's doc ID -->
-                <input type="hidden" id="edit-payroll-employee-doc-id"> <!-- Hidden input for employee's doc ID -->
-                <input type="hidden" id="edit-payroll-employee-salary-rate">
-                <input type="hidden" id="edit-payroll-hidden-sss-contribution" value="0">
-                <input type="hidden" id="edit-payroll-hidden-ph-contribution" value="0">
-                <input type="hidden" id="edit-payroll-hidden-pagibig-contribution" value="0">
-            </div>
-            <form id="edit-payroll-form" class="space-y-4">
-                <div>
-                    <label for="edit-working-days" class="block text-sm font-medium text-gray-700">Working Days</label>
-                    <input type="number" id="edit-working-days" name="workingDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="edit-overtime-hrs" class="block text-sm font-medium text-gray-700">Overtime Hours</label>
-                    <input type="number" id="edit-overtime-hrs" name="overtimeHrs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="edit-sunday-holiday-duty" class="block text-sm font-medium text-gray-700">Sunday/Holiday Duty (Hours)</label>
-                    <input type="number" id="edit-sunday-holiday-duty" name="sundayHolidayDuty" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="edit-night-shift-work-days" class="block text-sm font-medium text-gray-700">Night Shift Work Days (8-hour shifts)</label>
-                    <input type="number" id="edit-night-shift-work-days" name="nightShiftWorkDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="edit-night-shift-overtime-hrs" class="block text-sm font-medium text-gray-700">Night Shift Overtime Hours</label>
-                    <input type="number" id="edit-night-shift-overtime-hrs" name="nightShiftOvertimeHrs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-
-                <!-- Payroll Summary Table -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Payroll Summary</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                    <th class="py-2 px-4 text-left rounded-tl-lg">Item</th>
-                                    <th class="py-2 px-4 text-right rounded-tr-lg">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody id="edit-payroll-summary-table-body" class="text-gray-700 text-sm font-light">
-                                <!-- Dynamic rows will be inserted here by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-edit-payroll-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Close
-                    </button>
-                    <button type="submit" id="update-payroll-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Update Payroll
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Edit Deductions Modal (Duplicated from deductions-input-modal) -->
-    <div id="edit-deductions-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Other Deductions Record</h2>
-            <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Name: <span id="edit-deductions-employee-name" class="font-normal"></span></p>
-                <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="edit-deductions-employee-id" class="font-normal"></span></p>
-                <input type="hidden" id="edit-deductions-doc-id"> <!-- Hidden input for deduction record's doc ID -->
-                <input type="hidden" id="edit-deductions-employee-doc-id">
-                <input type="hidden" id="edit-deductions-employee-payroll-doc-id">
-            </div>
-            <form id="edit-deductions-form" class="space-y-4">
-                <div class="bg-gray-100 p-4 rounded-md">
-                    <p class="text-md font-medium text-gray-700">Latest Gross Pay (After Gov. Contributions):</p>
-                    <p class="text-2xl font-bold text-gray-900" id="edit-deductions-gross-pay">₱ 0.00</p>
-                </div>
-
-                <!-- Other Deductions (editable inputs) -->
-                <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Other Deductions</h3>
-                </div>
-                <div>
-                    <label for="edit-govt-loan" class="block text-sm font-medium text-gray-700">Government Loan</label>
-                    <input type="number" id="edit-govt-loan" name="govtLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-coop-share" class="block text-sm font-medium text-gray-700">Coop Share</label>
-                    <input type="number" id="edit-coop-share" name="coopShare" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-withholding-tax" class="block text-sm font-medium text-gray-700">With Holding Tax</label>
-                    <input type="number" id="edit-withholding-tax" name="withholdingTax" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-unpaid-loan" class="block text-sm font-medium text-gray-700">Unpaid Loan</label>
-                    <input type="number" id="edit-unpaid-loan" name="unpaidLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-coop-2025" class="block text-sm font-medium text-gray-700">Coop 2025</label>
-                    <input type="number" id="edit-coop-2025" name="coop2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-ca-voucher" class="block text-sm font-medium text-gray-700">C/A Voucher</label>
-                    <input type="number" id="edit-ca-voucher" name="caVoucher" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-daily-vale" class="block text-sm font-medium text-gray-700">Daily Vale</label>
-                    <input type="number" id="edit-daily-vale" name="dailyVale" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-others-deduction" class="block text-sm font-medium text-gray-700">Others</label>
-                    <input type="number" id="edit-others-deduction" name="othersDeduction" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                    <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900 mt-2">Total Other Deductions: <span id="edit-calculated-total-deductions">₱ 0.00</span></p>
-                        <p class="text-xl font-bold text-gray-900 mt-2">Net Pay: <span id="edit-calculated-net-pay">₱ 0.00</span></p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-edit-deductions-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Close
-                    </button>
-                    <button type="submit" id="update-deductions-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Update Deductions
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -803,6 +621,7 @@
         let userId = null;
         // __app_id and __initial_auth_token are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // FIX: Changed `initialAuthToken` to `__initial_auth_token` on the right side to avoid ReferenceError
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
         // Admin Mode variables
@@ -826,8 +645,6 @@
         let displayUserIdSpan;
         let payrollSummaryListBody; // New: For Payroll Summary table body
         let payrollSummaryDepartmentFilter; // New: Payroll Summary filter dropdown
-        let payrollRecordsListBody; // New: For displaying payroll records
-        let deductionRecordsListBody; // New: For displaying deduction records
 
         // Admin mode related elements
         let adminFeatureElements; 
@@ -877,9 +694,7 @@
         let deleteConfirmationModal;
         let cancelDeleteButton;
         let confirmDeleteButton;
-        let deleteConfirmationMessage; // New element for dynamic message
-        let itemToDeleteDocId = null; // To store the ID of the item to be deleted
-        let itemToDeleteCollection = null; // To store the collection of the item to be deleted
+        let employeeToDeleteDocId = null; // To store the ID of the employee to be deleted
 
         // Payroll Input Modal elements
         let payrollInputModal;
@@ -924,46 +739,6 @@
         let calculatedTotalDeductionsSpan; // This will now be Total Other Deductions
         let calculatedNetPaySpan;
         let deductionsInputForm;
-
-        // New: Edit Payroll Modal elements
-        let editPayrollModal;
-        let cancelEditPayrollButton;
-        let editPayrollForm;
-        let editPayrollDocIdInput;
-        let editPayrollEmployeeNameSpan;
-        let editPayrollEmployeeIdSpan;
-        let editPayrollEmployeeDocIdInput;
-        let editPayrollEmployeeSalaryRateInput;
-        let editWorkingDaysInput;
-        let editOvertimeHrsInput;
-        let editSundayHolidayDutyInput;
-        let editNightShiftWorkDaysInput;
-        let editNightShiftOvertimeHrsInput;
-        let editPayrollHiddenSssContributionInput;
-        let editPayrollHiddenPhContributionInput;
-        let editPayrollHiddenPagibigContributionInput;
-        let editPayrollSummaryTableBody;
-
-        // New: Edit Deductions Modal elements
-        let editDeductionsModal;
-        let cancelEditDeductionsButton;
-        let editDeductionsForm;
-        let editDeductionsDocIdInput;
-        let editDeductionsEmployeeNameSpan;
-        let editDeductionsEmployeeIdSpan;
-        let editDeductionsEmployeeDocIdInput;
-        let editDeductionsEmployeePayrollDocIdInput;
-        let editDeductionsGrossPaySpan;
-        let editGovtLoanInput;
-        let editCoopShareInput;
-        let editWithholdingTaxInput;
-        let editUnpaidLoanInput;
-        let editCoop2025Input;
-        let editCaVoucherInput;
-        let editDailyValeInput;
-        let editOthersDeductionInput;
-        let editCalculatedTotalDeductionsSpan;
-        let editCalculatedNetPaySpan;
 
 
         /**
@@ -1089,7 +864,7 @@
                                     <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${doc.id}" data-collection="employees">
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
@@ -1102,7 +877,7 @@
 
                 // Dynamically create tables for Process Payroll based on grouped employees
                 for (const siteName in groupedEmployees) {
-                    // Process Payroll Table (Employee Selection)
+                    // Process Payroll Table
                     if (processPayrollTablesContainer) {
                         let payrollSiteSection = document.createElement('div');
                         payrollSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
@@ -1129,7 +904,7 @@
 
                     let currentPayrollSiteTbody = document.getElementById(`process-payroll-table-${siteName.replace(/\s/g, '-')}-body`);
 
-                    // Deductions Table (Employee Selection)
+                    // Deductions Table
                     if (deductionsTablesContainer) {
                         let deductionsSiteSection = document.createElement('div');
                         deductionsSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
@@ -1157,7 +932,7 @@
                     let currentDeductionsSiteTbody = document.getElementById(`deductions-table-${siteName.replace(/\s/g, '-')}-body`);
 
                     groupedEmployees[siteName].forEach(employee => {
-                        // Populate Process Payroll Table (Employee Selection)
+                        // Populate Process Payroll Table
                         if (currentPayrollSiteTbody) {
                             const payrollRow = currentPayrollSiteTbody.insertRow();
                             payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1175,7 +950,7 @@
                                         <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${employee.docId}">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         </button>
-                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${employee.docId}" data-collection="employees">
+                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${employee.docId}">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </div>
@@ -1183,7 +958,7 @@
                             `;
                         }
 
-                        // Populate Deductions Table (Employee Selection)
+                        // Populate Deductions Table
                         if (currentDeductionsSiteTbody) {
                             const deductionsRow = currentDeductionsSiteTbody.insertRow();
                             deductionsRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
@@ -1201,7 +976,7 @@
                                         <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-deductions" data-id="${employee.docId}">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         </button>
-                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${employee.docId}" data-collection="employees">
+                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-deductions" data-id="${employee.docId}">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </div>
@@ -1212,202 +987,46 @@
                 }
 
                 // Attach event listeners after all content is loaded
-                attachActionListeners(); // Renamed from attachEmployeeActionListeners
+                attachEmployeeActionListeners();
+
             }, (error) => {
                 console.error("Error fetching employees: ", error);
             });
         };
 
         /**
-         * Fetches and displays all payroll records in the dedicated table.
-         */
-        const fetchPayrollRecords = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch payroll records.");
-                return;
-            }
-            if (payrollRecordsListBody) payrollRecordsListBody.innerHTML = `<tr><td colspan="5" class="py-3 px-6 text-center text-gray-500">Loading payroll records...</td></tr>`;
-
-            const q = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`), orderBy("payrollDate", "desc"));
-            onSnapshot(q, async (querySnapshot) => {
-                if (payrollRecordsListBody) payrollRecordsListBody.innerHTML = ''; // Clear current list
-                if (querySnapshot.empty) {
-                    if (payrollRecordsListBody) payrollRecordsListBody.innerHTML = `<tr><td colspan="5" class="py-3 px-6 text-center text-gray-500">No payroll records found.</td></tr>`;
-                    return;
-                }
-
-                const employeePromises = [];
-                const payrollRecords = [];
-
-                querySnapshot.forEach(doc => {
-                    const record = doc.data();
-                    payrollRecords.push({ ...record, docId: doc.id });
-                    // Fetch employee data to get full name and employee ID
-                    employeePromises.push(getDoc(doc(db, `/artifacts/${appId}/public/data/employees`, record.employeeDocId)));
-                });
-
-                const employeeSnaps = await Promise.all(employeePromises);
-                const employeeMap = {};
-                employeeSnaps.forEach(snap => {
-                    if (snap.exists()) {
-                        employeeMap[snap.id] = snap.data();
-                    }
-                });
-
-                payrollRecords.forEach(record => {
-                    const employeeData = employeeMap[record.employeeDocId] || {};
-                    const newRow = payrollRecordsListBody.insertRow();
-                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                    newRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
-                        <td class="py-3 px-6 text-left">${employeeData.employeeId || record.employeeId || 'N/A'}</td>
-                        <td class="py-3 px-6 text-left">${employeeData.fullName || record.employeeName || 'N/A'}</td>
-                        <td class="py-3 px-6 text-right">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-payroll-record-btn" data-id="${record.docId}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${record.docId}" data-collection="payroll_records">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                });
-                attachActionListeners();
-            }, (error) => {
-                console.error("Error fetching payroll records: ", error);
-                if (payrollRecordsListBody) payrollRecordsListBody.innerHTML = `<tr><td colspan="5" class="py-3 px-6 text-center text-red-500">Error loading payroll records: ${error.message}</td></tr>`;
-            });
-        };
-
-        /**
-         * Fetches and displays all deduction records in the dedicated table.
-         */
-        const fetchDeductionRecords = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch deduction records.");
-                return;
-            }
-            if (deductionRecordsListBody) deductionRecordsListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Loading deduction records...</td></tr>`;
-
-            const q = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`), orderBy("deductionDate", "desc"));
-            onSnapshot(q, async (querySnapshot) => {
-                if (deductionRecordsListBody) deductionRecordsListBody.innerHTML = ''; // Clear current list
-                if (querySnapshot.empty) {
-                    if (deductionRecordsListBody) deductionRecordsListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">No deduction records found.</td></tr>`;
-                    return;
-                }
-
-                const employeePromises = [];
-                const deductionRecords = [];
-
-                querySnapshot.forEach(doc => {
-                    const record = doc.data();
-                    deductionRecords.push({ ...record, docId: doc.id });
-                    // Fetch employee data to get full name and employee ID
-                    employeePromises.push(getDoc(doc(db, `/artifacts/${appId}/public/data/employees`, record.employeeDocId)));
-                });
-
-                const employeeSnaps = await Promise.all(employeePromises);
-                const employeeMap = {};
-                employeeSnaps.forEach(snap => {
-                    if (snap.exists()) {
-                        employeeMap[snap.id] = snap.data();
-                    }
-                    // If employee data is not found, the map will simply not have an entry for that ID.
-                    // The display logic below will handle 'N/A' for missing employee data.
-                });
-
-                deductionRecords.forEach(record => {
-                    const employeeData = employeeMap[record.employeeDocId] || {};
-                    const newRow = deductionRecordsListBody.insertRow();
-                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                    newRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A'}</td>
-                        <td class="py-3 px-6 text-left">${employeeData.employeeId || record.employeeId || 'N/A'}</td>
-                        <td class="py-3 px-6 text-left">${employeeData.fullName || record.employeeName || 'N/A'}</td>
-                        <td class="py-3 px-6 text-right">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="py-3 px-6 text-right">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-deduction-record-btn" data-id="${record.docId}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${record.docId}" data-collection="deduction_records">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                });
-                attachActionListeners();
-            }, (error) => {
-                console.error("Error fetching deduction records: ", error);
-                if (deductionRecordsListBody) deductionRecordsListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-red-500">Error loading deduction records: ${error.message}</td></tr>`;
-            });
-        };
-
-
-        /**
          * Attaches event listeners to dynamically created edit/delete buttons
-         * for employees, payroll records, and deduction records across different tabs.
+         * for employees across different tabs.
          */
-        const attachActionListeners = () => {
+        const attachEmployeeActionListeners = () => {
             // For Manage Employee tab
             document.querySelectorAll('#employee-list-body .edit-employee-btn').forEach(button => {
                 button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
             });
-            document.querySelectorAll('#employee-list-body .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
+            document.querySelectorAll('#employee-list-body .delete-employee-btn').forEach(button => {
+                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
             });
 
-            // For Process Payroll tab (buttons inside dynamically generated employee tables)
+            // For Process Payroll tab (buttons inside dynamically generated tables)
             document.querySelectorAll('#process-payroll-tables-container .edit-employee-btn-payroll').forEach(button => {
                 button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
             });
-            document.querySelectorAll('#process-payroll-tables-container .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
+            document.querySelectorAll('#process-payroll-tables-container .delete-employee-btn-payroll').forEach(button => {
+                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
             });
             document.querySelectorAll('.open-payroll-input-btn').forEach(button => {
                 button.onclick = (e) => openPayrollInputModal(e.currentTarget.dataset.id);
             });
 
-            // New: For Payroll Records List
-            document.querySelectorAll('#payroll-records-list-body .edit-payroll-record-btn').forEach(button => {
-                button.onclick = (e) => openEditPayrollModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#payroll-records-list-body .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
-            });
-
-
-            // For Deductions tab (buttons inside dynamically generated employee tables)
+            // For Deductions tab (buttons inside dynamically generated tables)
             document.querySelectorAll('#deductions-tables-container .edit-employee-btn-deductions').forEach(button => {
                 button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
             });
-            document.querySelectorAll('#deductions-tables-container .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
+            document.querySelectorAll('#deductions-tables-container .delete-employee-btn-deductions').forEach(button => {
+                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
             });
             document.querySelectorAll('.open-deductions-input-btn').forEach(button => {
                 button.onclick = (e) => openDeductionsModal(e.currentTarget.dataset.id);
-            });
-
-            // New: For Deduction Records List
-            document.querySelectorAll('#deduction-records-list-body .edit-deduction-record-btn').forEach(button => {
-                button.onclick = (e) => openEditDeductionsModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#deduction-records-list-body .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
-            });
-
-            // For Site tab
-            document.querySelectorAll('#site-list-body .edit-site-btn').forEach(button => {
-                button.onclick = (e) => openEditSiteModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#site-list-body .delete-item-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id, e.currentTarget.dataset.collection);
             });
         };
 
@@ -1445,7 +1064,7 @@
                                     <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-item-btn" data-id="${doc.id}" data-collection="sites">
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                     </button>
                                 </div>
@@ -1457,7 +1076,6 @@
                 // For now, setting to total sites. You might need to define "active" differently.
                 if (activeSitesCard) activeSitesCard.textContent = querySnapshot.size; 
                 populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
-                attachActionListeners();
             }, (error) => {
                 console.error("Error fetching sites: ", error);
             });
@@ -1685,15 +1303,9 @@
             }
 
             // Re-fetch data when switching to relevant tabs
-            if (targetId === 'manage-employee') {
-                fetchEmployees(); // Will populate employee list
+            if (targetId === 'manage-employee' || targetId === 'process-payroll' || targetId === 'deductions') {
+                fetchEmployees(); // Will populate all relevant tables
                 populateDepartmentSiteDropdown();
-            } else if (targetId === 'process-payroll') {
-                fetchEmployees(); // Will populate employee selection for payroll
-                fetchPayrollRecords(); // NEW: Fetch and display all payroll records
-            } else if (targetId === 'deductions') {
-                fetchEmployees(); // Will populate employee selection for deductions
-                fetchDeductionRecords(); // NEW: Fetch and display all deduction records
             } else if (targetId === 'site') {
                 fetchSites();
             } else if (targetId === 'dashboard') {
@@ -1796,8 +1408,6 @@
             displayUserIdSpan = document.getElementById('display-user-id');
             payrollSummaryListBody = document.getElementById('payroll-summary-list-body');
             payrollSummaryDepartmentFilter = document.getElementById('payroll-summary-department-filter');
-            payrollRecordsListBody = document.getElementById('payroll-records-list-body'); // New
-            deductionRecordsListBody = document.getElementById('deduction-records-list-body'); // New
 
             adminFeatureElements = document.querySelectorAll('.admin-feature-only');
             activateAdminModeButton = document.getElementById('activate-admin-mode-button');
@@ -1841,7 +1451,6 @@
             deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
             cancelDeleteButton = document.getElementById('cancel-delete-button');
             confirmDeleteButton = document.getElementById('confirm-delete-button');
-            deleteConfirmationMessage = document.getElementById('delete-confirmation-message'); // New
 
             payrollInputModal = document.getElementById('payroll-input-modal');
             cancelPayrollInputButton = document.getElementById('cancel-payroll-input');
@@ -1867,7 +1476,6 @@
             deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
             deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
             deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
-
             govtLoanInput = document.getElementById('govt-loan');
             coopShareInput = document.getElementById('coop-share');
             withholdingTaxInput = document.getElementById('withholding-tax');
@@ -1879,47 +1487,6 @@
             calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
             calculatedNetPaySpan = document.getElementById('calculated-net-pay');
             deductionsInputForm = document.getElementById('deductions-input-form');
-
-            // New: Edit Payroll Modal elements
-            editPayrollModal = document.getElementById('edit-payroll-modal');
-            cancelEditPayrollButton = document.getElementById('cancel-edit-payroll-button');
-            editPayrollForm = document.getElementById('edit-payroll-form');
-            editPayrollDocIdInput = document.getElementById('edit-payroll-doc-id');
-            editPayrollEmployeeNameSpan = document.getElementById('edit-payroll-employee-name');
-            editPayrollEmployeeIdSpan = document.getElementById('edit-payroll-employee-id');
-            editPayrollEmployeeDocIdInput = document.getElementById('edit-payroll-employee-doc-id');
-            editPayrollEmployeeSalaryRateInput = document.getElementById('edit-payroll-employee-salary-rate');
-            editWorkingDaysInput = document.getElementById('edit-working-days');
-            editOvertimeHrsInput = document.getElementById('edit-overtime-hrs');
-            editSundayHolidayDutyInput = document.getElementById('edit-sunday-holiday-duty');
-            editNightShiftWorkDaysInput = document.getElementById('edit-night-shift-work-days');
-            editNightShiftOvertimeHrsInput = document.getElementById('edit-night-shift-overtime-hrs');
-            editPayrollHiddenSssContributionInput = document.getElementById('edit-payroll-hidden-sss-contribution');
-            editPayrollHiddenPhContributionInput = document.getElementById('edit-payroll-hidden-ph-contribution');
-            editPayrollHiddenPagibigContributionInput = document.getElementById('edit-payroll-hidden-pagibig-contribution');
-            editPayrollSummaryTableBody = document.getElementById('edit-payroll-summary-table-body');
-
-            // New: Edit Deductions Modal elements
-            editDeductionsModal = document.getElementById('edit-deductions-modal');
-            cancelEditDeductionsButton = document.getElementById('cancel-edit-deductions-button');
-            editDeductionsForm = document.getElementById('edit-deductions-form');
-            editDeductionsDocIdInput = document.getElementById('edit-deductions-doc-id');
-            editDeductionsEmployeeNameSpan = document.getElementById('edit-deductions-employee-name');
-            editDeductionsEmployeeIdSpan = document.getElementById('edit-deductions-employee-id');
-            editDeductionsEmployeeDocIdInput = document.getElementById('edit-deductions-employee-doc-id');
-            editDeductionsEmployeePayrollDocIdInput = document.getElementById('edit-deductions-employee-payroll-doc-id');
-            editDeductionsGrossPaySpan = document.getElementById('edit-deductions-gross-pay');
-            editGovtLoanInput = document.getElementById('edit-govt-loan');
-            editCoopShareInput = document.getElementById('edit-coop-share');
-            editWithholdingTaxInput = document.getElementById('edit-withholding-tax');
-            editUnpaidLoanInput = document.getElementById('edit-unpaid-loan');
-            editCoop2025Input = document.getElementById('edit-coop-2025');
-            editCaVoucherInput = document.getElementById('edit-ca-voucher');
-            editDailyValeInput = document.getElementById('edit-daily-vale');
-            editOthersDeductionInput = document.getElementById('edit-others-deduction');
-            editCalculatedTotalDeductionsSpan = document.getElementById('edit-calculated-total-deductions');
-            editCalculatedNetPaySpan = document.getElementById('edit-calculated-net-pay');
-
 
             // Check if admin mode was previously activated in this session
             isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
@@ -2091,79 +1658,11 @@
             };
 
             /**
-             * Opens the Edit Site Modal and populates it with the selected site's data.
-             * @param {string} docId - The Firestore document ID of the site to edit.
+             * Opens the Delete Confirmation Modal for a given employee.
+             * @param {string} docId - The Firestore document ID of the employee to delete.
              */
-            window.openEditSiteModal = async (docId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot edit site.");
-                    return;
-                }
-                try {
-                    const siteRef = doc(db, `/artifacts/${appId}/public/data/sites`, docId);
-                    const siteSnap = await getDoc(siteRef);
-
-                    if (siteSnap.exists()) {
-                        const siteData = siteSnap.data();
-                        document.getElementById('edit-site-doc-id').value = docId;
-                        document.getElementById('edit-site-id').value = siteData.siteId || docId;
-                        document.getElementById('edit-site-name').value = siteData.siteName || '';
-                        document.getElementById('edit-site-location').value = siteData.siteLocation || '';
-                        // Removed siteStatus from here as it's no longer in the site schema
-                        document.getElementById('edit-site-modal').classList.remove('hidden');
-                    } else {
-                        console.error("No such site document!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching site for edit: ", e);
-                }
-            };
-
-            // Event listener for edit site form submission
-            document.getElementById('edit-site-form').addEventListener('submit', async (event) => {
-                event.preventDefault();
-                if (!userId) {
-                    console.error("User not authenticated. Cannot update site.");
-                    return;
-                }
-
-                const docId = document.getElementById('edit-site-doc-id').value;
-                const siteRef = doc(db, `/artifacts/${appId}/public/data/sites`, docId);
-
-                const formData = new FormData(document.getElementById('edit-site-form'));
-                const updatedData = {
-                    siteName: formData.get('siteName'),
-                    siteLocation: formData.get('siteLocation'),
-                    // Removed siteStatus from here as it's no longer in the site schema
-                };
-
-                try {
-                    await updateDoc(siteRef, updatedData);
-                    console.log("Site updated successfully!");
-                    document.getElementById('edit-site-modal').classList.add('hidden');
-                    document.getElementById('edit-site-form').reset();
-                } catch (e) {
-                    console.error("Error updating site: ", e);
-                }
-            });
-
-            // Event listener for "Cancel" button in the edit site modal
-            document.getElementById('cancel-edit-site').addEventListener('click', () => {
-                document.getElementById('edit-site-modal').classList.add('hidden');
-                document.getElementById('edit-site-form').reset();
-            });
-
-            /**
-             * Opens the Delete Confirmation Modal for a given item.
-             * @param {string} docId - The Firestore document ID of the item to delete.
-             * @param {string} collectionName - The name of the collection the item belongs to.
-             */
-            window.openDeleteConfirmationModal = (docId, collectionName) => {
-                itemToDeleteDocId = docId; // Store the ID
-                itemToDeleteCollection = collectionName; // Store the collection name
-                if (deleteConfirmationMessage) {
-                    deleteConfirmationMessage.textContent = `Are you sure you want to delete this ${collectionName.replace(/_/g, ' ').slice(0, -1)} record? This action cannot be undone.`;
-                }
+            window.openDeleteConfirmationModal = (docId) => {
+                employeeToDeleteDocId = docId; // Store the ID
                 if (deleteConfirmationModal) deleteConfirmationModal.classList.remove('hidden');
             };
 
@@ -2171,8 +1670,7 @@
             if (cancelDeleteButton) {
                     cancelDeleteButton.addEventListener('click', () => {
                     if (deleteConfirmationModal) deleteConfirmationModal.classList.add('hidden');
-                    itemToDeleteDocId = null; // Clear the stored ID
-                    itemToDeleteCollection = null; // Clear the stored collection
+                    employeeToDeleteDocId = null; // Clear the stored ID
                 });
             }
 
@@ -2180,18 +1678,17 @@
             if (confirmDeleteButton) {
                 confirmDeleteButton.addEventListener('click', async () => {
                     if (!userId) {
-                        console.error("User not authenticated. Cannot delete item.");
+                        console.error("User not authenticated. Cannot delete employee.");
                         return;
                     }
-                    if (itemToDeleteDocId && itemToDeleteCollection) {
+                    if (employeeToDeleteDocId) {
                         try {
-                            await deleteDoc(doc(db, `/artifacts/${appId}/public/data/${itemToDeleteCollection}`, itemToDeleteDocId));
-                            console.log(`${itemToDeleteCollection} record deleted successfully!`);
+                            await deleteDoc(doc(db, `/artifacts/${appId}/public/data/employees`, employeeToDeleteDocId));
+                            console.log("Employee deleted successfully!");
                             if (deleteConfirmationModal) deleteConfirmationModal.classList.add('hidden');
-                            itemToDeleteDocId = null; // Clear the stored ID
-                            itemToDeleteCollection = null; // Clear the stored collection
+                            employeeToDeleteDocId = null; // Clear the stored ID
                         } catch (e) {
-                            console.error(`Error deleting ${itemToDeleteCollection} record: `, e);
+                            console.error("Error deleting employee: ", e);
                         }
                     }
                 });
@@ -2258,31 +1755,19 @@
              * Calculates and updates the payroll components (Basic Pay, Overtime Pay, etc.)
              * and the Gross Pay (After Gov. Contributions) based on user inputs in the payroll input modal.
              * Also updates the payroll summary table within the modal.
-             * @param {boolean} isEditMode - True if called from the edit modal, false otherwise.
              */
-            const calculatePayroll = (isEditMode = false) => {
-                const salaryRateInput = isEditMode ? editPayrollEmployeeSalaryRateInput : payrollEmployeeSalaryRateInput;
-                const workingDaysInputEl = isEditMode ? editWorkingDaysInput : workingDaysInput;
-                const overtimeHrsInputEl = isEditMode ? editOvertimeHrsInput : overtimeHrsInput;
-                const sundayHolidayDutyInputEl = isEditMode ? editSundayHolidayDutyInput : sundayHolidayDutyInput;
-                const nightShiftWorkDaysInputEl = isEditMode ? editNightShiftWorkDaysInput : nightShiftWorkDaysInput;
-                const nightShiftOvertimeHrsInputEl = isEditMode ? editNightShiftOvertimeHrsInput : nightShiftOvertimeHrsInput;
-                const sssContributionInputEl = isEditMode ? editPayrollHiddenSssContributionInput : payrollHiddenSssContributionInput;
-                const phContributionInputEl = isEditMode ? editPayrollHiddenPhContributionInput : payrollHiddenPhContributionInput;
-                const pagibigContributionInputEl = isEditMode ? editPayrollHiddenPagibigContributionInput : payrollHiddenPagibigContributionInput;
-                const summaryTableBodyEl = isEditMode ? editPayrollSummaryTableBody : payrollSummaryTableBody;
-
-                const salaryRate = parseFloat(salaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
-                const workingDays = parseFloat(workingDaysInputEl.value || 0);
-                const overtimeHrs = parseFloat(overtimeHrsInputEl.value || 0);
-                const sundayHolidayDuty = parseFloat(sundayHolidayDutyInputEl.value || 0);
-                const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInputEl.value || 0); // Represents full 8-hour night shifts
-                const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInputEl.value || 0);
+            const calculatePayroll = () => {
+                const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
+                const workingDays = parseFloat(workingDaysInput.value || 0);
+                const overtimeHrs = parseFloat(overtimeHrsInput.value || 0);
+                const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
+                const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0); // Represents full 8-hour night shifts
+                const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
 
                 // Get government contributions (already loaded into hidden inputs)
-                const sssContribution = parseFloat(sssContributionInputEl.value || 0);
-                const phContribution = parseFloat(phContributionInputEl.value || 0);
-                const pagibigContribution = parseFloat(pagibigContributionInputEl.value || 0);
+                const sssContribution = parseFloat(payrollHiddenSssContributionInput.value || 0);
+                const phContribution = parseFloat(payrollHiddenPhContributionInput.value || 0);
+                const pagibigContribution = parseFloat(payrollHiddenPagibigContributionInput.value || 0);
 
                 // Constants for calculations
                 const dailyRate = salaryRate; // Daily rate is directly from the employee's salaryRate
@@ -2318,11 +1803,11 @@
                 const grossPayAfterGovt = grossEarningsBeforeGovt - totalGovtContributions;
 
                 // --- Update Payroll Summary Table ---
-                if (summaryTableBodyEl) summaryTableBodyEl.innerHTML = ''; // Clear existing rows
+                if (payrollSummaryTableBody) payrollSummaryTableBody.innerHTML = ''; // Clear existing rows
 
                 const addRow = (label, value) => {
-                    if (summaryTableBodyEl) {
-                        const row = summaryTableBodyEl.insertRow();
+                    if (payrollSummaryTableBody) {
+                        const row = payrollSummaryTableBody.insertRow();
                         row.innerHTML = `
                             <td class="py-2 px-4 text-left">${label}</td>
                             <td class="py-2 px-4 text-right">${formatCurrency(value)}</td>
@@ -2352,7 +1837,10 @@
                 addRow('Gross Pay (After Gov. Contributions)', grossPayAfterGovt);
             };
 
-            // Function to open the Payroll Input Modal
+            /**
+             * Opens the Payroll Input Modal for a specific employee and populates employee details.
+             * @param {string} docId - The Firestore document ID of the employee.
+             */
             window.openPayrollInputModal = async (docId) => {
                 if (!userId) {
                     console.warn("User not authenticated. Cannot open payroll input.");
@@ -2386,7 +1874,7 @@
                         if (nightShiftWorkDaysInput) nightShiftWorkDaysInput.value = 0;
                         if (nightShiftOvertimeHrsInput) nightShiftOvertimeHrsInput.value = 0;
                         
-                        calculatePayroll(false); // Initial calculation with zero inputs, but including pre-filled gov contributions
+                        calculatePayroll(); // Initial calculation with zero inputs, but including pre-filled gov contributions
 
                         if (payrollInputModal) payrollInputModal.classList.remove('hidden');
                     } else {
@@ -2398,11 +1886,11 @@
             };
 
             // Event listeners for payroll input fields to trigger calculation
-            if (workingDaysInput) workingDaysInput.addEventListener('input', () => calculatePayroll(false));
-            if (overtimeHrsInput) overtimeHrsInput.addEventListener('input', () => calculatePayroll(false));
-            if (sundayHolidayDutyInput) sundayHolidayDutyInput.addEventListener('input', () => calculatePayroll(false));
-            if (nightShiftWorkDaysInput) nightShiftWorkDaysInput.addEventListener('input', () => calculatePayroll(false));
-            if (nightShiftOvertimeHrsInput) nightShiftOvertimeHrsInput.addEventListener('input', () => calculatePayroll(false));
+            if (workingDaysInput) workingDaysInput.addEventListener('input', calculatePayroll);
+            if (overtimeHrsInput) overtimeHrsInput.addEventListener('input', calculatePayroll);
+            if (sundayHolidayDutyInput) sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
+            if (nightShiftWorkDaysInput) nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
+            if (nightShiftOvertimeHrsInput) nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
 
             // Event listener for closing payroll input modal
             if (cancelPayrollInputButton) {
@@ -2422,7 +1910,7 @@
                     }
 
                     // Re-calculate to ensure latest values are used before saving
-                    calculatePayroll(false); 
+                    calculatePayroll(); 
 
                     const employeeDocId = payrollEmployeeDocIdInput.value;
                     const employeeName = payrollEmployeeNameSpan.textContent;
@@ -2493,170 +1981,21 @@
             }
 
             /**
-             * Opens the Edit Payroll Modal and populates it with the selected payroll record's data.
-             * @param {string} docId - The Firestore document ID of the payroll record to edit.
-             */
-            window.openEditPayrollModal = async (docId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot edit payroll record.");
-                    return;
-                }
-                try {
-                    const payrollRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, docId);
-                    const payrollSnap = await getDoc(payrollRef);
-
-                    if (payrollSnap.exists()) {
-                        const payrollData = payrollSnap.data();
-                        const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, payrollData.employeeDocId);
-                        const employeeSnap = await getDoc(employeeRef);
-                        const employeeData = employeeSnap.exists() ? employeeSnap.data() : {};
-
-                        if (editPayrollDocIdInput) editPayrollDocIdInput.value = docId;
-                        if (editPayrollEmployeeDocIdInput) editPayrollEmployeeDocIdInput.value = payrollData.employeeDocId;
-                        if (editPayrollEmployeeNameSpan) editPayrollEmployeeNameSpan.textContent = employeeData.fullName || payrollData.employeeName || 'N/A';
-                        if (editPayrollEmployeeIdSpan) editPayrollEmployeeIdSpan.textContent = employeeData.employeeId || payrollData.employeeId || 'N/A';
-                        if (editPayrollEmployeeSalaryRateInput) editPayrollEmployeeSalaryRateInput.value = parseFloat(payrollData.salaryRate || 0);
-
-                        if (editWorkingDaysInput) editWorkingDaysInput.value = parseFloat(payrollData.workingDays || 0);
-                        if (editOvertimeHrsInput) editOvertimeHrsInput.value = parseFloat(payrollData.overtimeHrs || 0);
-                        if (editSundayHolidayDutyInput) editSundayHolidayDutyInput.value = parseFloat(payrollData.sundayHolidayDuty || 0);
-                        if (editNightShiftWorkDaysInput) editNightShiftWorkDaysInput.value = parseFloat(payrollData.nightShiftWorkDays || 0);
-                        if (editNightShiftOvertimeHrsInput) editNightShiftOvertimeHrsInput.value = parseFloat(payrollData.nightShiftOvertimeHrs || 0);
-
-                        if (editPayrollHiddenSssContributionInput) editPayrollHiddenSssContributionInput.value = parseFloat(payrollData.sssContribution || 0);
-                        if (editPayrollHiddenPhContributionInput) editPayrollHiddenPhContributionInput.value = parseFloat(payrollData.phContribution || 0);
-                        if (editPayrollHiddenPagibigContributionInput) editPayrollHiddenPagibigContributionInput.value = parseFloat(payrollData.pagibigContribution || 0);
-
-                        calculatePayroll(true); // Calculate for edit modal
-
-                        if (editPayrollModal) editPayrollModal.classList.remove('hidden');
-                    } else {
-                        console.error("No such payroll record document!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching payroll record for edit: ", e);
-                }
-            };
-
-            // Event listeners for edit payroll input fields to trigger calculation
-            if (editWorkingDaysInput) editWorkingDaysInput.addEventListener('input', () => calculatePayroll(true));
-            if (editOvertimeHrsInput) editOvertimeHrsInput.addEventListener('input', () => calculatePayroll(true));
-            if (editSundayHolidayDutyInput) editSundayHolidayDutyInput.addEventListener('input', () => calculatePayroll(true));
-            if (editNightShiftWorkDaysInput) editNightShiftWorkDaysInput.addEventListener('input', () => calculatePayroll(true));
-            if (editNightShiftOvertimeHrsInput) editNightShiftOvertimeHrsInput.addEventListener('input', () => calculatePayroll(true));
-
-            // Event listener for closing edit payroll modal
-            if (cancelEditPayrollButton) {
-                cancelEditPayrollButton.addEventListener('click', () => {
-                    if (editPayrollModal) editPayrollModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for updating payroll data
-            if (editPayrollForm) {
-                editPayrollForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot update payroll record.");
-                        return;
-                    }
-
-                    calculatePayroll(true); // Re-calculate to ensure latest values are used before saving
-
-                    const docId = editPayrollDocIdInput.value;
-                    const payrollRef = doc(db, `/artifacts/${appId}/public/data/payroll_records`, docId);
-
-                    const employeeDocId = editPayrollEmployeeDocIdInput.value;
-                    const employeeName = editPayrollEmployeeNameSpan.textContent;
-                    const employeeId = editPayrollEmployeeIdSpan.textContent;
-                    const salaryRate = parseFloat(editPayrollEmployeeSalaryRateInput.value || 0);
-
-                    const workingDays = parseFloat(editWorkingDaysInput.value || 0);
-                    const overtimeHrs = parseFloat(editOvertimeHrsInput.value || 0);
-                    const sundayHolidayDuty = parseFloat(editSundayHolidayDutyInput.value || 0);
-                    const nightShiftWorkDays = parseFloat(editNightShiftWorkDaysInput.value || 0);
-                    const nightShiftOvertimeHrs = parseFloat(editNightShiftOvertimeHrsInput.value || 0);
-                    const sssContribution = parseFloat(editPayrollHiddenSssContributionInput.value || 0);
-                    const phContribution = parseFloat(editPayrollHiddenPhContributionInput.value || 0);
-                    const pagibigContribution = parseFloat(editPayrollHiddenPagibigContributionInput.value || 0);
-
-                    const dailyRate = salaryRate;
-                    const dailyWorkingHours = 8;
-                    const hourlyRate = dailyRate / dailyWorkingHours;
-
-                    const basicPay = dailyRate * workingDays;
-                    const overtimePay = overtimeHrs * hourlyRate * 1.25;
-                    const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30;
-                    const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10;
-                    const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
-                    const grossEarningsBeforeGovt = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
-                    const totalGovtContributions = sssContribution + phContribution + pagibigContribution;
-                    const grossPayAfterGovt = grossEarningsBeforeGovt - totalGovtContributions;
-
-                    const updatedPayrollRecord = {
-                        employeeDocId: employeeDocId,
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        salaryRate: salaryRate,
-                        workingDays: workingDays,
-                        overtimeHrs: overtimeHrs,
-                        sundayHolidayDuty: sundayHolidayDuty,
-                        nightShiftWorkDays: nightShiftWorkDays,
-                        nightShiftOvertimeHrs: nightShiftOvertimeHrs,
-                        basicPay: basicPay,
-                        overtimePay: overtimePay,
-                        sundayHolidayPay: sundayHolidayPay,
-                        nightShiftDifferential: nightShiftDifferential,
-                        nightShiftOvertimePay: nightShiftOvertimePay,
-                        sssContribution: sssContribution,
-                        phContribution: phContribution,
-                        pagibigContribution: pagibigContribution,
-                        grossPay: grossPayAfterGovt,
-                        // Update payrollDate if needed, or keep original
-                        // processedByUserId: userId // Keep original or update if desired
-                    };
-
-                    try {
-                        await updateDoc(payrollRef, updatedPayrollRecord);
-                        console.log("Payroll record updated successfully!", updatedPayrollRecord);
-                        if (editPayrollModal) editPayrollModal.classList.add('hidden');
-                    } catch (e) {
-                        console.error("Error updating payroll record: ", e);
-                    }
-                });
-            }
-
-
-            /**
              * Calculates and updates the total other deductions and net pay based on user inputs
              * in the deductions input modal.
-             * @param {boolean} isEditMode - True if called from the edit modal, false otherwise.
              */
-            const calculateDeductions = (isEditMode = false) => {
-                const grossPaySpan = isEditMode ? editDeductionsGrossPaySpan : deductionsGrossPaySpan;
-                const govtLoanInputEl = isEditMode ? editGovtLoanInput : govtLoanInput;
-                const coopShareInputEl = isEditMode ? editCoopShareInput : coopShareInput;
-                const withholdingTaxInputEl = isEditMode ? editWithholdingTaxInput : withholdingTaxInput;
-                const unpaidLoanInputEl = isEditMode ? editUnpaidLoanInput : unpaidLoanInput;
-                const coop2025InputEl = isEditMode ? editCoop2025Input : coop2025Input;
-                const caVoucherInputEl = isEditMode ? editCaVoucherInput : caVoucherInput;
-                const dailyValeInputEl = isEditMode ? editDailyValeInput : dailyValeInput;
-                const othersDeductionInputEl = isEditMode ? editOthersDeductionInput : othersDeductionInput;
-                const totalDeductionsSpan = isEditMode ? editCalculatedTotalDeductionsSpan : calculatedTotalDeductionsSpan;
-                const netPaySpan = isEditMode ? editCalculatedNetPaySpan : calculatedNetPaySpan;
-
+            const calculateDeductions = () => {
                 // Gross pay here is already the amount AFTER government contributions
-                const grossPay = parseFloat(grossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
+                const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
                 
-                const govtLoan = parseFloat(govtLoanInputEl.value || 0);
-                const coopShare = parseFloat(coopShareInputEl.value || 0);
-                const withholdingTax = parseFloat(withholdingTaxInputEl.value || 0);
-                const unpaidLoan = parseFloat(unpaidLoanInputEl.value || 0);
-                const coop2025 = parseFloat(coop2025InputEl.value || 0);
-                const caVoucher = parseFloat(caVoucherInputEl.value || 0);
-                const dailyVale = parseFloat(dailyValeInputEl.value || 0);
-                const othersDeduction = parseFloat(othersDeductionInputEl.value || 0);
+                const govtLoan = parseFloat(govtLoanInput.value || 0);
+                const coopShare = parseFloat(coopShareInput.value || 0);
+                const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
+                const unpaidLoan = parseFloat(unpaidLoanInput.value || 0);
+                const coop2025 = parseFloat(coop2025Input.value || 0);
+                const caVoucher = parseFloat(caVoucherInput.value || 0);
+                const dailyVale = parseFloat(dailyValeInput.value || 0);
+                const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
                 // Total Deductions in this modal now only represent "other" deductions
                 const totalOtherDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
@@ -2664,8 +2003,8 @@
                 const netPay = grossPay - totalOtherDeductions;
 
                 // Update display
-                if (totalDeductionsSpan) totalDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                if (netPaySpan) netPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                if (calculatedTotalDeductionsSpan) calculatedTotalDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                if (calculatedNetPaySpan) calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
             /**
@@ -2720,7 +2059,7 @@
                         if (dailyValeInput) dailyValeInput.value = 0;
                         if (othersDeductionInput) othersDeductionInput.value = 0;
 
-                        calculateDeductions(false); // Initial calculation with all values
+                        calculateDeductions(); // Initial calculation with all values
 
                         if (deductionsInputModal) deductionsInputModal.classList.remove('hidden');
                     } else {
@@ -2732,14 +2071,14 @@
             };
 
             // Event listeners for deduction input fields to trigger calculation
-            if (govtLoanInput) govtLoanInput.addEventListener('input', () => calculateDeductions(false));
-            if (coopShareInput) coopShareInput.addEventListener('input', () => calculateDeductions(false));
-            if (withholdingTaxInput) withholdingTaxInput.addEventListener('input', () => calculateDeductions(false));
-            if (unpaidLoanInput) unpaidLoanInput.addEventListener('input', () => calculateDeductions(false));
-            if (coop2025Input) coop2025Input.addEventListener('input', () => calculateDeductions(false));
-            if (caVoucherInput) caVoucherInput.addEventListener('input', () => calculateDeductions(false));
-            if (dailyValeInput) dailyValeInput.addEventListener('input', () => calculateDeductions(false));
-            if (othersDeductionInput) othersDeductionInput.addEventListener('input', () => calculateDeductions(false));
+            if (govtLoanInput) govtLoanInput.addEventListener('input', calculateDeductions);
+            if (coopShareInput) coopShareInput.addEventListener('input', calculateDeductions);
+            if (withholdingTaxInput) withholdingTaxInput.addEventListener('input', calculateDeductions);
+            if (unpaidLoanInput) unpaidLoanInput.addEventListener('input', calculateDeductions);
+            if (coop2025Input) coop2025Input.addEventListener('input', calculateDeductions);
+            if (caVoucherInput) caVoucherInput.addEventListener('input', calculateDeductions);
+            if (dailyValeInput) dailyValeInput.addEventListener('input', calculateDeductions);
+            if (othersDeductionInput) othersDeductionInput.addEventListener('input', calculateDeductions);
 
             // Event listener for closing deductions input modal
             if (cancelDeductionsInputButton) {
@@ -2758,7 +2097,7 @@
                         return;
                     }
 
-                    calculateDeductions(false); // Re-calculate to ensure latest values are used before saving
+                    calculateDeductions(); // Re-calculate to ensure latest values are used before saving
 
                     const employeeDocId = deductionsEmployeeDocIdInput.value;
                     const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
@@ -2801,121 +2140,6 @@
                     }
                 });
             }
-
-            /**
-             * Opens the Edit Deductions Modal and populates it with the selected deduction record's data.
-             * @param {string} docId - The Firestore document ID of the deduction record to edit.
-             */
-            window.openEditDeductionsModal = async (docId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot edit deduction record.");
-                    return;
-                }
-                try {
-                    const deductionRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, docId);
-                    const deductionSnap = await getDoc(deductionRef);
-
-                    if (deductionSnap.exists()) {
-                        const deductionData = deductionSnap.data();
-                        const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, deductionData.employeeDocId);
-                        const employeeSnap = await getDoc(employeeRef);
-                        const employeeData = employeeSnap.exists() ? employeeSnap.data() : {};
-
-                        if (editDeductionsDocIdInput) editDeductionsDocIdInput.value = docId;
-                        if (editDeductionsEmployeeDocIdInput) editDeductionsEmployeeDocIdInput.value = deductionData.employeeDocId;
-                        if (editDeductionsEmployeePayrollDocIdInput) editDeductionsEmployeePayrollDocIdInput.value = deductionData.payrollDocId || '';
-                        if (editDeductionsEmployeeNameSpan) editDeductionsEmployeeNameSpan.textContent = employeeData.fullName || deductionData.employeeName || 'N/A';
-                        if (editDeductionsEmployeeIdSpan) editDeductionsEmployeeIdSpan.textContent = employeeData.employeeId || deductionData.employeeId || 'N/A';
-                        if (editDeductionsGrossPaySpan) editDeductionsGrossPaySpan.textContent = `₱ ${parseFloat(deductionData.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-                        if (editGovtLoanInput) editGovtLoanInput.value = parseFloat(deductionData.govtLoan || 0);
-                        if (editCoopShareInput) editCoopShareInput.value = parseFloat(deductionData.coopShare || 0);
-                        if (editWithholdingTaxInput) editWithholdingTaxInput.value = parseFloat(deductionData.withholdingTax || 0);
-                        if (editUnpaidLoanInput) editUnpaidLoanInput.value = parseFloat(deductionData.unpaidLoan || 0);
-                        if (editCoop2025Input) editCoop2025Input.value = parseFloat(deductionData.coop2025 || 0);
-                        if (editCaVoucherInput) editCaVoucherInput.value = parseFloat(deductionData.caVoucher || 0);
-                        if (editDailyValeInput) editDailyValeInput.value = parseFloat(deductionData.dailyVale || 0);
-                        if (editOthersDeductionInput) editOthersDeductionInput.value = parseFloat(deductionData.othersDeduction || 0);
-
-                        calculateDeductions(true); // Calculate for edit modal
-
-                        if (editDeductionsModal) editDeductionsModal.classList.remove('hidden');
-                    } else {
-                        console.error("No such deduction record document!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching deduction record for edit: ", e);
-                }
-            };
-
-            // Event listeners for edit deduction input fields to trigger calculation
-            if (editGovtLoanInput) editGovtLoanInput.addEventListener('input', () => calculateDeductions(true));
-            if (editCoopShareInput) editCoopShareInput.addEventListener('input', () => calculateDeductions(true));
-            if (editWithholdingTaxInput) editWithholdingTaxInput.addEventListener('input', () => calculateDeductions(true));
-            if (editUnpaidLoanInput) editUnpaidLoanInput.addEventListener('input', () => calculateDeductions(true));
-            if (editCoop2025Input) editCoop2025Input.addEventListener('input', () => calculateDeductions(true));
-            if (editCaVoucherInput) editCaVoucherInput.addEventListener('input', () => calculateDeductions(true));
-            if (editDailyValeInput) editDailyValeInput.addEventListener('input', () => calculateDeductions(true));
-            if (editOthersDeductionInput) editOthersDeductionInput.addEventListener('input', () => calculateDeductions(true));
-
-            // Event listener for closing edit deductions modal
-            if (cancelEditDeductionsButton) {
-                cancelEditDeductionsButton.addEventListener('click', () => {
-                    if (editDeductionsModal) editDeductionsModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for updating deductions data
-            if (editDeductionsForm) {
-                editDeductionsForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot update deduction record.");
-                        return;
-                    }
-
-                    calculateDeductions(true); // Re-calculate to ensure latest values are used before saving
-
-                    const docId = editDeductionsDocIdInput.value;
-                    const deductionRef = doc(db, `/artifacts/${appId}/public/data/deduction_records`, docId);
-
-                    const employeeDocId = editDeductionsEmployeeDocIdInput.value;
-                    const payrollDocId = editDeductionsEmployeePayrollDocIdInput.value;
-                    const employeeName = editDeductionsEmployeeNameSpan.textContent;
-                    const employeeId = editDeductionsEmployeeIdSpan.textContent;
-                    const grossPay = parseFloat(editDeductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
-
-                    const updatedDeductionRecord = {
-                        employeeDocId: employeeDocId,
-                        payrollDocId: payrollDocId,
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        grossPay: grossPay,
-                        govtLoan: parseFloat(editGovtLoanInput.value || 0),
-                        coopShare: parseFloat(editCoopShareInput.value || 0),
-                        withholdingTax: parseFloat(editWithholdingTaxInput.value || 0),
-                        unpaidLoan: parseFloat(editUnpaidLoanInput.value || 0),
-                        coop2025: parseFloat(editCoop2025Input.value || 0),
-                        caVoucher: parseFloat(editCaVoucherInput.value || 0),
-                        dailyVale: parseFloat(editDailyValeInput.value || 0),
-                        othersDeduction: parseFloat(editOthersDeductionInput.value || 0),
-                        totalDeductions: parseFloat(editCalculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        netPay: parseFloat(editCalculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        // deductionDate: new Date(), // Keep original or update if desired
-                        // processedByUserId: userId // Keep original or update if desired
-                    };
-
-                    try {
-                        await updateDoc(deductionRef, updatedDeductionRecord);
-                        console.log("Deduction record updated successfully!", updatedDeductionRecord);
-                        if (editDeductionsModal) editDeductionsModal.classList.add('hidden');
-                    } catch (e) {
-                        console.error("Error updating deduction record: ", e);
-                    }
-                });
-            }
-
 
             // Add console.log to confirm button clicks
             if (navButtons) {
