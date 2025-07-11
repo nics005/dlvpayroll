@@ -251,6 +251,7 @@
                                 <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
                                     <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
                                     <th class="py-3 px-6 text-left">Name</th>
+                                    <th class="py-3 px-6 text-left">Department/Site</th> <!-- NEW COLUMN -->
                                     <th class="py-3 px-6 text-left">Total Gross Pay</th>
                                     <th class="py-3 px-6 text-left">Total Deductions</th>
                                     <th class="py-3 px-6 text-left">Total Net Pay</th>
@@ -1099,24 +1100,32 @@
         const fetchPayrollSummary = async () => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch payroll summary.");
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
                 return;
             }
 
             if (!isAdminMode) {
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
                 return;
             }
 
 
-            payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
+            payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
 
             try {
-                // Fetch all payroll records
+                // 1. Fetch all employees to get their department/site
+                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                const employeesSnapshot = await getDocs(employeesQuery);
+                const employeesMap = {};
+                employeesSnapshot.forEach(doc => {
+                    employeesMap[doc.id] = doc.data();
+                });
+
+                // 2. Fetch all payroll records
                 const payrollQuery = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`));
                 const payrollSnapshot = await getDocs(payrollQuery);
 
-                // Fetch all deduction records
+                // 3. Fetch all deduction records
                 const deductionQuery = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`));
                 const deductionSnapshot = await getDocs(deductionQuery);
 
@@ -1126,77 +1135,89 @@
                 payrollSnapshot.forEach(doc => {
                     const record = doc.data();
                     const employeeDocId = record.employeeDocId;
-                    if (!employeeSummary[employeeDocId]) {
-                        employeeSummary[employeeDocId] = {
-                            employeeId: record.employeeId,
-                            employeeName: record.employeeName,
-                            totalGrossPay: 0,
-                            totalDeductions: 0,
-                            totalNetPay: 0, // This will be calculated later
-                            payrollCount: 0,
-                            deductionRecords: {} // To store deduction records by payrollDocId
-                        };
+                    const employeeData = employeesMap[employeeDocId]; // Get employee details
+
+                    if (employeeData) { // Ensure employee data exists
+                        if (!employeeSummary[employeeDocId]) {
+                            employeeSummary[employeeDocId] = {
+                                employeeId: record.employeeId,
+                                employeeName: employeeData.fullName, // Use full name from employee data
+                                departmentSite: employeeData.departmentSite || 'N/A', // Get department/site
+                                totalGrossPay: 0,
+                                totalDeductions: 0,
+                                totalNetPay: 0, 
+                                payrollCount: 0,
+                            };
+                        }
+                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
+                        employeeSummary[employeeDocId].payrollCount++;
                     }
-                    employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
-                    employeeSummary[employeeDocId].payrollCount++;
                 });
 
-                // Aggregate deduction data, linking to payroll records
+                // Aggregate deduction data
                 deductionSnapshot.forEach(doc => {
                     const record = doc.data();
                     const employeeDocId = record.employeeDocId;
-                    const payrollDocId = record.payrollDocId; // The payroll record this deduction is linked to
 
                     if (employeeSummary[employeeDocId]) {
-                        // If this deduction is linked to a specific payroll record, 
-                        // we can potentially refine the net pay calculation.
-                        // For simplicity, we'll sum up all deductions for an employee here.
                         employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
-                        
-                        // If you want to link deductions precisely to a payroll, you'd need a more complex structure
-                        // For now, we're just summing all deductions for an employee across all their payrolls.
-                        // If a deduction is associated with a specific payroll, store it
-                        if (payrollDocId) {
-                            if (!employeeSummary[employeeDocId].deductionRecords[payrollDocId]) {
-                                employeeSummary[employeeDocId].deductionRecords[payrollDocId] = 0;
-                            }
-                            employeeSummary[employeeDocId].deductionRecords[payrollDocId] += record.totalDeductions || 0;
-                        }
                     }
                 });
 
-                // Calculate total net pay for each employee
+                // Calculate total net pay for each employee and convert to array
+                const summaryArray = [];
                 for (const empDocId in employeeSummary) {
                     const summary = employeeSummary[empDocId];
-                    // Simple calculation: Total Gross Pay - Total Deductions
-                    // This assumes all deductions are applied against the sum of all gross pays.
                     summary.totalNetPay = summary.totalGrossPay - summary.totalDeductions;
+                    summaryArray.push(summary);
                 }
+
+                // Sort the summary array by departmentSite
+                summaryArray.sort((a, b) => {
+                    const siteA = a.departmentSite.toUpperCase(); // ignore case
+                    const siteB = b.departmentSite.toUpperCase(); // ignore case
+                    if (siteA < siteB) {
+                        return -1;
+                    }
+                    if (siteA > siteB) {
+                        return 1;
+                    }
+                    // If department/site is the same, sort by employee name
+                    const nameA = a.employeeName.toUpperCase();
+                    const nameB = b.employeeName.toUpperCase();
+                    if (nameA < nameB) {
+                        return -1;
+                    }
+                    if (nameA > nameB) {
+                        return 1;
+                    }
+                    return 0; // names must be equal
+                });
 
 
                 // Clear and populate the table
                 payrollSummaryListBody.innerHTML = '';
-                if (Object.keys(employeeSummary).length === 0) {
-                    payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">No payroll summary data available.</td></tr>`;
+                if (summaryArray.length === 0) {
+                    payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available.</td></tr>`;
                 } else {
-                    for (const empDocId in employeeSummary) {
-                        const summary = employeeSummary[empDocId];
+                    summaryArray.forEach(summary => {
                         const newRow = payrollSummaryListBody.insertRow();
                         newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
                         newRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || empDocId}</td>
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || 'N/A'}</td>
                             <td class="py-3 px-6 text-left">${summary.employeeName || ''}</td>
+                            <td class="py-3 px-6 text-left">${summary.departmentSite || 'N/A'}</td> <!-- NEW CELL -->
                             <td class="py-3 px-6 text-left">₱ ${summary.totalGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                             <td class="py-3 px-6 text-left">₱ ${summary.totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                             <td class="py-3 px-6 text-left">₱ ${summary.totalNetPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                             <td class="py-3 px-6 text-center">${summary.payrollCount}</td>
                         `;
-                    }
+                    });
                 }
 
             } catch (e) {
                 console.error("Error fetching payroll summary: ", e);
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
             }
         };
 
@@ -1228,7 +1249,8 @@
                     button.classList.remove('bg-gray-700', 'text-white');
                     button.classList.add('text-gray-300', 'hover:bg-gray-700');
                 }
-            });
+            }
+            );
 
             // Re-fetch data when switching to relevant tabs
             if (targetId === 'manage-employee' || targetId === 'process-payroll' || targetId === 'deductions') {
