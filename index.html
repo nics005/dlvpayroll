@@ -244,6 +244,12 @@
             <!-- Payroll Summary Content -->
             <div id="payroll-summary-content" class="page-content hidden">
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Payroll Summary</h2>
+                <div class="mb-4">
+                    <label for="payroll-summary-department-filter" class="block text-sm font-medium text-gray-700">Filter by Department/Site:</label>
+                    <select id="payroll-summary-department-filter" class="mt-1 block w-full md:w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
+                        <option value="">All Departments/Sites</option>
+                    </select>
+                </div>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white rounded-lg">
@@ -660,6 +666,7 @@
         const siteListBody = document.getElementById('site-list-body');
         const displayUserIdSpan = document.getElementById('display-user-id');
         const payrollSummaryListBody = document.getElementById('payroll-summary-list-body'); // New: For Payroll Summary table body
+        const payrollSummaryDepartmentFilter = document.getElementById('payroll-summary-department-filter'); // New: Payroll Summary filter dropdown
 
         // Admin mode related elements
         const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); 
@@ -797,6 +804,41 @@
                 console.error("Error populating department/site dropdown: ", e);
             }
         };
+
+        /**
+         * Populates the Payroll Summary Department/Site filter dropdown with unique department/site names.
+         */
+        const populatePayrollSummaryDepartmentFilter = async () => {
+            if (!payrollSummaryDepartmentFilter) return;
+
+            payrollSummaryDepartmentFilter.innerHTML = '<option value="">All Departments/Sites</option>'; // Always start with "All" option
+
+            try {
+                if (!userId) {
+                    console.warn("User not authenticated yet. Cannot fetch employees for filter dropdown.");
+                    return;
+                }
+                const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                const querySnapshot = await getDocs(q);
+                const uniqueDepartments = new Set();
+                querySnapshot.forEach((doc) => {
+                    const employee = doc.data();
+                    if (employee.departmentSite) {
+                        uniqueDepartments.add(employee.departmentSite);
+                    }
+                });
+
+                Array.from(uniqueDepartments).sort().forEach(department => {
+                    const option = document.createElement('option');
+                    option.value = department;
+                    option.textContent = department;
+                    payrollSummaryDepartmentFilter.appendChild(option);
+                });
+            } catch (e) {
+                console.error("Error populating payroll summary department filter: ", e);
+            }
+        };
+
 
         /**
          * Fetches and displays employee data in the Manage Employee, Process Payroll,
@@ -1096,8 +1138,10 @@
 
         /**
          * Fetches and displays a summary of payroll and deduction records per employee.
+         * @param {string} departmentSiteFilter - Optional. The department/site name to filter by.
+         * If empty or null, all employees are included.
          */
-        const fetchPayrollSummary = async () => {
+        const fetchPayrollSummary = async (departmentSiteFilter = '') => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch payroll summary.");
                 payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
@@ -1113,8 +1157,17 @@
             payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
 
             try {
-                // 1. Fetch all employees to get their department/site
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                // 1. Fetch employees, optionally filtered by department/site
+                let employeesQuery;
+                if (departmentSiteFilter) {
+                    employeesQuery = query(
+                        collection(db, `/artifacts/${appId}/public/data/employees`),
+                        where("departmentSite", "==", departmentSiteFilter)
+                    );
+                } else {
+                    employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                }
+                
                 const employeesSnapshot = await getDocs(employeesQuery);
                 const employeesMap = {};
                 employeesSnapshot.forEach(doc => {
@@ -1131,13 +1184,14 @@
 
                 const employeeSummary = {};
 
-                // Aggregate payroll data
+                // Aggregate payroll data, only for filtered employees
                 payrollSnapshot.forEach(doc => {
                     const record = doc.data();
                     const employeeDocId = record.employeeDocId;
                     const employeeData = employeesMap[employeeDocId]; // Get employee details
 
-                    if (employeeData) { // Ensure employee data exists
+                    // Only include if employeeData exists (meaning it passed the department filter)
+                    if (employeeData) { 
                         if (!employeeSummary[employeeDocId]) {
                             employeeSummary[employeeDocId] = {
                                 employeeId: record.employeeId,
@@ -1154,11 +1208,12 @@
                     }
                 });
 
-                // Aggregate deduction data
+                // Aggregate deduction data, only for filtered employees
                 deductionSnapshot.forEach(doc => {
                     const record = doc.data();
                     const employeeDocId = record.employeeDocId;
 
+                    // Only include if employeeSummary already contains this employee (meaning it passed the department filter)
                     if (employeeSummary[employeeDocId]) {
                         employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
                     }
@@ -1198,7 +1253,7 @@
                 // Clear and populate the table
                 payrollSummaryListBody.innerHTML = '';
                 if (summaryArray.length === 0) {
-                    payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available.</td></tr>`;
+                    payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available for this selection.</td></tr>`;
                 } else {
                     summaryArray.forEach(summary => {
                         const newRow = payrollSummaryListBody.insertRow();
@@ -1261,7 +1316,8 @@
             } else if (targetId === 'dashboard') {
                 updateDashboardCounts();
             } else if (targetId === 'payroll-summary') {
-                fetchPayrollSummary(); // Call the new function to load summary
+                populatePayrollSummaryDepartmentFilter(); // Populate filter dropdown first
+                fetchPayrollSummary(); // Call the new function to load summary (initially all)
             }
         };
 
@@ -1991,6 +2047,14 @@
                     showContent(targetId);
                 });
             });
+
+            // Event listener for the new payroll summary department filter dropdown
+            if (payrollSummaryDepartmentFilter) {
+                payrollSummaryDepartmentFilter.addEventListener('change', (event) => {
+                    const selectedDepartment = event.target.value;
+                    fetchPayrollSummary(selectedDepartment); // Re-fetch summary with filter
+                });
+            }
         });
     </script>
 </body>
