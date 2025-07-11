@@ -602,7 +602,9 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                     <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900">Total Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
+                        <p class="text-md font-bold text-gray-900">Total Government Contributions: <span id="calculated-govt-deductions">₱ 0.00</span></p>
+                        <p class="text-md font-bold text-gray-900 mt-1">Total Other Deductions: <span id="calculated-other-deductions">₱ 0.00</span></p>
+                        <p class="text-xl font-bold text-gray-900 mt-2">Total Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
                         <p class="text-xl font-bold text-gray-900 mt-2">Net Pay: <span id="calculated-net-pay">₱ 0.00</span></p>
                     </div>
                 </div>
@@ -644,7 +646,7 @@
         let userId = null;
         // __app_id and __initial_auth_token are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
 
         // Admin Mode variables
         let isAdminMode = false;
@@ -765,6 +767,9 @@
         const calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
         const calculatedNetPaySpan = document.getElementById('calculated-net-pay');
         const deductionsInputForm = document.getElementById('deductions-input-form');
+        // New spans for deduction subtotals
+        const calculatedGovtDeductionsSpan = document.getElementById('calculated-govt-deductions');
+        const calculatedOtherDeductionsSpan = document.getElementById('calculated-other-deductions');
 
 
         /**
@@ -1882,11 +1887,19 @@
                 const dailyVale = parseFloat(dailyValeInput.value || 0);
                 const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
-                // Include government contributions in total deductions
-                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction +
-                                        sssContribution + phContribution + pagibigContribution;
+                // Calculate total government contributions
+                const totalGovtDeductions = sssContribution + phContribution + pagibigContribution;
+
+                // Calculate total other deductions
+                const totalOtherDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
+
+                // Total Deductions is the sum of government and other deductions
+                const totalDeductions = totalGovtDeductions + totalOtherDeductions;
                 const netPay = grossPay - totalDeductions;
 
+                // Update display
+                calculatedGovtDeductionsSpan.textContent = `₱ ${totalGovtDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedOtherDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
