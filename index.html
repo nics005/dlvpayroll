@@ -537,6 +537,29 @@
                     <p class="text-2xl font-bold text-gray-900" id="deductions-gross-pay">₱ 0.00</p>
                 </div>
 
+                <!-- Government Benefits (read-only display and hidden inputs for calculation) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">SSS Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-sss-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-sss-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">PhilHealth Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-ph-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-ph-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-pagibig-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-pagibig-contribution" value="0">
+                    </div>
+                </div>
+
+                <!-- Other Deductions (editable inputs) -->
+                <div class="pt-4 border-t border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Other Deductions</h3>
+                </div>
                 <div>
                     <label for="govt-loan" class="block text-sm font-medium text-gray-700">Government Loan</label>
                     <input type="number" id="govt-loan" name="govtLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
@@ -715,6 +738,14 @@
         const deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
         const deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
         const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
+        // New elements for SSS, PhilHealth, Pag-IBIG contributions in deductions modal
+        const deductionsSssContributionSpan = document.getElementById('deductions-sss-contribution');
+        const deductionsPhContributionSpan = document.getElementById('deductions-ph-contribution');
+        const deductionsPagibigContributionSpan = document.getElementById('deductions-pagibig-contribution');
+        const hiddenSssContributionInput = document.getElementById('hidden-sss-contribution');
+        const hiddenPhContributionInput = document.getElementById('hidden-ph-contribution');
+        const hiddenPagibigContributionInput = document.getElementById('hidden-pagibig-contribution');
+
         const govtLoanInput = document.getElementById('govt-loan');
         const coopShareInput = document.getElementById('coop-share');
         const withholdingTaxInput = document.getElementById('withholding-tax');
@@ -1759,6 +1790,11 @@
              */
             const calculateDeductions = () => {
                 const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
+                // Get government contributions from hidden inputs
+                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
+                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
+                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
+
                 const govtLoan = parseFloat(govtLoanInput.value || 0);
                 const coopShare = parseFloat(coopShareInput.value || 0);
                 const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
@@ -1768,7 +1804,9 @@
                 const dailyVale = parseFloat(dailyValeInput.value || 0);
                 const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
-                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
+                // Include government contributions in total deductions
+                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction +
+                                        sssContribution + phContribution + pagibigContribution;
                 const netPay = grossPay - totalDeductions;
 
                 calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1795,6 +1833,20 @@
                         deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
                         deductionsEmployeeDocIdInput.value = employeeDocId;
 
+                        // Populate SSS, PhilHealth, Pag-IBIG contributions
+                        const sss = parseFloat(employeeData.sssContribution || 0);
+                        const ph = parseFloat(employeeData.phContribution || 0);
+                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
+
+                        deductionsSssContributionSpan.textContent = `₱ ${sss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsPhContributionSpan.textContent = `₱ ${ph.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsPagibigContributionSpan.textContent = `₱ ${pagibig.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        
+                        hiddenSssContributionInput.value = sss;
+                        hiddenPhContributionInput.value = ph;
+                        hiddenPagibigContributionInput.value = pagibig;
+
+
                         // Fetch the latest gross pay from payroll_records
                         const payrollRecordsQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/payroll_records`),
@@ -1817,7 +1869,7 @@
                         deductionsGrossPaySpan.textContent = `₱ ${latestGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                         deductionsEmployeePayrollDocIdInput.value = latestPayrollDocId; // Store the associated payroll record ID
 
-                        // Reset deduction input fields
+                        // Reset other deduction input fields
                         govtLoanInput.value = 0;
                         coopShareInput.value = 0;
                         withholdingTaxInput.value = 0;
@@ -1827,7 +1879,7 @@
                         dailyValeInput.value = 0;
                         othersDeductionInput.value = 0;
 
-                        calculateDeductions(); // Initial calculation with zero inputs
+                        calculateDeductions(); // Initial calculation with all values
 
                         deductionsInputModal.classList.remove('hidden');
                     } else {
@@ -1847,6 +1899,7 @@
             caVoucherInput.addEventListener('input', calculateDeductions);
             dailyValeInput.addEventListener('input', calculateDeductions);
             othersDeductionInput.addEventListener('input', calculateDeductions);
+            // No need to add event listeners for the hidden SSS/PhilHealth/Pag-IBIG inputs as they are pre-filled
 
             // Event listener for closing deductions input modal
             if (cancelDeductionsInputButton) {
@@ -1879,6 +1932,11 @@
                         employeeId: employeeId,
                         employeeName: employeeName,
                         grossPay: grossPay,
+                        // Include government contributions in the saved record
+                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
+                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
+                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
+                        
                         govtLoan: parseFloat(govtLoanInput.value || 0),
                         coopShare: parseFloat(coopShareInput.value || 0),
                         withholdingTax: parseFloat(withholdingTaxInput.value || 0),
