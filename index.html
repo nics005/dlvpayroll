@@ -467,6 +467,10 @@
                 <!-- Hidden input to store the employee's Firestore document ID -->
                 <input type="hidden" id="payroll-employee-doc-id">
                 <input type="hidden" id="payroll-employee-salary-rate">
+                <!-- NEW: Hidden inputs for government contributions to be used in calculation -->
+                <input type="hidden" id="payroll-hidden-sss-contribution" value="0">
+                <input type="hidden" id="payroll-hidden-ph-contribution" value="0">
+                <input type="hidden" id="payroll-hidden-pagibig-contribution" value="0">
             </div>
             <form id="payroll-input-form" class="space-y-4">
                 <div>
@@ -704,16 +708,6 @@
         const nightShiftWorkDaysInput = document.getElementById('night-shift-work-days');
         const nightShiftOvertimeHrsInput = document.getElementById('night-shift-overtime-hrs');
         
-        // Removed individual calculated spans as they will now be in the table
-        // const calculatedBasicPaySpan = document.getElementById('calculated-basic-pay');
-        // const calculatedOvertimePaySpan = document.getElementById('calculated-overtime-pay');
-        // const calculatedSundayHolidayPaySpan = document.getElementById('calculated-sunday-holiday-pay');
-        // const calculatedNightShiftDifferentialSpan = document.getElementById('calculated-night-shift-differential');
-        // const calculatedNightShiftOvertimePaySpan = document.getElementById('calculated-night-shift-overtime-pay');
-        // const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay'); // This will now be Gross Pay (After Gov. Contributions)
-        
-        const payrollInputForm = document.getElementById('payroll-input-form'); // Reference to the form
-
         // New elements for SSS, PhilHealth, Pag-IBIG contributions in payroll modal (now hidden inputs)
         const payrollHiddenSssContributionInput = document.getElementById('payroll-hidden-sss-contribution');
         const payrollHiddenPhContributionInput = document.getElementById('payroll-hidden-ph-contribution');
@@ -1802,9 +1796,10 @@
                         const ph = parseFloat(employeeData.phContribution || 0);
                         const pagibig = parseFloat(employeeData.pagibigContribution || 0);
 
-                        payrollHiddenSssContributionInput.value = sss;
-                        payrollHiddenPhContributionInput.value = ph;
-                        payrollHiddenPagibigContributionInput.value = pagibig;
+                        // Ensure these elements exist before setting their values
+                        if (payrollHiddenSssContributionInput) payrollHiddenSssContributionInput.value = sss;
+                        if (payrollHiddenPhContributionInput) payrollHiddenPhContributionInput.value = ph;
+                        if (payrollHiddenPagibigContributionInput) payrollHiddenPagibigContributionInput.value = pagibig;
 
                         // Reset input fields
                         workingDaysInput.value = 0;
