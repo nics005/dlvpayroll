@@ -136,14 +136,7 @@
                     Deductions
                 </button>
             </li>
-            <!-- Payroll Summary Navigation Button Re-added -->
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payroll-summary">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Payroll Summary
-                </button>
-            </li>
-            <!-- New Payslips Navigation Button -->
+            <!-- Removed Payroll Summary Navigation Button -->
             <li>
                 <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payslips">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -332,13 +325,7 @@
                 </div>
             </div>
 
-            <!-- Payroll Summary Content Re-added -->
-            <div id="payroll-summary-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Payroll Summary</h2>
-                <div id="payroll-summary-container" class="space-y-8">
-                    <!-- Payroll summary data will be dynamically loaded here -->
-                </div>
-            </div>
+            <!-- Removed Payroll Summary Content -->
 
             <!-- Payslips Content -->
             <div id="payslips-content" class="page-content hidden">
@@ -708,6 +695,8 @@
         </div>
     </div>
 
+    <!-- Removed Payroll Summary Detail Modal -->
+
     <!-- Payslip View Modal -->
     <div id="payslip-view-modal" class="modal-backdrop hidden">
         <div class="payslip-modal-content">
@@ -900,8 +889,12 @@
         const deductionsInputForm = document.getElementById('deductions-input-form');
         const deductionRecordsListBody = document.getElementById('deduction-records-list-body'); // New
 
-        // Payroll Summary elements (re-added)
-        const payrollSummaryContainer = document.getElementById('payroll-summary-container');
+        // Removed Payroll Summary elements
+        // const payrollSummaryContainer = document.getElementById('payroll-summary-container');
+        // const payrollSummaryDetailModal = document.getElementById('payroll-summary-detail-modal');
+        // const summaryDetailEmployeeName = document.getElementById('summary-detail-employee-name');
+        // const summaryDetailContent = document.getElementById('summary-detail-content');
+        // const closeSummaryDetailModalButton = document.getElementById('close-summary-detail-modal');
 
         // Payslip elements
         const payslipEmployeeListBody = document.getElementById('payslip-employee-list-body');
@@ -1365,162 +1358,194 @@
             });
         };
 
-        // Fetch and Display Payroll Summary
-        const fetchAndDisplayPayrollSummary = async () => {
+        // Removed Fetch and Display Payroll Summary function
+
+        // Function to open the Payroll Summary Detail Modal (No longer needed, but keeping for context if re-added)
+        /*
+        const openPayrollSummaryDetailModal = async (employeeDocId) => {
             if (!userId || !db || !appId) { // Ensure Firebase is initialized
-                console.warn("Firebase not initialized or user not authenticated. Cannot fetch payroll summary.");
-                payrollSummaryContainer.innerHTML = '<p class="text-red-500">Firebase not initialized or user not authenticated.</p>';
+                console.warn("Firebase not initialized or user not authenticated. Cannot open summary detail.");
                 return;
             }
-            if (!isAdminMode) {
-                payrollSummaryContainer.innerHTML = '<p class="text-red-500">Admin mode is required to view Payroll Summary.</p>';
-                return;
-            }
-
-            payrollSummaryContainer.innerHTML = '<p class="text-gray-600">Loading payroll summary...</p>'; // Loading indicator
-
             try {
-                // Fetch all employees
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
-                const employeeRawSnapshot = await getDocs(employeesQuery);
-                let employees = [];
-                employeeRawSnapshot.forEach(doc => employees.push({ id: doc.id, ...doc.data() }));
+                summaryDetailContent.innerHTML = '<p>Loading details...</p>'; // Loading indicator
 
-                // Group employees by department/site
-                const groupedEmployees = {};
-                employees.forEach(employee => {
-                    const departmentSite = employee.departmentSite || 'Unassigned';
-                    if (!groupedEmployees[departmentSite]) {
-                        groupedEmployees[departmentSite] = [];
-                    }
-                    groupedEmployees[departmentSite].push(employee);
-                });
+                const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, employeeDocId);
+                const employeeSnap = await getDoc(employeeRef);
 
-                let reportHtml = `
-                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Payroll Summary Report</h3>
-                        <p class="text-gray-600 mb-4">Generated on: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
-                `;
+                if (employeeSnap.exists()) {
+                    const employeeData = employeeSnap.data();
+                    summaryDetailEmployeeName.textContent = `Summary for: ${employeeData.fullName || 'N/A'} (ID: ${employeeData.employeeId || employeeDocId})`;
 
-                const sortedDepartmentSites = Object.keys(groupedEmployees).sort();
+                    let contentHtml = `
+                        <div class="bg-gray-100 p-4 rounded-md mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Employee Information</h3>
+                            <p><strong>Position:</strong> ${employeeData.position || 'N/A'}</p>
+                            <p><strong>Department/Site:</strong> ${employeeData.departmentSite || 'N/A'}</p>
+                            <p><strong>Contact No.:</strong> ${employeeData.contactNo || 'N/A'}</p>
+                            <p><strong>Salary Rate:</strong> ₱ ${parseFloat(employeeData.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            <p><strong>SSS Contribution:</strong> ₱ ${parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            <p><strong>PhilHealth Contribution:</strong> ₱ ${parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                            <p><strong>Pag-IBIG Contribution:</strong> ₱ ${parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        </div>
+                    `;
 
-                if (employees.length === 0) {
-                    reportHtml += `<p class="py-3 px-6 text-center">No employee records found.</p>`;
-                } else {
-                    for (const siteName of sortedDepartmentSites) {
-                        const employeesInSite = groupedEmployees[siteName].sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+                    // Fetch all payroll records for this employee
+                    const payrollRecordsQuery = query(
+                        collection(db, `/artifacts/${appId}/public/data/payroll_records`),
+                        where("employeeDocId", "==", employeeDocId)
+                    );
+                    const payrollSnapshot = await getDocs(payrollRecordsQuery);
+                    let allPayrollRecords = [];
+                    payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
+                    // Sort in memory for display
+                    allPayrollRecords.sort((a, b) => {
+                        const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
+                        const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
+                        return dateB - dateA;
+                    });
 
-                        reportHtml += `
-                            <div class="mb-8">
-                                <h4 class="text-lg font-semibold text-gray-700 mb-3 p-2 bg-gray-50 rounded-md">Department/Site: ${siteName}</h4>
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                                        <thead>
-                                            <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                                <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
-                                                <th class="py-2 px-4 text-left">Name</th>
-                                                <th class="py-2 px-4 text-left">Position</th>
-                                                <th class="py-2 px-4 text-left">Daily Rate</th>
-                                                <th class="py-2 px-4 text-left">Latest Gross Pay</th>
-                                                <th class="py-2 px-4 text-left">SSS</th>
-                                                <th class="py-2 px-4 text-left">PhilHealth</th>
-                                                <th class="py-2 px-4 text-left">Pag-IBIG</th>
-                                                <th class="py-2 px-4 text-left">Other Deductions</th>
-                                                <th class="py-2 px-4 text-left">Total Deductions</th>
-                                                <th class="py-2 px-4 text-left rounded-tr-lg">Net Pay</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="text-gray-600 text-sm font-light">
-                        `;
-
-                        for (const employeeData of employeesInSite) {
-                            const employeeDocId = employeeData.id;
-
-                            // Fetch all payroll records for this employee
-                            const payrollQuery = query(
-                                collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                                where("employeeDocId", "==", employeeDocId)
-                            );
-                            const payrollSnapshot = await getDocs(payrollQuery);
-                            let allPayrollRecords = [];
-                            payrollSnapshot.forEach(doc => allPayrollRecords.push(doc.data()));
-                            // Sort in memory to find the latest
-                            allPayrollRecords.sort((a, b) => {
-                                const dateA = a.payrollDate ? a.payrollDate.seconds : 0;
-                                const dateB = b.payrollDate ? b.payrollDate.seconds : 0;
-                                return dateB - dateA;
-                            });
-                            const latestGrossPay = allPayrollRecords.length > 0 ? allPayrollRecords[0].grossPay || 0 : 0;
-
-                            // Fetch all deduction records for this employee
-                            const deductionQuery = query(
-                                collection(db, `/artifacts/${appId}/public/data/deduction_records`),
-                                where("employeeDocId", "==", employeeDocId)
-                            );
-                            const deductionSnapshot = await getDocs(deductionQuery);
-                            let allDeductionRecords = [];
-                            deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
-                            // Sort in memory to find the latest
-                            allDeductionRecords.sort((a, b) => {
-                                const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
-                                const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
-                                return dateB - dateA;
-                            });
-                            
-                            let latestTotalDeductions = 0;
-                            let latestNetPay = latestGrossPay; // Default net pay to gross pay if no deductions
-                            let otherDeductionsSum = 0; // Sum of non-govt deductions
-
-                            if (allDeductionRecords.length > 0) {
-                                const latestDeductionRecord = allDeductionRecords[0];
-                                latestTotalDeductions = latestDeductionRecord.totalDeductions || 0;
-                                latestNetPay = latestDeductionRecord.netPay || latestGrossPay;
-
-                                // Calculate other deductions (non-govt)
-                                otherDeductionsSum = (latestDeductionRecord.govtLoan || 0) +
-                                                     (latestDeductionRecord.coopShare || 0) +
-                                                     (latestDeductionRecord.withholdingTax || 0) +
-                                                     (latestDeductionRecord.unpaidLoan || 0) +
-                                                     (latestDeductionRecord.coop2025 || 0) +
-                                                     (latestDeductionRecord.caVoucher || 0) +
-                                                     (latestDeductionRecord.dailyVale || 0) +
-                                                     (latestDeductionRecord.othersDeduction || 0);
-                            }
-
-                            reportHtml += `
+                    contentHtml += `
+                        <div class="bg-gray-100 p-4 rounded-md mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Payroll History</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
+                                            <th class="py-2 px-4 text-left">Date</th>
+                                            <th class="py-2 px-4 text-left">Working Days</th>
+                                            <th class="py-2 px-4 text-left">Overtime Hrs</th>
+                                            <th class="py-2 px-4 text-left">Sun/Hol Duty</th>
+                                            <th class="py-2 px-4 text-left">Night Shift Days</th>
+                                            <th class="py-2 px-4 text-left">Night Shift OT</th>
+                                            <th class="py-2 px-4 text-left">Basic Pay</th>
+                                            <th class="py-2 px-4 text-left">Overtime Pay</th>
+                                            <th class="py-2 px-4 text-left">Sun/Hol Pay</th>
+                                            <th class="py-2 px-4 text-left">Night Diff</th>
+                                            <th class="py-2 px-4 text-left">Night OT Pay</th>
+                                            <th class="py-2 px-4 text-left">Gross Pay</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 text-sm font-light">
+                    `;
+                    if (allPayrollRecords.length === 0) {
+                        contentHtml += `<tr><td colspan="12" class="py-3 px-6 text-center">No payroll records found.</td></tr>`;
+                    } else {
+                        allPayrollRecords.forEach(record => {
+                            const payrollDate = record.payrollDate ? new Date(record.payrollDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                            contentHtml += `
                                 <tr>
-                                    <td class="py-3 px-4 text-left whitespace-nowrap">${employeeData.employeeId || 'N/A'}</td>
-                                    <td class="py-3 px-4 text-left">${employeeData.fullName || 'N/A'}</td>
-                                    <td class="py-3 px-4 text-left">${employeeData.position || 'N/A'}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(employeeData.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(latestGrossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(employeeData.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(employeeData.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(employeeData.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left">₱ ${parseFloat(otherDeductionsSum || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left font-semibold">₱ ${parseFloat(latestTotalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    <td class="py-3 px-4 text-left font-semibold">₱ ${parseFloat(latestNetPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">${payrollDate}</td>
+                                    <td class="py-3 px-6">${record.workingDays || 0}</td>
+                                    <td class="py-3 px-6">${record.overtimeHrs || 0}</td>
+                                    <td class="py-3 px-6">${record.sundayHolidayDuty || 0}</td>
+                                    <td class="py-3 px-6">${record.nightShiftWorkDays || 0}</td>
+                                    <td class="py-3 px-6">${record.nightShiftOvertimeHrs || 0}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.basicPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.overtimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.sundayHolidayPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.nightShiftDifferential || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.nightShiftOvertimePay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                 </tr>
                             `;
-                        }
-                        reportHtml += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
+                        });
                     }
+                    contentHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    // Fetch all deduction records for this employee
+                    const deductionRecordsQuery = query(
+                        collection(db, `/artifacts/${appId}/public/data/deduction_records`),
+                        where("employeeDocId", "==", employeeDocId)
+                    );
+                    const deductionSnapshot = await getDocs(deductionRecordsQuery);
+                    let allDeductionRecords = [];
+                    deductionSnapshot.forEach(doc => allDeductionRecords.push(doc.data()));
+                    // Sort in memory for display
+                    allDeductionRecords.sort((a, b) => {
+                        const dateA = a.deductionDate ? a.deductionDate.seconds : 0;
+                        const dateB = b.deductionDate ? b.deductionDate.seconds : 0;
+                        return dateB - dateA;
+                    });
+
+                    contentHtml += `
+                        <div class="bg-gray-100 p-4 rounded-md">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">Deduction History</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                    <thead>
+                                        <tr class="bg-gray-200 text-gray-700 uppercase text-xs leading-normal">
+                                            <th class="py-2 px-4 text-left">Date</th>
+                                            <th class="py-2 px-4 text-left">Gross Pay</th>
+                                            <th class="py-2 px-4 text-left">SSS</th>
+                                            <th class="py-2 px-4 text-left">PhilHealth</th>
+                                            <th class="py-2 px-4 text-left">Pag-IBIG</th>
+                                            <th class="py-2 px-4 text-left">Govt Loan</th>
+                                            <th class="py-2 px-4 text-left">Coop Share</th>
+                                            <th class="py-2 px-4 text-left">W/Tax</th>
+                                            <th class="py-2 px-4 text-left">Unpaid Loan</th>
+                                            <th class="py-2 px-4 text-left">Coop 2025</th>
+                                            <th class="py-2 px-4 text-left">C/A Voucher</th>
+                                            <th class="py-2 px-4 text-left">Daily Vale</th>
+                                            <th class="py-2 px-4 text-left">Others</th>
+                                            <th class="py-2 px-4 text-left">Total Deductions</th>
+                                            <th class="py-2 px-4 text-left">Net Pay</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 text-sm font-light">
+                    `;
+                    if (allDeductionRecords.length === 0) {
+                        contentHtml += `<tr><td colspan="15" class="py-3 px-6 text-center">No deduction records found.</td></tr>`;
+                    } else {
+                        allDeductionRecords.forEach(record => {
+                            const deductionDate = record.deductionDate ? new Date(record.deductionDate.seconds * 1000).toLocaleDateString() : 'N/A';
+                            contentHtml += `
+                                <tr>
+                                    <td class="py-3 px-6">${deductionDate}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.grossPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.sssContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.phContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.pagibigContribution || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.govtLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.coopShare || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.withholdingTax || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.unpaidLoan || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.coop2025 || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.caVoucher || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.dailyVale || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6">₱ ${parseFloat(record.othersDeduction || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.totalDeductions || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                    <td class="py-3 px-6 font-semibold">₱ ${parseFloat(record.netPay || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    contentHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+
+                    summaryDetailContent.innerHTML = contentHtml;
+                    payrollSummaryDetailModal.classList.remove('hidden');
+                } else {
+                    console.error("No such employee document for summary detail!");
+                    summaryDetailContent.innerHTML = '<p class="text-red-500">Employee details not found.</p>';
+                    payrollSummaryDetailModal.classList.remove('hidden');
                 }
-                
-                reportHtml += `</div>`; // Close bg-white p-6 div
-                payrollSummaryContainer.innerHTML = reportHtml;
-                // No need to attach action listeners for view/generate buttons as they are removed
             } catch (e) {
-                console.error("Error fetching payroll summary: ", e);
-                payrollSummaryContainer.innerHTML = '<p class="text-red-500">Error loading payroll summary.</p>';
+                console.error("Error fetching payroll summary detail: ", e);
+                summaryDetailContent.innerHTML = '<p class="text-red-500">Error loading summary details.</p>';
+                payrollSummaryDetailModal.classList.remove('hidden');
             }
         };
-
+        */
 
         // Fetch and display Employees for Manage Employee, Process Payroll, and Deductions tables
         const fetchEmployees = () => {
@@ -1757,6 +1782,16 @@
                 button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.recordId, 'deduction');
             });
 
+            // Removed Payroll Summary table listeners
+            /*
+            document.querySelectorAll('#payroll-summary-container .view-summary-btn').forEach(button => {
+                button.onclick = (e) => openPayrollSummaryDetailModal(e.currentTarget.dataset.employeeId);
+            });
+            document.querySelectorAll('#payroll-summary-container .generate-report-btn').forEach(button => {
+                button.onclick = (e) => alert("Generate Report functionality coming soon!"); // Placeholder
+            });
+            */
+
             // For Payslip employee list
             document.querySelectorAll('#payslip-employee-list-body .view-payslip-btn').forEach(button => {
                 button.onclick = (e) => openPayslipViewModal(e.currentTarget.dataset.id);
@@ -1888,11 +1923,10 @@
                 fetchSites();
             } else if (targetId === 'dashboard') {
                 updateDashboardCounts();
-            } else if (targetId === 'payroll-summary') {
-                fetchAndDisplayPayrollSummary(); // Fetch and display summary data
             } else if (targetId === 'payslips') { // New payslips content load
                 fetchEmployees(); // To populate the employee list for payslips
             }
+            // Removed call to fetchAndDisplayPayrollSummary for 'payroll-summary' target
         };
 
 
@@ -2478,6 +2512,13 @@
                 deductionsInputModal.classList.add('hidden');
                 deductionsInputForm.reset();
             });
+
+            // Removed closeSummaryDetailModalButton event listener
+            /*
+            closeSummaryDetailModalButton.addEventListener('click', () => {
+                payrollSummaryDetailModal.classList.add('hidden');
+            });
+            */
 
             closePayslipViewModalButton.addEventListener('click', () => {
                 payslipViewModal.classList.add('hidden');
