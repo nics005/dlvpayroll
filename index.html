@@ -511,8 +511,24 @@
                         <p class="text-sm font-medium text-gray-700">Night Shift Overtime Pay:</p>
                         <p class="text-lg font-bold text-gray-900" id="calculated-night-shift-overtime-pay">₱ 0.00</p>
                     </div>
+                    <!-- New fields for government contributions -->
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">SSS Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="payroll-sss-contribution">₱ 0.00</p>
+                        <input type="hidden" id="payroll-hidden-sss-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">PhilHealth Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="payroll-ph-contribution">₱ 0.00</p>
+                        <input type="hidden" id="payroll-hidden-ph-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="payroll-pagibig-contribution">₱ 0.00</p>
+                        <input type="hidden" id="payroll-hidden-pagibig-contribution" value="0">
+                    </div>
                     <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900">Gross Pay: <span id="calculated-gross-pay">₱ 0.00</span></p>
+                        <p class="text-xl font-bold text-gray-900">Gross Pay (After Gov. Contributions): <span id="calculated-gross-pay">₱ 0.00</span></p>
                     </div>
                 </div>
 
@@ -531,7 +547,7 @@
     <!-- New Deductions Input Modal -->
     <div id="deductions-input-modal" class="modal-backdrop hidden">
         <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Deductions Input for Employee</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Other Deductions Input for Employee</h2>
             <div class="mb-4">
                 <p class="text-lg font-semibold text-gray-700">Name: <span id="deductions-employee-name" class="font-normal"></span></p>
                 <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="deductions-employee-id" class="font-normal"></span></p>
@@ -540,27 +556,8 @@
             </div>
             <form id="deductions-input-form" class="space-y-4">
                 <div class="bg-gray-100 p-4 rounded-md">
-                    <p class="text-md font-medium text-gray-700">Latest Gross Pay:</p>
+                    <p class="text-md font-medium text-gray-700">Latest Gross Pay (After Gov. Contributions):</p>
                     <p class="text-2xl font-bold text-gray-900" id="deductions-gross-pay">₱ 0.00</p>
-                </div>
-
-                <!-- Government Benefits (read-only display and hidden inputs for calculation) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">SSS Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-sss-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-sss-contribution" value="0">
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">PhilHealth Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-ph-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-ph-contribution" value="0">
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-pagibig-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-pagibig-contribution" value="0">
-                    </div>
                 </div>
 
                 <!-- Other Deductions (editable inputs) -->
@@ -602,9 +599,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                     <div class="col-span-full text-right pt-2">
-                        <p class="text-md font-bold text-gray-900">Total Government Contributions: <span id="calculated-govt-deductions">₱ 0.00</span></p>
-                        <p class="text-md font-bold text-gray-900 mt-1">Total Other Deductions: <span id="calculated-other-deductions">₱ 0.00</span></p>
-                        <p class="text-xl font-bold text-gray-900 mt-2">Total Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
+                        <p class="text-xl font-bold text-gray-900 mt-2">Total Other Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
                         <p class="text-xl font-bold text-gray-900 mt-2">Net Pay: <span id="calculated-net-pay">₱ 0.00</span></p>
                     </div>
                 </div>
@@ -737,24 +732,25 @@
         const calculatedSundayHolidayPaySpan = document.getElementById('calculated-sunday-holiday-pay');
         const calculatedNightShiftDifferentialSpan = document.getElementById('calculated-night-shift-differential');
         const calculatedNightShiftOvertimePaySpan = document.getElementById('calculated-night-shift-overtime-pay');
-        const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay');
+        const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay'); // This will now be Gross Pay (After Gov. Contributions)
         const payrollInputForm = document.getElementById('payroll-input-form'); // Reference to the form
 
-        // Deductions Input Modal elements
+        // New elements for SSS, PhilHealth, Pag-IBIG contributions in payroll modal
+        const payrollSssContributionSpan = document.getElementById('payroll-sss-contribution');
+        const payrollPhContributionSpan = document.getElementById('payroll-ph-contribution');
+        const payrollPagibigContributionSpan = document.getElementById('payroll-pagibig-contribution');
+        const payrollHiddenSssContributionInput = document.getElementById('payroll-hidden-sss-contribution');
+        const payrollHiddenPhContributionInput = document.getElementById('payroll-hidden-ph-contribution');
+        const payrollHiddenPagibigContributionInput = document.getElementById('payroll-hidden-pagibig-contribution');
+
+        // Deductions Input Modal elements (now for Other Deductions only)
         const deductionsInputModal = document.getElementById('deductions-input-modal');
         const cancelDeductionsInputButton = document.getElementById('cancel-deductions-input');
         const deductionsEmployeeNameSpan = document.getElementById('deductions-employee-name');
         const deductionsEmployeeIdSpan = document.getElementById('deductions-employee-id');
         const deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
         const deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
-        const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
-        // New elements for SSS, PhilHealth, Pag-IBIG contributions in deductions modal
-        const deductionsSssContributionSpan = document.getElementById('deductions-sss-contribution');
-        const deductionsPhContributionSpan = document.getElementById('deductions-ph-contribution');
-        const deductionsPagibigContributionSpan = document.getElementById('deductions-pagibig-contribution');
-        const hiddenSssContributionInput = document.getElementById('hidden-sss-contribution');
-        const hiddenPhContributionInput = document.getElementById('hidden-ph-contribution');
-        const hiddenPagibigContributionInput = document.getElementById('hidden-pagibig-contribution');
+        const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay'); // This will be Gross Pay (After Gov. Contributions)
 
         const govtLoanInput = document.getElementById('govt-loan');
         const coopShareInput = document.getElementById('coop-share');
@@ -764,12 +760,9 @@
         const caVoucherInput = document.getElementById('ca-voucher');
         const dailyValeInput = document.getElementById('daily-vale');
         const othersDeductionInput = document.getElementById('others-deduction');
-        const calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
+        const calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions'); // This will now be Total Other Deductions
         const calculatedNetPaySpan = document.getElementById('calculated-net-pay');
         const deductionsInputForm = document.getElementById('deductions-input-form');
-        // New spans for deduction subtotals
-        const calculatedGovtDeductionsSpan = document.getElementById('calculated-govt-deductions');
-        const calculatedOtherDeductionsSpan = document.getElementById('calculated-other-deductions');
 
 
         /**
@@ -1208,7 +1201,7 @@
                                 payrollCount: 0,
                             };
                         }
-                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
+                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0; // This grossPay now includes gov deductions
                         employeeSummary[employeeDocId].payrollCount++;
                     }
                 });
@@ -1220,7 +1213,8 @@
 
                     // Only include if employeeSummary already contains this employee (meaning it passed the department filter)
                     if (employeeSummary[employeeDocId]) {
-                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
+                        // totalDeductions in deduction_records now only includes "other" deductions
+                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0; 
                     }
                 });
 
@@ -1712,7 +1706,7 @@
 
             /**
              * Calculates and updates the payroll components (Basic Pay, Overtime Pay, etc.)
-             * and the Gross Pay based on user inputs in the payroll input modal.
+             * and the Gross Pay (After Gov. Contributions) based on user inputs in the payroll input modal.
              */
             const calculatePayroll = () => {
                 const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
@@ -1721,6 +1715,11 @@
                 const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
                 const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0); // Represents full 8-hour night shifts
                 const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
+
+                // Get government contributions (already loaded into hidden inputs)
+                const sssContribution = parseFloat(payrollHiddenSssContributionInput.value || 0);
+                const phContribution = parseFloat(payrollHiddenPhContributionInput.value || 0);
+                const pagibigContribution = parseFloat(payrollHiddenPagibigContributionInput.value || 0);
 
                 // Constants for calculations
                 const dailyRate = salaryRate; // Daily rate is directly from the employee's salaryRate
@@ -1751,10 +1750,14 @@
                 const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
                 console.log(`Night Shift Overtime Pay: ${nightShiftOvertimeHrs} (NS OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.375 (NS OT Premium) = ${nightShiftOvertimePay.toFixed(2)}`);
 
+                // Calculate Gross Earnings (before government deductions)
+                const grossEarningsBeforeGovt = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
 
-                const grossPay = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
-                console.log(`Gross Pay: Basic (${basicPay.toFixed(2)}) + OT (${overtimePay.toFixed(2)}) + Sun/Hol (${sundayHolidayPay.toFixed(2)}) + NSD (${nightShiftDifferential.toFixed(2)}) + NSOT (${nightShiftOvertimePay.toFixed(2)}) = ${grossPay.toFixed(2)}`);
+                // Calculate Total Government Contributions
+                const totalGovtContributions = sssContribution + phContribution + pagibigContribution;
 
+                // Calculate Gross Pay (After Gov. Contributions)
+                const grossPayAfterGovt = grossEarningsBeforeGovt - totalGovtContributions;
 
                 // Update display
                 calculatedBasicPaySpan.textContent = `₱ ${basicPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -1762,7 +1765,14 @@
                 calculatedSundayHolidayPaySpan.textContent = `₱ ${sundayHolidayPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 calculatedNightShiftDifferentialSpan.textContent = `₱ ${nightShiftDifferential.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 calculatedNightShiftOvertimePaySpan.textContent = `₱ ${nightShiftOvertimePay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedGrossPaySpan.textContent = `₱ ${grossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                
+                // Display government contributions
+                payrollSssContributionSpan.textContent = `₱ ${sssContribution.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                payrollPhContributionSpan.textContent = `₱ ${phContribution.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                payrollPagibigContributionSpan.textContent = `₱ ${pagibigContribution.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                // Display the new gross pay
+                calculatedGrossPaySpan.textContent = `₱ ${grossPayAfterGovt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
             /**
@@ -1785,13 +1795,22 @@
                         payrollEmployeeDocIdInput.value = docId; // Store the employee's Firestore doc ID
                         payrollEmployeeSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0);
 
-                        // Reset input fields and calculations
+                        // Populate government contributions into hidden inputs and display spans
+                        const sss = parseFloat(employeeData.sssContribution || 0);
+                        const ph = parseFloat(employeeData.phContribution || 0);
+                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
+
+                        payrollHiddenSssContributionInput.value = sss;
+                        payrollHiddenPhContributionInput.value = ph;
+                        payrollHiddenPagibigContributionInput.value = pagibig;
+
+                        // Reset input fields and trigger calculation
                         workingDaysInput.value = 0;
                         overtimeHrsInput.value = 0;
                         sundayHolidayDutyInput.value = 0;
                         nightShiftWorkDaysInput.value = 0;
                         nightShiftOvertimeHrsInput.value = 0;
-                        calculatePayroll(); // Initial calculation with zero inputs
+                        calculatePayroll(); // Initial calculation with zero inputs, but including pre-filled gov contributions
 
                         payrollInputModal.classList.remove('hidden');
                     } else {
@@ -1849,7 +1868,13 @@
                         sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        
+                        // Save the government contributions with the payroll record
+                        sssContribution: parseFloat(payrollHiddenSssContributionInput.value || 0),
+                        phContribution: parseFloat(payrollHiddenPhContributionInput.value || 0),
+                        pagibigContribution: parseFloat(payrollHiddenPagibigContributionInput.value || 0),
+
+                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')), // This is now gross pay AFTER gov deductions
                         payrollDate: new Date(),
                         processedByUserId: userId
                     };
@@ -1868,16 +1893,13 @@
             }
 
             /**
-             * Calculates and updates the total deductions and net pay based on user inputs
+             * Calculates and updates the total other deductions and net pay based on user inputs
              * in the deductions input modal.
              */
             const calculateDeductions = () => {
+                // Gross pay here is already the amount AFTER government contributions
                 const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
-                // Get government contributions from hidden inputs
-                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
-                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
-                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
-
+                
                 const govtLoan = parseFloat(govtLoanInput.value || 0);
                 const coopShare = parseFloat(coopShareInput.value || 0);
                 const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
@@ -1887,26 +1909,19 @@
                 const dailyVale = parseFloat(dailyValeInput.value || 0);
                 const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
-                // Calculate total government contributions
-                const totalGovtDeductions = sssContribution + phContribution + pagibigContribution;
-
-                // Calculate total other deductions
+                // Total Deductions in this modal now only represent "other" deductions
                 const totalOtherDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
 
-                // Total Deductions is the sum of government and other deductions
-                const totalDeductions = totalGovtDeductions + totalOtherDeductions;
-                const netPay = grossPay - totalDeductions;
+                const netPay = grossPay - totalOtherDeductions;
 
                 // Update display
-                calculatedGovtDeductionsSpan.textContent = `₱ ${totalGovtDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedOtherDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedTotalDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
                 calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
             /**
              * Opens the Deductions Input Modal for a specific employee and populates employee details
-             * and their latest gross pay.
+             * and their latest gross pay (after government contributions).
              * @param {string} employeeDocId - The Firestore document ID of the employee.
              */
             window.openDeductionsModal = async (employeeDocId) => {
@@ -1924,21 +1939,7 @@
                         deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
                         deductionsEmployeeDocIdInput.value = employeeDocId;
 
-                        // Populate SSS, PhilHealth, Pag-IBIG contributions
-                        const sss = parseFloat(employeeData.sssContribution || 0);
-                        const ph = parseFloat(employeeData.phContribution || 0);
-                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
-
-                        deductionsSssContributionSpan.textContent = `₱ ${sss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        deductionsPhContributionSpan.textContent = `₱ ${ph.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        deductionsPagibigContributionSpan.textContent = `₱ ${pagibig.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        
-                        hiddenSssContributionInput.value = sss;
-                        hiddenPhContributionInput.value = ph;
-                        hiddenPagibigContributionInput.value = pagibig;
-
-
-                        // Fetch the latest gross pay from payroll_records
+                        // Fetch the latest gross pay (after government contributions) from payroll_records
                         const payrollRecordsQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/payroll_records`),
                             where("employeeDocId", "==", employeeDocId),
@@ -1946,7 +1947,7 @@
                             limit(1)
                         );
                         const payrollSnapshot = await getDocs(payrollRecordsQuery);
-                        let latestGrossPay = 0;
+                        let latestGrossPay = 0; // This will be gross pay AFTER gov contributions
                         let latestPayrollDocId = null;
 
                         if (!payrollSnapshot.empty) {
@@ -1990,7 +1991,6 @@
             caVoucherInput.addEventListener('input', calculateDeductions);
             dailyValeInput.addEventListener('input', calculateDeductions);
             othersDeductionInput.addEventListener('input', calculateDeductions);
-            // No need to add event listeners for the hidden SSS/PhilHealth/Pag-IBIG inputs as they are pre-filled
 
             // Event listener for closing deductions input modal
             if (cancelDeductionsInputButton) {
@@ -2015,6 +2015,7 @@
                     const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
                     const employeeName = deductionsEmployeeNameSpan.textContent;
                     const employeeId = deductionsEmployeeIdSpan.textContent;
+                    // grossPay here is already the amount AFTER government contributions
                     const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
 
                     const deductionRecord = {
@@ -2022,11 +2023,11 @@
                         payrollDocId: payrollDocId, // Link to the specific payroll record
                         employeeId: employeeId,
                         employeeName: employeeName,
-                        grossPay: grossPay,
-                        // Include government contributions in the saved record
-                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
-                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
-                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
+                        grossPay: grossPay, // This is gross pay AFTER government contributions
+                        
+                        // Government contributions are no longer part of this deduction record,
+                        // as they are now deducted from gross pay directly.
+                        // For historical tracking, they are stored with the payroll record.
                         
                         govtLoan: parseFloat(govtLoanInput.value || 0),
                         coopShare: parseFloat(coopShareInput.value || 0),
@@ -2036,7 +2037,7 @@
                         caVoucher: parseFloat(caVoucherInput.value || 0),
                         dailyVale: parseFloat(dailyValeInput.value || 0),
                         othersDeduction: parseFloat(othersDeductionInput.value || 0),
-                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')), // This is now only "other" deductions
                         netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         deductionDate: new Date(),
                         processedByUserId: userId
