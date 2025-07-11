@@ -467,10 +467,6 @@
                 <!-- Hidden input to store the employee's Firestore document ID -->
                 <input type="hidden" id="payroll-employee-doc-id">
                 <input type="hidden" id="payroll-employee-salary-rate">
-                <!-- NEW: Hidden inputs for government contributions to be used in calculation -->
-                <input type="hidden" id="payroll-hidden-sss-contribution" value="0">
-                <input type="hidden" id="payroll-hidden-ph-contribution" value="0">
-                <input type="hidden" id="payroll-hidden-pagibig-contribution" value="0">
             </div>
             <form id="payroll-input-form" class="space-y-4">
                 <div>
@@ -494,21 +490,29 @@
                     <input type="number" id="night-shift-overtime-hrs" name="nightShiftOvertimeHrs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
                 </div>
 
-                <!-- Payroll Summary Table -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Payroll Summary</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                    <th class="py-2 px-4 text-left rounded-tl-lg">Item</th>
-                                    <th class="py-2 px-4 text-right rounded-tr-lg">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody id="payroll-summary-table-body" class="text-gray-700 text-sm font-light">
-                                <!-- Dynamic rows will be inserted here by JavaScript -->
-                            </tbody>
-                        </table>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Basic Pay:</p>
+                        <p class="text-lg font-bold text-gray-900" id="calculated-basic-pay">₱ 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Overtime Pay:</p>
+                        <p class="text-lg font-bold text-gray-900" id="calculated-overtime-pay">₱ 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Sunday/Holiday Pay:</p>
+                        <p class="text-lg font-bold text-gray-900" id="calculated-sunday-holiday-pay">₱ 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Night Shift Differential:</p>
+                        <p class="text-lg font-bold text-gray-900" id="calculated-night-shift-differential">₱ 0.00</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Night Shift Overtime Pay:</p>
+                        <p class="text-lg font-bold text-gray-900" id="calculated-night-shift-overtime-pay">₱ 0.00</p>
+                    </div>
+                    <div class="col-span-full text-right pt-2">
+                        <p class="text-xl font-bold text-gray-900">Gross Pay: <span id="calculated-gross-pay">₱ 0.00</span></p>
                     </div>
                 </div>
 
@@ -527,7 +531,7 @@
     <!-- New Deductions Input Modal -->
     <div id="deductions-input-modal" class="modal-backdrop hidden">
         <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Other Deductions Input for Employee</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Deductions Input for Employee</h2>
             <div class="mb-4">
                 <p class="text-lg font-semibold text-gray-700">Name: <span id="deductions-employee-name" class="font-normal"></span></p>
                 <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="deductions-employee-id" class="font-normal"></span></p>
@@ -536,8 +540,27 @@
             </div>
             <form id="deductions-input-form" class="space-y-4">
                 <div class="bg-gray-100 p-4 rounded-md">
-                    <p class="text-md font-medium text-gray-700">Latest Gross Pay (After Gov. Contributions):</p>
+                    <p class="text-md font-medium text-gray-700">Latest Gross Pay:</p>
                     <p class="text-2xl font-bold text-gray-900" id="deductions-gross-pay">₱ 0.00</p>
+                </div>
+
+                <!-- Government Benefits (read-only display and hidden inputs for calculation) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">SSS Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-sss-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-sss-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">PhilHealth Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-ph-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-ph-contribution" value="0">
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution:</p>
+                        <p class="text-lg font-bold text-gray-900" id="deductions-pagibig-contribution">₱ 0.00</p>
+                        <input type="hidden" id="hidden-pagibig-contribution" value="0">
+                    </div>
                 </div>
 
                 <!-- Other Deductions (editable inputs) -->
@@ -579,7 +602,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                     <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900 mt-2">Total Other Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
+                        <p class="text-xl font-bold text-gray-900">Total Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
                         <p class="text-xl font-bold text-gray-900 mt-2">Net Pay: <span id="calculated-net-pay">₱ 0.00</span></p>
                     </div>
                 </div>
@@ -621,8 +644,7 @@
         let userId = null;
         // __app_id and __initial_auth_token are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        // FIX: Changed `initialAuthToken` to `__initial_auth_token` on the right side to avoid ReferenceError
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Admin Mode variables
         let isAdminMode = false;
@@ -631,114 +653,118 @@
         // and check custom claims or roles for authorization.
         const ADMIN_PASSWORD = "dlvadmin"; 
 
-        // --- Global element references (declared as let, assigned in DOMContentLoaded) ---
-        let totalEmployeesCard;
-        let payrollProcessedCard;
-        let activeSitesCard;
-        let recentActivitiesList;
-        let employeeListBody; // For Manage Employee tab
-        let processPayrollTablesContainer; // Container for grouped tables
-        let deductionsTablesContainer; // New container for deductions
-        let departmentSiteDropdown;
-        let editDepartmentSiteDropdown; // For Edit Employee Modal
-        let siteListBody;
-        let displayUserIdSpan;
-        let payrollSummaryListBody; // New: For Payroll Summary table body
-        let payrollSummaryDepartmentFilter; // New: Payroll Summary filter dropdown
+        // --- Global element references ---
+        const totalEmployeesCard = document.getElementById('total-employees');
+        const payrollProcessedCard = document.getElementById('payroll-processed');
+        const activeSitesCard = document.getElementById('active-sites');
+        const recentActivitiesList = document.getElementById('recent-activities-list');
+        const employeeListBody = document.getElementById('employee-list-body'); // For Manage Employee tab
+        const processPayrollTablesContainer = document.getElementById('process-payroll-tables-container'); // Container for grouped tables
+        const deductionsTablesContainer = document.getElementById('deductions-tables-container'); // New container for deductions
+        const departmentSiteDropdown = document.getElementById('department-site-dropdown');
+        const editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown'); // For Edit Employee Modal
+        const siteListBody = document.getElementById('site-list-body');
+        const displayUserIdSpan = document.getElementById('display-user-id');
+        const payrollSummaryListBody = document.getElementById('payroll-summary-list-body'); // New: For Payroll Summary table body
+        const payrollSummaryDepartmentFilter = document.getElementById('payroll-summary-department-filter'); // New: Payroll Summary filter dropdown
 
         // Admin mode related elements
-        let adminFeatureElements; 
-        let activateAdminModeButton;
-        let deactivateAdminModeButton; 
-        let adminModal;
-        let adminPasswordInput;
-        let activateAdminModalButton;
-        let cancelAdminModalButton;
-        let adminErrorMessage;
+        const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); 
+        const activateAdminModeButton = document.getElementById('activate-admin-mode-button');
+        const deactivateAdminModeButton = document.getElementById('deactivate-admin-mode-button'); 
+        const adminModal = document.getElementById('admin-modal');
+        const adminPasswordInput = document.getElementById('admin-password-input');
+        const activateAdminModalButton = document.getElementById('activate-admin-modal-button');
+        const cancelAdminModalButton = document.getElementById('cancel-admin-modal-button');
+        const adminErrorMessage = document.getElementById('admin-error-message');
 
         // Global references for navigation and page content
-        let navButtons;
-        let pageContents;
-        let currentPageTitle;
+        const navButtons = document.querySelectorAll('.nav-button');
+        const pageContents = document.querySelectorAll('.page-content');
+        const currentPageTitle = document.getElementById('current-page-title');
 
         // Employee Modals
-        let addEmployeeButton;
-        let addEmployeeModal;
-        let cancelAddEmployee;
-        let addEmployeeForm;
-        let employeeIdInput;
+        const addEmployeeButton = document.getElementById('add-employee-button');
+        const addEmployeeModal = document.getElementById('add-employee-modal');
+        const cancelAddEmployee = document.getElementById('cancel-add-employee');
+        const addEmployeeForm = document.getElementById('add-employee-form');
+        const employeeIdInput = document.getElementById('employee-id');
 
-        let editEmployeeModal;
-        let cancelEditEmployee;
-        let editEmployeeForm;
-        let editEmployeeDocIdInput;
-        let editEmployeeIdInput; 
-        let editFullNameInput;
-        let editPositionInput;
-        let editAddressInput;
-        let editContactNoInput;
-        let editSalaryRateInput;
-        let editSssContributionInput;
-        let editPhilhealthContributionInput;
-        let editPagibigContributionInput;
+        const editEmployeeModal = document.getElementById('edit-employee-modal');
+        const cancelEditEmployee = document.getElementById('cancel-edit-employee');
+        const editEmployeeForm = document.getElementById('edit-employee-form');
+        const editEmployeeDocIdInput = document.getElementById('edit-employee-doc-id');
+        const editEmployeeIdInput = document.getElementById('edit-employee-id'); 
+        const editFullNameInput = document.getElementById('edit-full-name');
+        const editPositionInput = document.getElementById('edit-position');
+        const editAddressInput = document.getElementById('edit-address');
+        const editContactNoInput = document.getElementById('edit-contact-no');
+        const editSalaryRateInput = document.getElementById('edit-salary-rate');
+        const editSssContributionInput = document.getElementById('edit-sss-contribution');
+        const editPhilhealthContributionInput = document.getElementById('edit-ph-contribution');
+        const editPagibigContributionInput = document.getElementById('edit-pagibig-contribution');
 
 
         // Site Modals
-        let addSiteButton;
-        let addSiteModal;
-        let cancelAddSite;
-        let addSiteForm; 
-        let siteIdInput;
+        const addSiteButton = document.getElementById('add-site-button');
+        const addSiteModal = document.getElementById('add-site-modal');
+        const cancelAddSite = document.getElementById('cancel-add-site');
+        const addSiteForm = document.getElementById('add-site-form'); 
+        const siteIdInput = document.getElementById('site-id');
 
         // Delete Confirmation Modal
-        let deleteConfirmationModal;
-        let cancelDeleteButton;
-        let confirmDeleteButton;
+        const deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
         let employeeToDeleteDocId = null; // To store the ID of the employee to be deleted
 
         // Payroll Input Modal elements
-        let payrollInputModal;
-        let cancelPayrollInputButton;
-        let payrollEmployeeNameSpan;
-        let payrollEmployeeIdSpan;
-        let payrollEmployeeDocIdInput; // New hidden input for doc ID
-        let payrollEmployeeSalaryRateInput;
-        let workingDaysInput;
-        let overtimeHrsInput;
-        let sundayHolidayDutyInput;
-        let nightShiftWorkDaysInput;
-        let nightShiftOvertimeHrsInput;
-        
-        // New elements for SSS, PhilHealth, Pag-IBIG contributions in payroll modal (now hidden inputs)
-        let payrollHiddenSssContributionInput;
-        let payrollHiddenPhContributionInput;
-        let payrollHiddenPagibigContributionInput;
+        const payrollInputModal = document.getElementById('payroll-input-modal');
+        const cancelPayrollInputButton = document.getElementById('cancel-payroll-input');
+        const payrollEmployeeNameSpan = document.getElementById('payroll-employee-name');
+        const payrollEmployeeIdSpan = document.getElementById('payroll-employee-id');
+        const payrollEmployeeDocIdInput = document.getElementById('payroll-employee-doc-id'); // New hidden input for doc ID
+        const payrollEmployeeSalaryRateInput = document.getElementById('payroll-employee-salary-rate');
+        const workingDaysInput = document.getElementById('working-days');
+        const overtimeHrsInput = document.getElementById('overtime-hrs');
+        const sundayHolidayDutyInput = document.getElementById('sunday-holiday-duty');
+        const nightShiftWorkDaysInput = document.getElementById('night-shift-work-days');
+        const nightShiftOvertimeHrsInput = document.getElementById('night-shift-overtime-hrs');
+        const calculatedBasicPaySpan = document.getElementById('calculated-basic-pay');
+        const calculatedOvertimePaySpan = document.getElementById('calculated-overtime-pay');
+        const calculatedSundayHolidayPaySpan = document.getElementById('calculated-sunday-holiday-pay');
+        const calculatedNightShiftDifferentialSpan = document.getElementById('calculated-night-shift-differential');
+        const calculatedNightShiftOvertimePaySpan = document.getElementById('calculated-night-shift-overtime-pay');
+        const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay');
+        const payrollInputForm = document.getElementById('payroll-input-form'); // Reference to the form
 
-        // New: Payroll Summary Table Body within the modal
-        let payrollSummaryTableBody;
-        let payrollInputForm;
+        // Deductions Input Modal elements
+        const deductionsInputModal = document.getElementById('deductions-input-modal');
+        const cancelDeductionsInputButton = document.getElementById('cancel-deductions-input');
+        const deductionsEmployeeNameSpan = document.getElementById('deductions-employee-name');
+        const deductionsEmployeeIdSpan = document.getElementById('deductions-employee-id');
+        const deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
+        const deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
+        const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
+        // New elements for SSS, PhilHealth, Pag-IBIG contributions in deductions modal
+        const deductionsSssContributionSpan = document.getElementById('deductions-sss-contribution');
+        const deductionsPhContributionSpan = document.getElementById('deductions-ph-contribution');
+        const deductionsPagibigContributionSpan = document.getElementById('deductions-pagibig-contribution');
+        const hiddenSssContributionInput = document.getElementById('hidden-sss-contribution');
+        const hiddenPhContributionInput = document.getElementById('hidden-ph-contribution');
+        const hiddenPagibigContributionInput = document.getElementById('hidden-pagibig-contribution');
 
-
-        // Deductions Input Modal elements (now for Other Deductions only)
-        let deductionsInputModal;
-        let cancelDeductionsInputButton;
-        let deductionsEmployeeNameSpan;
-        let deductionsEmployeeIdSpan;
-        let deductionsEmployeeDocIdInput;
-        let deductionsEmployeePayrollDocIdInput;
-        let deductionsGrossPaySpan; // This will be Gross Pay (After Gov. Contributions)
-
-        let govtLoanInput;
-        let coopShareInput;
-        let withholdingTaxInput;
-        let unpaidLoanInput;
-        let coop2025Input;
-        let caVoucherInput;
-        let dailyValeInput;
-        let othersDeductionInput;
-        let calculatedTotalDeductionsSpan; // This will now be Total Other Deductions
-        let calculatedNetPaySpan;
-        let deductionsInputForm;
+        const govtLoanInput = document.getElementById('govt-loan');
+        const coopShareInput = document.getElementById('coop-share');
+        const withholdingTaxInput = document.getElementById('withholding-tax');
+        const unpaidLoanInput = document.getElementById('unpaid-loan');
+        const coop2025Input = document.getElementById('coop-2025');
+        const caVoucherInput = document.getElementById('ca-voucher');
+        const dailyValeInput = document.getElementById('daily-vale');
+        const othersDeductionInput = document.getElementById('others-deduction');
+        const calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
+        const calculatedNetPaySpan = document.getElementById('calculated-net-pay');
+        const deductionsInputForm = document.getElementById('deductions-input-form');
 
 
         /**
@@ -826,9 +852,9 @@
             }
             const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
             onSnapshot(q, (querySnapshot) => {
-                if (employeeListBody) employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
-                if (processPayrollTablesContainer) processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
-                if (deductionsTablesContainer) deductionsTablesContainer.innerHTML = ''; // Clear current list for Deductions
+                employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
+                processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
+                deductionsTablesContainer.innerHTML = ''; // Clear current list for Deductions
 
                 let totalEmployees = 0;
                 let totalPayroll = 0;
@@ -848,141 +874,131 @@
                     groupedEmployees[departmentSite].push({ ...employee, docId: doc.id });
 
                     // Row for Manage Employee table
-                    if (employeeListBody) {
-                        const manageRow = employeeListBody.insertRow();
-                        manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        manageRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
-                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
-                            <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    }
+                    const manageRow = employeeListBody.insertRow();
+                    manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    manageRow.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
+                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
+                        <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
+                        <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center space-x-2">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
                 });
-                if (totalEmployeesCard) totalEmployeesCard.textContent = totalEmployees;
-                if (payrollProcessedCard) payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                totalEmployeesCard.textContent = totalEmployees;
+                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
                 // Dynamically create tables for Process Payroll based on grouped employees
                 for (const siteName in groupedEmployees) {
                     // Process Payroll Table
-                    if (processPayrollTablesContainer) {
-                        let payrollSiteSection = document.createElement('div');
-                        payrollSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
-                        payrollSiteSection.innerHTML += `
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                                    <thead>
-                                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                            <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
-                                            <th class="py-2 px-4 text-left">Name</th>
-                                            <th class="py-2 px-4 text-left">Position</th>
-                                            <th class="py-2 px-4 text-left">Status</th>
-                                            <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-600 text-sm font-light" id="process-payroll-table-${siteName.replace(/\s/g, '-')}-body">
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                        processPayrollTablesContainer.appendChild(payrollSiteSection);
-                    }
+                    let payrollSiteSection = document.createElement('div');
+                    payrollSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
+                    payrollSiteSection.innerHTML += `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                                        <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
+                                        <th class="py-2 px-4 text-left">Name</th>
+                                        <th class="py-2 px-4 text-left">Position</th>
+                                        <th class="py-2 px-4 text-left">Status</th>
+                                        <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light" id="process-payroll-table-${siteName.replace(/\s/g, '-')}-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    processPayrollTablesContainer.appendChild(payrollSiteSection);
 
                     let currentPayrollSiteTbody = document.getElementById(`process-payroll-table-${siteName.replace(/\s/g, '-')}-body`);
 
                     // Deductions Table
-                    if (deductionsTablesContainer) {
-                        let deductionsSiteSection = document.createElement('div');
-                        deductionsSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
-                        deductionsSiteSection.innerHTML += `
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                                    <thead>
-                                        <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                            <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
-                                            <th class="py-2 px-4 text-left">Name</th>
-                                            <th class="py-2 px-4 text-left">Position</th>
-                                            <th class="py-2 px-4 text-left">Status</th>
-                                            <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-600 text-sm font-light" id="deductions-table-${siteName.replace(/\s/g, '-')}-body">
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
-                        deductionsTablesContainer.appendChild(deductionsSiteSection);
-                    }
+                    let deductionsSiteSection = document.createElement('div');
+                    deductionsSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
+                    deductionsSiteSection.innerHTML += `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white rounded-lg border border-gray-200">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                                        <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
+                                        <th class="py-2 px-4 text-left">Name</th>
+                                        <th class="py-2 px-4 text-left">Position</th>
+                                        <th class="py-2 px-4 text-left">Status</th>
+                                        <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-600 text-sm font-light" id="deductions-table-${siteName.replace(/\s/g, '-')}-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    deductionsTablesContainer.appendChild(deductionsSiteSection);
 
                     let currentDeductionsSiteTbody = document.getElementById(`deductions-table-${siteName.replace(/\s/g, '-')}-body`);
 
                     groupedEmployees[siteName].forEach(employee => {
                         // Populate Process Payroll Table
-                        if (currentPayrollSiteTbody) {
-                            const payrollRow = currentPayrollSiteTbody.insertRow();
-                            payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                            payrollRow.innerHTML = `
-                                <td class="py-3 px-6 text-left whitespace-nowrap">
-                                    <button class="text-blue-600 hover:underline open-payroll-input-btn" data-id="${employee.docId}">
-                                        ${employee.employeeId || employee.docId}
+                        const payrollRow = currentPayrollSiteTbody.insertRow();
+                        payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        payrollRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">
+                                <button class="text-blue-600 hover:underline open-payroll-input-btn" data-id="${employee.docId}">
+                                    ${employee.employeeId || employee.docId}
+                                </button>
+                            </td>
+                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </button>
-                                </td>
-                                <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                                <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                                <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
-                                <td class="py-3 px-6 text-center">
-                                    <div class="flex item-center justify-center space-x-2">
-                                        <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${employee.docId}">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                        </button>
-                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${employee.docId}">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            `;
-                        }
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
 
                         // Populate Deductions Table
-                        if (currentDeductionsSiteTbody) {
-                            const deductionsRow = currentDeductionsSiteTbody.insertRow();
-                            deductionsRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                            deductionsRow.innerHTML = `
-                                <td class="py-3 px-6 text-left whitespace-nowrap">
-                                    <button class="text-blue-600 hover:underline open-deductions-input-btn" data-id="${employee.docId}">
-                                        ${employee.employeeId || employee.docId}
+                        const deductionsRow = currentDeductionsSiteTbody.insertRow();
+                        deductionsRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        deductionsRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">
+                                <button class="text-blue-600 hover:underline open-deductions-input-btn" data-id="${employee.docId}">
+                                    ${employee.employeeId || employee.docId}
+                                </button>
+                            </td>
+                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
+                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
+                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
+                            <td class="py-3 px-6 text-center">
+                                <div class="flex item-center justify-center space-x-2">
+                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-deductions" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </button>
-                                </td>
-                                <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                                <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                                <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
-                                <td class="py-3 px-6 text-center">
-                                    <div class="flex item-center justify-center space-x-2">
-                                        <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-deductions" data-id="${employee.docId}">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                        </button>
-                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-deductions" data-id="${employee.docId}">
-                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            `;
-                        }
+                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-deductions" data-id="${employee.docId}">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
                     });
                 }
 
@@ -1042,7 +1058,7 @@
             }
             const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
             onSnapshot(q, (querySnapshot) => {
-                if (siteListBody) siteListBody.innerHTML = ''; // Clear current list
+                siteListBody.innerHTML = ''; // Clear current list
                 let activeSitesCount = 0;
                 querySnapshot.forEach((doc) => {
                     const site = doc.data();
@@ -1050,31 +1066,29 @@
                     // if (site.siteStatus === 'Ongoing') {
                     //     activeSitesCount++;
                     // }
-                    if (siteListBody) {
-                        const newRow = siteListBody.insertRow();
-                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                    const newRow = siteListBody.insertRow();
+                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
 
-                        // Removed statusColorClass logic
-                        newRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
-                            <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
-                            <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    }
+                    // Removed statusColorClass logic
+                    newRow.innerHTML = `
+                        <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
+                        <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
+                        <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
+                        <td class="py-3 px-6 text-center">
+                            <div class="flex item-center justify-center space-x-2">
+                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
                 });
                 // Since status is removed, we can't count "active" sites directly from siteStatus.
                 // For now, setting to total sites. You might need to define "active" differently.
-                if (activeSitesCard) activeSitesCard.textContent = querySnapshot.size; 
+                activeSitesCard.textContent = querySnapshot.size; 
                 populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
             }, (error) => {
                 console.error("Error fetching sites: ", error);
@@ -1099,25 +1113,23 @@
                     const employee = doc.data();
                     totalPayroll += parseFloat(employee.salaryRate || 0);
                 });
-                if (totalEmployeesCard) totalEmployeesCard.textContent = totalEmployees;
-                if (payrollProcessedCard) payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                totalEmployeesCard.textContent = totalEmployees;
+                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
                 // Sites
                 const sitesQuery = query(collection(db, `/artifacts/${appId}/public/data/sites`));
                 const siteSnapshot = await getDocs(sitesQuery);
                 // Adjusted active sites count since siteStatus is removed
-                if (activeSitesCard) activeSitesCard.textContent = siteSnapshot.size; 
+                activeSitesCard.textContent = siteSnapshot.size; 
 
                 // Recent Activities (placeholder for now, you'd populate this with actual activity data)
-                if (recentActivitiesList) {
-                    recentActivitiesList.innerHTML = `
-                        <li class="py-3 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-900">No recent activities.</p>
-                            </div>
-                        </li>
-                    `;
-                }
+                recentActivitiesList.innerHTML = `
+                    <li class="py-3 flex justify-between items-center">
+                        <div>
+                            <p class="font-medium text-gray-900">No recent activities.</p>
+                        </div>
+                    </li>
+                `;
 
             } catch (error) {
                 console.error("Error updating dashboard counts:", error);
@@ -1132,17 +1144,17 @@
         const fetchPayrollSummary = async (departmentSiteFilter = '') => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch payroll summary.");
-                if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
                 return;
             }
 
             if (!isAdminMode) {
-                if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
                 return;
             }
 
 
-            if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
+            payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
 
             try {
                 // 1. Fetch employees, optionally filtered by department/site
@@ -1191,7 +1203,7 @@
                                 payrollCount: 0,
                             };
                         }
-                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0; // This grossPay now includes gov deductions
+                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
                         employeeSummary[employeeDocId].payrollCount++;
                     }
                 });
@@ -1203,8 +1215,7 @@
 
                     // Only include if employeeSummary already contains this employee (meaning it passed the department filter)
                     if (employeeSummary[employeeDocId]) {
-                        // totalDeductions in deduction_records now only includes "other" deductions
-                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0; 
+                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
                     }
                 });
 
@@ -1240,30 +1251,28 @@
 
 
                 // Clear and populate the table
-                if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = '';
+                payrollSummaryListBody.innerHTML = '';
                 if (summaryArray.length === 0) {
-                    if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available for this selection.</td></tr>`;
+                    payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available for this selection.</td></tr>`;
                 } else {
                     summaryArray.forEach(summary => {
-                        if (payrollSummaryListBody) {
-                            const newRow = payrollSummaryListBody.insertRow();
-                            newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                            newRow.innerHTML = `
-                                <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || 'N/A'}</td>
-                                <td class="py-3 px-6 text-left">${summary.employeeName || ''}</td>
-                                <td class="py-3 px-6 text-left">${summary.departmentSite || 'N/A'}</td> <!-- NEW CELL -->
-                                <td class="py-3 px-6 text-left">₱ ${summary.totalGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                <td class="py-3 px-6 text-left">₱ ${summary.totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                <td class="py-3 px-6 text-left">₱ ${summary.totalNetPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                <td class="py-3 px-6 text-center">${summary.payrollCount}</td>
-                            `;
-                        }
+                        const newRow = payrollSummaryListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || 'N/A'}</td>
+                            <td class="py-3 px-6 text-left">${summary.employeeName || ''}</td>
+                            <td class="py-3 px-6 text-left">${summary.departmentSite || 'N/A'}</td> <!-- NEW CELL -->
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalNetPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-center">${summary.payrollCount}</td>
+                        `;
                     });
                 }
 
             } catch (e) {
                 console.error("Error fetching payroll summary: ", e);
-                if (payrollSummaryListBody) payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
             }
         };
 
@@ -1273,13 +1282,10 @@
          * @param {string} targetId - The ID of the content section to display.
          */
         const showContent = (targetId) => {
-            if (pageContents) {
-                pageContents.forEach(content => {
-                    content.classList.add('hidden');
-                    content.classList.remove('active');
-                });
-            }
-
+            pageContents.forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('active');
+            });
 
             const targetContent = document.getElementById(targetId + '-content');
             if (targetContent) {
@@ -1287,20 +1293,19 @@
                 targetContent.classList.add('active');
             }
 
-            if (currentPageTitle && navButtons) {
-                const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
-                currentPageTitle.textContent = buttonText;
+            const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
+            currentPageTitle.textContent = buttonText;
 
-                navButtons.forEach(button => {
-                    if (button.dataset.target === targetId) {
-                        button.classList.add('bg-gray-700', 'text-white');
-                        button.classList.remove('text-gray-300', 'hover:bg-gray-700');
-                    } else {
-                        button.classList.remove('bg-gray-700', 'text-white');
-                        button.classList.add('text-gray-300', 'hover:bg-gray-700');
-                    }
-                });
+            navButtons.forEach(button => {
+                if (button.dataset.target === targetId) {
+                    button.classList.add('bg-gray-700', 'text-white');
+                    button.classList.remove('text-gray-300', 'hover:bg-gray-700');
+                } else {
+                    button.classList.remove('bg-gray-700', 'text-white');
+                    button.classList.add('text-gray-300', 'hover:bg-gray-700');
+                }
             }
+            );
 
             // Re-fetch data when switching to relevant tabs
             if (targetId === 'manage-employee' || targetId === 'process-payroll' || targetId === 'deductions') {
@@ -1352,7 +1357,7 @@
             // After all authentication attempts, ensure userId is set and then fetch data
             if (userId) {
                 console.log("Final User ID for data operations:", userId);
-                if (displayUserIdSpan) displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
+                displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
                 fetchEmployees();
                 fetchSites();
                 updateDashboardCounts();
@@ -1366,16 +1371,13 @@
          * Updates the visibility of admin-only UI elements based on `isAdminMode` status.
          */
         const updateAdminUI = () => {
-            if (adminFeatureElements) {
-                adminFeatureElements.forEach(el => {
-                    if (isAdminMode) {
-                        el.classList.remove('hidden');
-                    } else {
-                        el.classList.add('hidden');
-                    }
-                });
-            }
-
+            adminFeatureElements.forEach(el => {
+                if (isAdminMode) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
 
             if (activateAdminModeButton) {
                 if (isAdminMode) {
@@ -1393,101 +1395,69 @@
             }
         };
 
+        // Admin mode activation logic
+        if (activateAdminModeButton) {
+            activateAdminModeButton.addEventListener('click', () => {
+                if (adminModal) {
+                    adminModal.classList.remove('hidden');
+                    if (adminPasswordInput) adminPasswordInput.value = ''; // Clear previous input
+                    if (adminErrorMessage) adminErrorMessage.textContent = ''; // Clear previous error
+                }
+            });
+        }
+
+        if (cancelAdminModalButton) {
+            cancelAdminModalButton.addEventListener('click', () => {
+                if (adminModal) adminModal.classList.add('hidden');
+            });
+        }
+
+        if (activateAdminModalButton) {
+            activateAdminModalButton.addEventListener('click', () => {
+                if (adminPasswordInput && adminErrorMessage) {
+                    const enteredPassword = adminPasswordInput.value;
+                    if (enteredPassword === ADMIN_PASSWORD) {
+                        isAdminMode = true;
+                        sessionStorage.setItem('isAdminMode', 'true'); // Persist admin mode for the session
+                        if (adminModal) adminModal.classList.add('hidden');
+                        updateAdminUI();
+                        showContent('dashboard'); // Re-show dashboard to ensure correct active tab
+                        console.log("Admin mode activated!");
+                    } else {
+                        adminErrorMessage.textContent = "Incorrect password.";
+                    }
+                }
+            });
+        }
+
+        // Admin mode deactivation (logout) logic
+        if (deactivateAdminModeButton) {
+            deactivateAdminModeButton.addEventListener('click', () => {
+                isAdminMode = false;
+                sessionStorage.removeItem('isAdminMode'); // Remove admin mode from session storage
+                updateAdminUI(); // Update UI to hide admin features
+                showContent('dashboard'); // Redirect to dashboard
+                console.log("Admin mode deactivated!");
+            });
+        }
+
+
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Assign all global element references here after DOM is loaded ---
-            totalEmployeesCard = document.getElementById('total-employees');
-            payrollProcessedCard = document.getElementById('payroll-processed');
-            activeSitesCard = document.getElementById('active-sites');
-            recentActivitiesList = document.getElementById('recent-activities-list');
-            employeeListBody = document.getElementById('employee-list-body');
-            processPayrollTablesContainer = document.getElementById('process-payroll-tables-container');
-            deductionsTablesContainer = document.getElementById('deductions-tables-container');
-            departmentSiteDropdown = document.getElementById('department-site-dropdown');
-            editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown');
-            siteListBody = document.getElementById('site-list-body');
-            displayUserIdSpan = document.getElementById('display-user-id');
-            payrollSummaryListBody = document.getElementById('payroll-summary-list-body');
-            payrollSummaryDepartmentFilter = document.getElementById('payroll-summary-department-filter');
+            // Employee Management elements
+            const addEmployeeButton = document.getElementById('add-employee-button');
+            const addEmployeeModal = document.getElementById('add-employee-modal');
+            const cancelAddEmployee = document.getElementById('cancel-add-employee');
+            const addEmployeeForm = document.getElementById('add-employee-form');
+            const employeeIdInput = document.getElementById('employee-id');
+            
 
-            adminFeatureElements = document.querySelectorAll('.admin-feature-only');
-            activateAdminModeButton = document.getElementById('activate-admin-mode-button');
-            deactivateAdminModeButton = document.getElementById('deactivate-admin-mode-button');
-            adminModal = document.getElementById('admin-modal');
-            adminPasswordInput = document.getElementById('admin-password-input');
-            activateAdminModalButton = document.getElementById('activate-admin-modal-button');
-            cancelAdminModalButton = document.getElementById('cancel-admin-modal-button');
-            adminErrorMessage = document.getElementById('admin-error-message');
-
-            navButtons = document.querySelectorAll('.nav-button');
-            pageContents = document.querySelectorAll('.page-content');
-            currentPageTitle = document.getElementById('current-page-title');
-
-            addEmployeeButton = document.getElementById('add-employee-button');
-            addEmployeeModal = document.getElementById('add-employee-modal');
-            cancelAddEmployee = document.getElementById('cancel-add-employee');
-            addEmployeeForm = document.getElementById('add-employee-form');
-            employeeIdInput = document.getElementById('employee-id');
-
-            editEmployeeModal = document.getElementById('edit-employee-modal');
-            cancelEditEmployee = document.getElementById('cancel-edit-employee');
-            editEmployeeForm = document.getElementById('edit-employee-form');
-            editEmployeeDocIdInput = document.getElementById('edit-employee-doc-id');
-            editEmployeeIdInput = document.getElementById('edit-employee-id');
-            editFullNameInput = document.getElementById('edit-full-name');
-            editPositionInput = document.getElementById('edit-position');
-            editAddressInput = document.getElementById('edit-address');
-            editContactNoInput = document.getElementById('edit-contact-no');
-            editSalaryRateInput = document.getElementById('edit-salary-rate');
-            editSssContributionInput = document.getElementById('edit-sss-contribution');
-            editPhilhealthContributionInput = document.getElementById('edit-ph-contribution');
-            editPagibigContributionInput = document.getElementById('edit-pagibig-contribution');
-
-            addSiteButton = document.getElementById('add-site-button');
-            addSiteModal = document.getElementById('add-site-modal');
-            cancelAddSite = document.getElementById('cancel-add-site');
-            addSiteForm = document.getElementById('add-site-form');
-            siteIdInput = document.getElementById('site-id');
-
-            deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
-            cancelDeleteButton = document.getElementById('cancel-delete-button');
-            confirmDeleteButton = document.getElementById('confirm-delete-button');
-
-            payrollInputModal = document.getElementById('payroll-input-modal');
-            cancelPayrollInputButton = document.getElementById('cancel-payroll-input');
-            payrollEmployeeNameSpan = document.getElementById('payroll-employee-name');
-            payrollEmployeeIdSpan = document.getElementById('payroll-employee-id');
-            payrollEmployeeDocIdInput = document.getElementById('payroll-employee-doc-id');
-            payrollEmployeeSalaryRateInput = document.getElementById('payroll-employee-salary-rate');
-            workingDaysInput = document.getElementById('working-days');
-            overtimeHrsInput = document.getElementById('overtime-hrs');
-            sundayHolidayDutyInput = document.getElementById('sunday-holiday-duty');
-            nightShiftWorkDaysInput = document.getElementById('night-shift-work-days');
-            nightShiftOvertimeHrsInput = document.getElementById('night-shift-overtime-hrs');
-            payrollHiddenSssContributionInput = document.getElementById('payroll-hidden-sss-contribution');
-            payrollHiddenPhContributionInput = document.getElementById('payroll-hidden-ph-contribution');
-            payrollHiddenPagibigContributionInput = document.getElementById('payroll-hidden-pagibig-contribution');
-            payrollSummaryTableBody = document.getElementById('payroll-summary-table-body');
-            payrollInputForm = document.getElementById('payroll-input-form'); 
-
-            deductionsInputModal = document.getElementById('deductions-input-modal');
-            cancelDeductionsInputButton = document.getElementById('cancel-deductions-input');
-            deductionsEmployeeNameSpan = document.getElementById('deductions-employee-name');
-            deductionsEmployeeIdSpan = document.getElementById('deductions-employee-id');
-            deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
-            deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
-            deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
-            govtLoanInput = document.getElementById('govt-loan');
-            coopShareInput = document.getElementById('coop-share');
-            withholdingTaxInput = document.getElementById('withholding-tax');
-            unpaidLoanInput = document.getElementById('unpaid-loan');
-            coop2025Input = document.getElementById('coop-2025');
-            caVoucherInput = document.getElementById('ca-voucher');
-            dailyValeInput = document.getElementById('daily-vale');
-            othersDeductionInput = document.getElementById('others-deduction');
-            calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
-            calculatedNetPaySpan = document.getElementById('calculated-net-pay');
-            deductionsInputForm = document.getElementById('deductions-input-form');
-
+            // Site Management elements
+            const addSiteButton = document.getElementById('add-site-button');
+            const addSiteModal = document.getElementById('add-site-modal');
+            const cancelAddSite = document.getElementById('cancel-add-site');
+            const addSiteForm = document.getElementById('add-site-form'); 
+            const siteIdInput = document.getElementById('site-id');
+            
             // Check if admin mode was previously activated in this session
             isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
 
@@ -1519,62 +1489,58 @@
             // Event listener for "Add New Employee" button
             if (addEmployeeButton) { // Ensure button exists before adding listener
                 addEmployeeButton.addEventListener('click', () => {
-                    if (employeeIdInput) employeeIdInput.value = generateEmployeeId(); // Generate and set ID
+                    employeeIdInput.value = generateEmployeeId(); // Generate and set ID
                     populateDepartmentSiteDropdown(); // Populate dropdown before showing modal
-                    if (addEmployeeModal) addEmployeeModal.classList.remove('hidden');
+                    addEmployeeModal.classList.remove('hidden');
                 });
             }
 
             // Event listener for "Cancel" button in the add employee modal
-            if (cancelAddEmployee) {
-                cancelAddEmployee.addEventListener('click', () => {
-                    if (addEmployeeModal) addEmployeeModal.classList.add('hidden');
-                    if (addEmployeeForm) addEmployeeForm.reset(); // Clear the form
-                });
-            }
+            cancelAddEmployee.addEventListener('click', () => {
+                addEmployeeModal.classList.add('hidden');
+                addEmployeeForm.reset(); // Clear the form
+            });
 
             // Event listener for add employee form submission
-            if (addEmployeeForm) {
-                addEmployeeForm.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Prevent default form submission
+            addEmployeeForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default form submission
 
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save employee.");
-                        return;
-                    }
+                if (!userId) {
+                    console.error("User not authenticated. Cannot save employee.");
+                    return;
+                }
 
-                    const formData = new FormData(addEmployeeForm);
-                    const employeeData = {
-                        employeeId: formData.get('employeeId'),
-                        fullName: formData.get('fullName'),
-                        position: formData.get('position'),
-                        address: formData.get('address'),
-                        contactNo: formData.get('contactNo'),
-                        departmentSite: formData.get('departmentSite'),
-                        salaryRate: parseFloat(formData.get('salaryRate')),
-                        sssContribution: parseFloat(formData.get('sssContribution')),
-                        phContribution: parseFloat(formData.get('phContribution')),
-                        pagibigContribution: parseFloat(formData.get('pagibigContribution')),
-                        status: 'Active', // Default status
-                        createdAt: new Date()
-                    };
+                const formData = new FormData(addEmployeeForm);
+                const employeeData = {
+                    employeeId: formData.get('employeeId'),
+                    fullName: formData.get('fullName'),
+                    position: formData.get('position'),
+                    address: formData.get('address'),
+                    contactNo: formData.get('contactNo'),
+                    departmentSite: formData.get('departmentSite'),
+                    salaryRate: parseFloat(formData.get('salaryRate')),
+                    sssContribution: parseFloat(formData.get('sssContribution')),
+                    phContribution: parseFloat(formData.get('phContribution')),
+                    pagibigContribution: parseFloat(formData.get('pagibigContribution')),
+                    status: 'Active', // Default status
+                    createdAt: new Date()
+                };
 
-                    try {
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/employees`), employeeData);
-                        console.log("Employee added successfully!");
-                        if (addEmployeeModal) addEmployeeModal.classList.add('hidden'); // Hide modal after submission
-                        if (addEmployeeForm) addEmployeeForm.reset(); // Clear the form
-                    } catch (e) {
-                        console.error("Error adding employee: ", e);
-                    }
-                });
-            }
+                try {
+                    await addDoc(collection(db, `/artifacts/${appId}/public/data/employees`), employeeData);
+                    console.log("Employee added successfully!");
+                    addEmployeeModal.classList.add('hidden'); // Hide modal after submission
+                    addEmployeeForm.reset(); // Clear the form
+                } catch (e) {
+                    console.error("Error adding employee: ", e);
+                }
+            });
 
             // Event listener for "Cancel" button in the edit employee modal
             if (cancelEditEmployee) {
                 cancelEditEmployee.addEventListener('click', () => {
-                    if (editEmployeeModal) editEmployeeModal.classList.add('hidden');
-                    if (editEmployeeForm) editEmployeeForm.reset();
+                    editEmployeeModal.classList.add('hidden');
+                    editEmployeeForm.reset();
                 });
             }
 
@@ -1607,10 +1573,9 @@
                     try {
                         await updateDoc(employeeRef, updatedData);
                         console.log("Employee updated successfully!");
-                        if (editEmployeeModal) editEmployeeModal.classList.add('hidden');
-                        if (editEmployeeForm) editEmployeeForm.reset();
-                    }
-                    catch (e) {
+                        editEmployeeModal.classList.add('hidden');
+                        editEmployeeForm.reset();
+                    } catch (e) {
                         console.error("Error updating employee: ", e);
                     }
                 });
@@ -1631,16 +1596,16 @@
 
                     if (employeeSnap.exists()) {
                         const employeeData = employeeSnap.data();
-                        if (editEmployeeDocIdInput) editEmployeeDocIdInput.value = docId;
-                        if (editEmployeeIdInput) editEmployeeIdInput.value = employeeData.employeeId || docId;
-                        if (editFullNameInput) editFullNameInput.value = employeeData.fullName || '';
-                        if (editPositionInput) editPositionInput.value = employeeData.position || '';
-                        if (editAddressInput) editAddressInput.value = employeeData.address || '';
-                        if (editContactNoInput) editContactNoInput.value = employeeData.contactNo || '';
-                        if (editSalaryRateInput) editSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0).toFixed(2);
-                        if (editSssContributionInput) editSssContributionInput.value = parseFloat(employeeData.sssContribution || 0).toFixed(2);
-                        if (editPhilhealthContributionInput) editPhilhealthContributionInput.value = parseFloat(employeeData.phContribution || 0).toFixed(2);
-                        if (editPagibigContributionInput) editPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0).toFixed(2);
+                        editEmployeeDocIdInput.value = docId;
+                        editEmployeeIdInput.value = employeeData.employeeId || docId;
+                        editFullNameInput.value = employeeData.fullName || '';
+                        editPositionInput.value = employeeData.position || '';
+                        editAddressInput.value = employeeData.address || '';
+                        editContactNoInput.value = employeeData.contactNo || '';
+                        editSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0).toFixed(2);
+                        editSssContributionInput.value = parseFloat(employeeData.sssContribution || 0).toFixed(2);
+                        editPhilhealthContributionInput.value = parseFloat(employeeData.phContribution || 0).toFixed(2);
+                        editPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0).toFixed(2);
                         
                         // Populate and select the correct option in the department/site dropdown
                         await populateDepartmentSiteDropdown(); // Ensure dropdown is populated first
@@ -1648,7 +1613,7 @@
                             editDepartmentSiteDropdown.value = employeeData.departmentSite || '';
                         }
 
-                        if (editEmployeeModal) editEmployeeModal.classList.remove('hidden');
+                        editEmployeeModal.classList.remove('hidden');
                     } else {
                         console.error("No such employee document!");
                     }
@@ -1663,13 +1628,13 @@
              */
             window.openDeleteConfirmationModal = (docId) => {
                 employeeToDeleteDocId = docId; // Store the ID
-                if (deleteConfirmationModal) deleteConfirmationModal.classList.remove('hidden');
+                deleteConfirmationModal.classList.remove('hidden');
             };
 
             // Event listener for "Cancel" button in the delete confirmation modal
             if (cancelDeleteButton) {
-                    cancelDeleteButton.addEventListener('click', () => {
-                    if (deleteConfirmationModal) deleteConfirmationModal.classList.add('hidden');
+                cancelDeleteButton.addEventListener('click', () => {
+                    deleteConfirmationModal.classList.add('hidden');
                     employeeToDeleteDocId = null; // Clear the stored ID
                 });
             }
@@ -1685,7 +1650,7 @@
                         try {
                             await deleteDoc(doc(db, `/artifacts/${appId}/public/data/employees`, employeeToDeleteDocId));
                             console.log("Employee deleted successfully!");
-                            if (deleteConfirmationModal) deleteConfirmationModal.classList.add('hidden');
+                            deleteConfirmationModal.classList.add('hidden');
                             employeeToDeleteDocId = null; // Clear the stored ID
                         } catch (e) {
                             console.error("Error deleting employee: ", e);
@@ -1698,18 +1663,16 @@
             // Event listener for "Add New Site" button
             if (addSiteButton) { // Ensure button exists before adding listener
                 addSiteButton.addEventListener('click', () => {
-                    if (siteIdInput) siteIdInput.value = generateSiteId(); // Generate and set ID
-                    if (addSiteModal) addSiteModal.classList.remove('hidden');
+                    siteIdInput.value = generateSiteId(); // Generate and set ID
+                    addSiteModal.classList.remove('hidden');
                 });
             }
 
             // Event listener for "Cancel" button in the site modal
-            if (cancelAddSite) {
-                cancelAddSite.addEventListener('click', () => {
-                    if (addSiteModal) addSiteModal.classList.add('hidden');
-                    if (addSiteForm) addSiteForm.reset(); // Clear the form
-                });
-            }
+            cancelAddSite.addEventListener('click', () => {
+                addSiteModal.classList.add('hidden');
+                addSiteForm.reset(); // Clear the form
+            });
 
             // Event listener for site form submission
             if (addSiteForm) {
@@ -1734,8 +1697,8 @@
                         // Sites are public data, so they are stored in a public collection
                         await addDoc(collection(db, `/artifacts/${appId}/public/data/sites`), siteData);
                         console.log("Site added successfully!");
-                        if (addSiteModal) addSiteModal.classList.add('hidden'); // Hide modal after submission
-                        if (addSiteForm) addSiteForm.reset(); // Clear the form
+                        addSiteModal.classList.add('hidden'); // Hide modal after submission
+                        addSiteForm.reset(); // Clear the form
                     } catch (e) {
                         console.error("Error adding site: ", e);
                     }
@@ -1743,18 +1706,8 @@
             }
 
             /**
-             * Helper function to format currency.
-             * @param {number} amount - The number to format.
-             * @returns {string} The formatted currency string.
-             */
-            const formatCurrency = (amount) => {
-                return `₱ ${parseFloat(amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            };
-
-            /**
              * Calculates and updates the payroll components (Basic Pay, Overtime Pay, etc.)
-             * and the Gross Pay (After Gov. Contributions) based on user inputs in the payroll input modal.
-             * Also updates the payroll summary table within the modal.
+             * and the Gross Pay based on user inputs in the payroll input modal.
              */
             const calculatePayroll = () => {
                 const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
@@ -1763,11 +1716,6 @@
                 const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
                 const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0); // Represents full 8-hour night shifts
                 const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
-
-                // Get government contributions (already loaded into hidden inputs)
-                const sssContribution = parseFloat(payrollHiddenSssContributionInput.value || 0);
-                const phContribution = parseFloat(payrollHiddenPhContributionInput.value || 0);
-                const pagibigContribution = parseFloat(payrollHiddenPagibigContributionInput.value || 0);
 
                 // Constants for calculations
                 const dailyRate = salaryRate; // Daily rate is directly from the employee's salaryRate
@@ -1778,63 +1726,38 @@
 
                 // Basic Pay: Daily Rate multiplied by the number of working days
                 const basicPay = dailyRate * workingDays;
+                console.log(`Basic Pay: ${dailyRate.toFixed(2)} (Daily Rate) * ${workingDays} (Working Days) = ${basicPay.toFixed(2)}`);
 
                 // Overtime Pay: Overtime Hours * Hourly Rate * 125% (standard overtime premium)
                 const overtimePay = overtimeHrs * hourlyRate * 1.25;
+                console.log(`Overtime Pay: ${overtimeHrs} (OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.25 (OT Premium) = ${overtimePay.toFixed(2)}`);
 
                 // Sunday/Holiday Pay: Sunday/Holiday Duty Hours * Hourly Rate * 130% (standard premium for working on Sundays/Holidays)
                 const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30;
+                console.log(`Sunday/Holiday Pay: ${sundayHolidayDuty} (Sun/Hol Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.30 (Sun/Hol Premium) = ${sundayHolidayPay.toFixed(2)}`);
 
                 // Night Shift Differential: Night Shift Work Days * Daily Working Hours * Hourly Rate * 10% (night shift premium)
                 // Assumes each 'Night Shift Work Day' is a full 8-hour shift.
                 const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10;
+                console.log(`Night Shift Differential: ${nightShiftWorkDays} (Night Shift Days) * ${dailyWorkingHours} (Hrs/Day) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 0.10 (Night Diff Premium) = ${nightShiftDifferential.toFixed(2)}`);
 
                 // Night Shift Overtime Pay: Night Shift Overtime Hours * Hourly Rate * 137.5% (125% OT premium on top of 10% night diff)
                 // Calculation: (Hourly Rate * 1.10 for night shift) * 1.25 for overtime = Hourly Rate * 1.375
                 const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
+                console.log(`Night Shift Overtime Pay: ${nightShiftOvertimeHrs} (NS OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.375 (NS OT Premium) = ${nightShiftOvertimePay.toFixed(2)}`);
 
-                // Calculate Gross Earnings (before government deductions)
-                const grossEarningsBeforeGovt = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
 
-                // Calculate Total Government Contributions
-                const totalGovtContributions = sssContribution + phContribution + pagibigContribution;
+                const grossPay = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
+                console.log(`Gross Pay: Basic (${basicPay.toFixed(2)}) + OT (${overtimePay.toFixed(2)}) + Sun/Hol (${sundayHolidayPay.toFixed(2)}) + NSD (${nightShiftDifferential.toFixed(2)}) + NSOT (${nightShiftOvertimePay.toFixed(2)}) = ${grossPay.toFixed(2)}`);
 
-                // Calculate Gross Pay (After Gov. Contributions)
-                const grossPayAfterGovt = grossEarningsBeforeGovt - totalGovtContributions;
 
-                // --- Update Payroll Summary Table ---
-                if (payrollSummaryTableBody) payrollSummaryTableBody.innerHTML = ''; // Clear existing rows
-
-                const addRow = (label, value) => {
-                    if (payrollSummaryTableBody) {
-                        const row = payrollSummaryTableBody.insertRow();
-                        row.innerHTML = `
-                            <td class="py-2 px-4 text-left">${label}</td>
-                            <td class="py-2 px-4 text-right">${formatCurrency(value)}</td>
-                        `;
-                    }
-                };
-
-                // Input Data
-                addRow('Working Days', workingDays);
-                addRow('Overtime Hours', overtimeHrs);
-                addRow('Sunday/Holiday Duty (Hrs)', sundayHolidayDuty);
-                addRow('Night Shift Work Days', nightShiftWorkDays);
-                addRow('Night Shift Overtime Hrs', nightShiftOvertimeHrs);
-                
-                // Calculated Components
-                addRow('Basic Pay', basicPay);
-                addRow('Overtime Pay', overtimePay);
-                addRow('Sunday/Holiday Pay', sundayHolidayPay);
-                addRow('Night Shift Differential', nightShiftDifferential);
-                addRow('Night Shift Overtime Pay', nightShiftOvertimePay);
-                addRow('---', '---'); // Separator
-                addRow('Gross Earnings (Before Gov. Contributions)', grossEarningsBeforeGovt);
-                addRow('SSS Contribution', sssContribution);
-                addRow('PhilHealth Contribution', phContribution);
-                addRow('Pag-IBIG Contribution', pagibigContribution);
-                addRow('---', '---'); // Separator
-                addRow('Gross Pay (After Gov. Contributions)', grossPayAfterGovt);
+                // Update display
+                calculatedBasicPaySpan.textContent = `₱ ${basicPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedOvertimePaySpan.textContent = `₱ ${overtimePay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedSundayHolidayPaySpan.textContent = `₱ ${sundayHolidayPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedNightShiftDifferentialSpan.textContent = `₱ ${nightShiftDifferential.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedNightShiftOvertimePaySpan.textContent = `₱ ${nightShiftOvertimePay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedGrossPaySpan.textContent = `₱ ${grossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
             /**
@@ -1852,31 +1775,20 @@
 
                     if (employeeSnap.exists()) {
                         const employeeData = employeeSnap.data();
-                        if (payrollEmployeeNameSpan) payrollEmployeeNameSpan.textContent = employeeData.fullName || '';
-                        if (payrollEmployeeIdSpan) payrollEmployeeIdSpan.textContent = employeeData.employeeId || docId;
-                        if (payrollEmployeeDocIdInput) payrollEmployeeDocIdInput.value = docId; // Store the employee's Firestore doc ID
-                        if (payrollEmployeeSalaryRateInput) payrollEmployeeSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0);
+                        payrollEmployeeNameSpan.textContent = employeeData.fullName || '';
+                        payrollEmployeeIdSpan.textContent = employeeData.employeeId || docId;
+                        payrollEmployeeDocIdInput.value = docId; // Store the employee's Firestore doc ID
+                        payrollEmployeeSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0);
 
-                        // Populate government contributions into hidden inputs
-                        const sss = parseFloat(employeeData.sssContribution || 0);
-                        const ph = parseFloat(employeeData.phContribution || 0);
-                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
+                        // Reset input fields and calculations
+                        workingDaysInput.value = 0;
+                        overtimeHrsInput.value = 0;
+                        sundayHolidayDutyInput.value = 0;
+                        nightShiftWorkDaysInput.value = 0;
+                        nightShiftOvertimeHrsInput.value = 0;
+                        calculatePayroll(); // Initial calculation with zero inputs
 
-                        // Ensure these elements exist before setting their values
-                        if (payrollHiddenSssContributionInput) payrollHiddenSssContributionInput.value = sss;
-                        if (payrollHiddenPhContributionInput) payrollHiddenPhContributionInput.value = ph;
-                        if (payrollHiddenPagibigContributionInput) payrollHiddenPagibigContributionInput.value = pagibig;
-
-                        // Reset input fields
-                        if (workingDaysInput) workingDaysInput.value = 0;
-                        if (overtimeHrsInput) overtimeHrsInput.value = 0;
-                        if (sundayHolidayDutyInput) sundayHolidayDutyInput.value = 0;
-                        if (nightShiftWorkDaysInput) nightShiftWorkDaysInput.value = 0;
-                        if (nightShiftOvertimeHrsInput) nightShiftOvertimeHrsInput.value = 0;
-                        
-                        calculatePayroll(); // Initial calculation with zero inputs, but including pre-filled gov contributions
-
-                        if (payrollInputModal) payrollInputModal.classList.remove('hidden');
+                        payrollInputModal.classList.remove('hidden');
                     } else {
                         console.error("No such employee document for payroll input!");
                     }
@@ -1886,16 +1798,16 @@
             };
 
             // Event listeners for payroll input fields to trigger calculation
-            if (workingDaysInput) workingDaysInput.addEventListener('input', calculatePayroll);
-            if (overtimeHrsInput) overtimeHrsInput.addEventListener('input', calculatePayroll);
-            if (sundayHolidayDutyInput) sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
-            if (nightShiftWorkDaysInput) nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
-            if (nightShiftOvertimeHrsInput) nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
+            workingDaysInput.addEventListener('input', calculatePayroll);
+            overtimeHrsInput.addEventListener('input', calculatePayroll);
+            sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
+            nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
+            nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
 
             // Event listener for closing payroll input modal
             if (cancelPayrollInputButton) {
                 cancelPayrollInputButton.addEventListener('click', () => {
-                    if (payrollInputModal) payrollInputModal.classList.add('hidden');
+                    payrollInputModal.classList.add('hidden');
                 });
             }
 
@@ -1917,52 +1829,22 @@
                     const employeeId = payrollEmployeeIdSpan.textContent;
                     const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
 
-                    // Re-calculate values to ensure they are fresh for saving
-                    const workingDays = parseFloat(workingDaysInput.value || 0);
-                    const overtimeHrs = parseFloat(overtimeHrsInput.value || 0);
-                    const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
-                    const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0);
-                    const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
-                    const sssContribution = parseFloat(payrollHiddenSssContributionInput.value || 0);
-                    const phContribution = parseFloat(payrollHiddenPhContributionInput.value || 0);
-                    const pagibigContribution = parseFloat(payrollHiddenPagibigContributionInput.value || 0);
-
-                    const dailyRate = salaryRate;
-                    const dailyWorkingHours = 8;
-                    const hourlyRate = dailyRate / dailyWorkingHours;
-
-                    const basicPay = dailyRate * workingDays;
-                    const overtimePay = overtimeHrs * hourlyRate * 1.25;
-                    const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30;
-                    const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10;
-                    const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
-                    const grossEarningsBeforeGovt = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
-                    const totalGovtContributions = sssContribution + phContribution + pagibigContribution;
-                    const grossPayAfterGovt = grossEarningsBeforeGovt - totalGovtContributions;
-
-
                     const payrollRecord = {
                         employeeDocId: employeeDocId,
                         employeeId: employeeId,
                         employeeName: employeeName,
                         salaryRate: salaryRate,
-                        workingDays: workingDays,
-                        overtimeHrs: overtimeHrs,
-                        sundayHolidayDuty: sundayHolidayDuty,
-                        nightShiftWorkDays: nightShiftWorkDays,
-                        nightShiftOvertimeHrs: nightShiftOvertimeHrs,
-                        basicPay: basicPay,
-                        overtimePay: overtimePay,
-                        sundayHolidayPay: sundayHolidayPay,
-                        nightShiftDifferential: nightShiftDifferential,
-                        nightShiftOvertimePay: nightShiftOvertimePay,
-                        
-                        // Save the government contributions with the payroll record
-                        sssContribution: sssContribution,
-                        phContribution: phContribution,
-                        pagibigContribution: pagibigContribution,
-
-                        grossPay: grossPayAfterGovt, // This is now gross pay AFTER gov deductions
+                        workingDays: parseFloat(workingDaysInput.value || 0),
+                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
+                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
+                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
+                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
+                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
+                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         payrollDate: new Date(),
                         processedByUserId: userId
                     };
@@ -1971,7 +1853,7 @@
                         // Save the payroll record to a new collection
                         await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecord);
                         console.log("Payroll record saved successfully!", payrollRecord);
-                        if (payrollInputModal) payrollInputModal.classList.add('hidden'); // Hide modal after saving
+                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
                         // Optionally, show a success message to the user
                     } catch (e) {
                         console.error("Error saving payroll record: ", e);
@@ -1981,13 +1863,16 @@
             }
 
             /**
-             * Calculates and updates the total other deductions and net pay based on user inputs
+             * Calculates and updates the total deductions and net pay based on user inputs
              * in the deductions input modal.
              */
             const calculateDeductions = () => {
-                // Gross pay here is already the amount AFTER government contributions
                 const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
-                
+                // Get government contributions from hidden inputs
+                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
+                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
+                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
+
                 const govtLoan = parseFloat(govtLoanInput.value || 0);
                 const coopShare = parseFloat(coopShareInput.value || 0);
                 const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
@@ -1997,19 +1882,18 @@
                 const dailyVale = parseFloat(dailyValeInput.value || 0);
                 const othersDeduction = parseFloat(othersDeductionInput.value || 0);
 
-                // Total Deductions in this modal now only represent "other" deductions
-                const totalOtherDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction;
+                // Include government contributions in total deductions
+                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction +
+                                        sssContribution + phContribution + pagibigContribution;
+                const netPay = grossPay - totalDeductions;
 
-                const netPay = grossPay - totalOtherDeductions;
-
-                // Update display
-                if (calculatedTotalDeductionsSpan) calculatedTotalDeductionsSpan.textContent = `₱ ${totalOtherDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                if (calculatedNetPaySpan) calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
             /**
              * Opens the Deductions Input Modal for a specific employee and populates employee details
-             * and their latest gross pay (after government contributions).
+             * and their latest gross pay.
              * @param {string} employeeDocId - The Firestore document ID of the employee.
              */
             window.openDeductionsModal = async (employeeDocId) => {
@@ -2023,11 +1907,25 @@
 
                     if (employeeSnap.exists()) {
                         const employeeData = employeeSnap.data();
-                        if (deductionsEmployeeNameSpan) deductionsEmployeeNameSpan.textContent = employeeData.fullName || '';
-                        if (deductionsEmployeeIdSpan) deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
-                        if (deductionsEmployeeDocIdInput) deductionsEmployeeDocIdInput.value = employeeDocId;
+                        deductionsEmployeeNameSpan.textContent = employeeData.fullName || '';
+                        deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
+                        deductionsEmployeeDocIdInput.value = employeeDocId;
 
-                        // Fetch the latest gross pay (after government contributions) from payroll_records
+                        // Populate SSS, PhilHealth, Pag-IBIG contributions
+                        const sss = parseFloat(employeeData.sssContribution || 0);
+                        const ph = parseFloat(employeeData.phContribution || 0);
+                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
+
+                        deductionsSssContributionSpan.textContent = `₱ ${sss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsPhContributionSpan.textContent = `₱ ${ph.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsPagibigContributionSpan.textContent = `₱ ${pagibig.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        
+                        hiddenSssContributionInput.value = sss;
+                        hiddenPhContributionInput.value = ph;
+                        hiddenPagibigContributionInput.value = pagibig;
+
+
+                        // Fetch the latest gross pay from payroll_records
                         const payrollRecordsQuery = query(
                             collection(db, `/artifacts/${appId}/public/data/payroll_records`),
                             where("employeeDocId", "==", employeeDocId),
@@ -2035,7 +1933,7 @@
                             limit(1)
                         );
                         const payrollSnapshot = await getDocs(payrollRecordsQuery);
-                        let latestGrossPay = 0; // This will be gross pay AFTER gov contributions
+                        let latestGrossPay = 0;
                         let latestPayrollDocId = null;
 
                         if (!payrollSnapshot.empty) {
@@ -2046,22 +1944,22 @@
                             console.warn(`No payroll records found for employee ${employeeData.fullName}. Gross Pay set to 0.`);
                         }
                         
-                        if (deductionsGrossPaySpan) deductionsGrossPaySpan.textContent = `₱ ${latestGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        if (deductionsEmployeePayrollDocIdInput) deductionsEmployeePayrollDocIdInput.value = latestPayrollDocId; // Store the associated payroll record ID
+                        deductionsGrossPaySpan.textContent = `₱ ${latestGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                        deductionsEmployeePayrollDocIdInput.value = latestPayrollDocId; // Store the associated payroll record ID
 
                         // Reset other deduction input fields
-                        if (govtLoanInput) govtLoanInput.value = 0;
-                        if (coopShareInput) coopShareInput.value = 0;
-                        if (withholdingTaxInput) withholdingTaxInput.value = 0;
-                        if (unpaidLoanInput) unpaidLoanInput.value = 0;
-                        if (coop2025Input) coop2025Input.value = 0;
-                        if (caVoucherInput) caVoucherInput.value = 0;
-                        if (dailyValeInput) dailyValeInput.value = 0;
-                        if (othersDeductionInput) othersDeductionInput.value = 0;
+                        govtLoanInput.value = 0;
+                        coopShareInput.value = 0;
+                        withholdingTaxInput.value = 0;
+                        unpaidLoanInput.value = 0;
+                        coop2025Input.value = 0;
+                        caVoucherInput.value = 0;
+                        dailyValeInput.value = 0;
+                        othersDeductionInput.value = 0;
 
                         calculateDeductions(); // Initial calculation with all values
 
-                        if (deductionsInputModal) deductionsInputModal.classList.remove('hidden');
+                        deductionsInputModal.classList.remove('hidden');
                     } else {
                         console.error("No such employee document for deductions input!");
                     }
@@ -2071,19 +1969,20 @@
             };
 
             // Event listeners for deduction input fields to trigger calculation
-            if (govtLoanInput) govtLoanInput.addEventListener('input', calculateDeductions);
-            if (coopShareInput) coopShareInput.addEventListener('input', calculateDeductions);
-            if (withholdingTaxInput) withholdingTaxInput.addEventListener('input', calculateDeductions);
-            if (unpaidLoanInput) unpaidLoanInput.addEventListener('input', calculateDeductions);
-            if (coop2025Input) coop2025Input.addEventListener('input', calculateDeductions);
-            if (caVoucherInput) caVoucherInput.addEventListener('input', calculateDeductions);
-            if (dailyValeInput) dailyValeInput.addEventListener('input', calculateDeductions);
-            if (othersDeductionInput) othersDeductionInput.addEventListener('input', calculateDeductions);
+            govtLoanInput.addEventListener('input', calculateDeductions);
+            coopShareInput.addEventListener('input', calculateDeductions);
+            withholdingTaxInput.addEventListener('input', calculateDeductions);
+            unpaidLoanInput.addEventListener('input', calculateDeductions);
+            coop2025Input.addEventListener('input', calculateDeductions);
+            caVoucherInput.addEventListener('input', calculateDeductions);
+            dailyValeInput.addEventListener('input', calculateDeductions);
+            othersDeductionInput.addEventListener('input', calculateDeductions);
+            // No need to add event listeners for the hidden SSS/PhilHealth/Pag-IBIG inputs as they are pre-filled
 
             // Event listener for closing deductions input modal
             if (cancelDeductionsInputButton) {
                 cancelDeductionsInputButton.addEventListener('click', () => {
-                    if (deductionsInputModal) deductionsInputModal.classList.add('hidden');
+                    deductionsInputModal.classList.add('hidden');
                 });
             }
 
@@ -2103,7 +2002,6 @@
                     const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
                     const employeeName = deductionsEmployeeNameSpan.textContent;
                     const employeeId = deductionsEmployeeIdSpan.textContent;
-                    // grossPay here is already the amount AFTER government contributions
                     const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
 
                     const deductionRecord = {
@@ -2111,11 +2009,11 @@
                         payrollDocId: payrollDocId, // Link to the specific payroll record
                         employeeId: employeeId,
                         employeeName: employeeName,
-                        grossPay: grossPay, // This is gross pay AFTER government contributions
-                        
-                        // Government contributions are no longer part of this deduction record,
-                        // as they are now deducted from gross pay directly.
-                        // For historical tracking, they are stored with the payroll record.
+                        grossPay: grossPay,
+                        // Include government contributions in the saved record
+                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
+                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
+                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
                         
                         govtLoan: parseFloat(govtLoanInput.value || 0),
                         coopShare: parseFloat(coopShareInput.value || 0),
@@ -2125,7 +2023,7 @@
                         caVoucher: parseFloat(caVoucherInput.value || 0),
                         dailyVale: parseFloat(dailyValeInput.value || 0),
                         othersDeduction: parseFloat(othersDeductionInput.value || 0),
-                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')), // This is now only "other" deductions
+                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
                         deductionDate: new Date(),
                         processedByUserId: userId
@@ -2134,7 +2032,7 @@
                     try {
                         await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionRecord);
                         console.log("Deduction record saved successfully!", deductionRecord);
-                        if (deductionsInputModal) deductionsInputModal.classList.add('hidden');
+                        deductionsInputModal.classList.add('hidden');
                     } catch (e) {
                         console.error("Error saving deduction record: ", e);
                     }
@@ -2142,15 +2040,13 @@
             }
 
             // Add console.log to confirm button clicks
-            if (navButtons) {
-                navButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        const targetId = button.dataset.target;
-                        console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
-                        showContent(targetId);
-                    });
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
+                    showContent(targetId);
                 });
-            }
+            });
 
             // Event listener for the new payroll summary department filter dropdown
             if (payrollSummaryDepartmentFilter) {
