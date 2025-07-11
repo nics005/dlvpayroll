@@ -93,6 +93,13 @@
                     Deductions
                 </button>
             </li>
+            <!-- New Payroll Summary Navigation Button -->
+            <li>
+                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payroll-summary">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-2m9-10H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V3a2 2 0 00-2-2z"></path></svg>
+                    Payroll Summary
+                </button>
+            </li>
         </ul>
         <div class="mt-auto pt-4 border-t border-gray-700">
             <button id="activate-admin-mode-button" class="w-full flex items-center px-4 py-2 rounded-lg text-left bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200">
@@ -231,6 +238,30 @@
                 <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Deductions</h2>
                 <div id="deductions-tables-container" class="space-y-8">
                     <!-- Employee data grouped by department/site will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Payroll Summary Content -->
+            <div id="payroll-summary-content" class="page-content hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Payroll Summary</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg">
+                            <thead>
+                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
+                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
+                                    <th class="py-3 px-6 text-left">Name</th>
+                                    <th class="py-3 px-6 text-left">Total Gross Pay</th>
+                                    <th class="py-3 px-6 text-left">Total Deductions</th>
+                                    <th class="py-3 px-6 text-left">Total Net Pay</th>
+                                    <th class="py-3 px-6 text-center rounded-tr-lg">Payroll Count</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light" id="payroll-summary-list-body">
+                                <!-- Payroll summary data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -581,6 +612,7 @@
         const auth = getAuth(app);
 
         let userId = null;
+        // __app_id and __initial_auth_token are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -603,6 +635,7 @@
         const editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown'); // For Edit Employee Modal
         const siteListBody = document.getElementById('site-list-body');
         const displayUserIdSpan = document.getElementById('display-user-id');
+        const payrollSummaryListBody = document.getElementById('payroll-summary-list-body'); // New: For Payroll Summary table body
 
         // Admin mode related elements
         const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); 
@@ -695,7 +728,10 @@
         const deductionsInputForm = document.getElementById('deductions-input-form');
 
 
-        // Function to populate the Department/Site dropdown from Firestore sites
+        /**
+         * Populates the Department/Site dropdowns with data from Firestore sites.
+         * Clears existing options before populating.
+         */
         const populateDepartmentSiteDropdown = async () => {
             const dropdowns = [departmentSiteDropdown, editDepartmentSiteDropdown];
             
@@ -730,7 +766,11 @@
             }
         };
 
-        // Fetch and display Employees for Manage Employee, Process Payroll, and Deductions tables
+        /**
+         * Fetches and displays employee data in the Manage Employee, Process Payroll,
+         * and Deductions tables. Groups employees by department/site for payroll/deductions.
+         * Updates dashboard employee and payroll counts.
+         */
         const fetchEmployees = () => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch employees.");
@@ -896,7 +936,10 @@
             });
         };
 
-        // Function to attach event listeners for edit/delete buttons
+        /**
+         * Attaches event listeners to dynamically created edit/delete buttons
+         * for employees across different tabs.
+         */
         const attachEmployeeActionListeners = () => {
             // For Manage Employee tab
             document.querySelectorAll('#employee-list-body .edit-employee-btn').forEach(button => {
@@ -930,7 +973,10 @@
         };
 
 
-        // Fetch and display Sites
+        /**
+         * Fetches and displays site data in the Manage Sites table.
+         * Updates the dashboard active sites count.
+         */
         const fetchSites = () => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot fetch sites.");
@@ -975,7 +1021,9 @@
             });
         };
 
-        // Update Dashboard Counts
+        /**
+         * Updates the dashboard cards with current employee and site counts.
+         */
         const updateDashboardCounts = async () => {
             if (!userId) {
                 console.warn("User not authenticated. Cannot update dashboard counts.");
@@ -1014,7 +1062,118 @@
             }
         };
 
-        // Function to show the selected content and update the title
+        /**
+         * Fetches and displays a summary of payroll and deduction records per employee.
+         */
+        const fetchPayrollSummary = async () => {
+            if (!userId) {
+                console.warn("User not authenticated. Cannot fetch payroll summary.");
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                return;
+            }
+
+            if (!isAdminMode) {
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
+                return;
+            }
+
+
+            payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
+
+            try {
+                // Fetch all payroll records
+                const payrollQuery = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`));
+                const payrollSnapshot = await getDocs(payrollQuery);
+
+                // Fetch all deduction records
+                const deductionQuery = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`));
+                const deductionSnapshot = await getDocs(deductionQuery);
+
+                const employeeSummary = {};
+
+                // Aggregate payroll data
+                payrollSnapshot.forEach(doc => {
+                    const record = doc.data();
+                    const employeeDocId = record.employeeDocId;
+                    if (!employeeSummary[employeeDocId]) {
+                        employeeSummary[employeeDocId] = {
+                            employeeId: record.employeeId,
+                            employeeName: record.employeeName,
+                            totalGrossPay: 0,
+                            totalDeductions: 0,
+                            totalNetPay: 0, // This will be calculated later
+                            payrollCount: 0,
+                            deductionRecords: {} // To store deduction records by payrollDocId
+                        };
+                    }
+                    employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
+                    employeeSummary[employeeDocId].payrollCount++;
+                });
+
+                // Aggregate deduction data, linking to payroll records
+                deductionSnapshot.forEach(doc => {
+                    const record = doc.data();
+                    const employeeDocId = record.employeeDocId;
+                    const payrollDocId = record.payrollDocId; // The payroll record this deduction is linked to
+
+                    if (employeeSummary[employeeDocId]) {
+                        // If this deduction is linked to a specific payroll record, 
+                        // we can potentially refine the net pay calculation.
+                        // For simplicity, we'll sum up all deductions for an employee here.
+                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
+                        
+                        // If you want to link deductions precisely to a payroll, you'd need a more complex structure
+                        // For now, we're just summing all deductions for an employee across all their payrolls.
+                        // If a deduction is associated with a specific payroll, store it
+                        if (payrollDocId) {
+                            if (!employeeSummary[employeeDocId].deductionRecords[payrollDocId]) {
+                                employeeSummary[employeeDocId].deductionRecords[payrollDocId] = 0;
+                            }
+                            employeeSummary[employeeDocId].deductionRecords[payrollDocId] += record.totalDeductions || 0;
+                        }
+                    }
+                });
+
+                // Calculate total net pay for each employee
+                for (const empDocId in employeeSummary) {
+                    const summary = employeeSummary[empDocId];
+                    // Simple calculation: Total Gross Pay - Total Deductions
+                    // This assumes all deductions are applied against the sum of all gross pays.
+                    summary.totalNetPay = summary.totalGrossPay - summary.totalDeductions;
+                }
+
+
+                // Clear and populate the table
+                payrollSummaryListBody.innerHTML = '';
+                if (Object.keys(employeeSummary).length === 0) {
+                    payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-gray-500">No payroll summary data available.</td></tr>`;
+                } else {
+                    for (const empDocId in employeeSummary) {
+                        const summary = employeeSummary[empDocId];
+                        const newRow = payrollSummaryListBody.insertRow();
+                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
+                        newRow.innerHTML = `
+                            <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || empDocId}</td>
+                            <td class="py-3 px-6 text-left">${summary.employeeName || ''}</td>
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-left">₱ ${summary.totalNetPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td class="py-3 px-6 text-center">${summary.payrollCount}</td>
+                        `;
+                    }
+                }
+
+            } catch (e) {
+                console.error("Error fetching payroll summary: ", e);
+                payrollSummaryListBody.innerHTML = `<tr><td colspan="6" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
+            }
+        };
+
+        /**
+         * Shows the selected content tab and updates the navigation button's active state.
+         * Also triggers data fetching for relevant tabs.
+         * @param {string} targetId - The ID of the content section to display.
+         */
         const showContent = (targetId) => {
             pageContents.forEach(content => {
                 content.classList.add('hidden');
@@ -1048,11 +1207,13 @@
                 fetchSites();
             } else if (targetId === 'dashboard') {
                 updateDashboardCounts();
+            } else if (targetId === 'payroll-summary') {
+                fetchPayrollSummary(); // Call the new function to load summary
             }
         };
 
 
-        // Authenticate user
+        // Authenticate user with Firebase
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 userId = user.uid;
@@ -1097,7 +1258,9 @@
         });
 
 
-        // Function to update UI based on admin mode status
+        /**
+         * Updates the visibility of admin-only UI elements based on `isAdminMode` status.
+         */
         const updateAdminUI = () => {
             adminFeatureElements.forEach(el => {
                 if (isAdminMode) {
@@ -1196,13 +1359,19 @@
             showContent('dashboard'); 
 
 
-            // Function to generate unique employee ID
+            /**
+             * Generates a unique employee ID in the format DLV-XXXXX.
+             * @returns {string} The generated employee ID.
+             */
             const generateEmployeeId = () => {
                 const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
                 return `DLV-${randomNumbers}`;
             };
 
-            // Function to generate unique site ID
+            /**
+             * Generates a unique site ID in the format DLV-SITE-XXXXX.
+             * @returns {string} The generated site ID.
+             */
             const generateSiteId = () => {
                 const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
                 return `DLV-SITE-${randomNumbers}`;
@@ -1303,7 +1472,10 @@
                 });
             }
 
-            // Function to open the Edit Employee Modal
+            /**
+             * Opens the Edit Employee Modal and populates it with the selected employee's data.
+             * @param {string} docId - The Firestore document ID of the employee to edit.
+             */
             window.openEditEmployeeModal = async (docId) => {
                 if (!userId) {
                     console.warn("User not authenticated. Cannot edit employee.");
@@ -1341,7 +1513,10 @@
                 }
             };
 
-            // Function to open the Delete Confirmation Modal
+            /**
+             * Opens the Delete Confirmation Modal for a given employee.
+             * @param {string} docId - The Firestore document ID of the employee to delete.
+             */
             window.openDeleteConfirmationModal = (docId) => {
                 employeeToDeleteDocId = docId; // Store the ID
                 deleteConfirmationModal.classList.remove('hidden');
@@ -1421,7 +1596,10 @@
                 });
             }
 
-            // Payroll Calculation Logic
+            /**
+             * Calculates and updates the payroll components (Basic Pay, Overtime Pay, etc.)
+             * and the Gross Pay based on user inputs in the payroll input modal.
+             */
             const calculatePayroll = () => {
                 const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
                 const workingDays = parseFloat(workingDaysInput.value || 0);
@@ -1473,7 +1651,10 @@
                 calculatedGrossPaySpan.textContent = `₱ ${grossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
-            // Function to open the Payroll Input Modal
+            /**
+             * Opens the Payroll Input Modal for a specific employee and populates employee details.
+             * @param {string} docId - The Firestore document ID of the employee.
+             */
             window.openPayrollInputModal = async (docId) => {
                 if (!userId) {
                     console.warn("User not authenticated. Cannot open payroll input.");
@@ -1572,7 +1753,10 @@
                 });
             }
 
-            // Deductions Calculation Logic
+            /**
+             * Calculates and updates the total deductions and net pay based on user inputs
+             * in the deductions input modal.
+             */
             const calculateDeductions = () => {
                 const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
                 const govtLoan = parseFloat(govtLoanInput.value || 0);
@@ -1591,7 +1775,11 @@
                 calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             };
 
-            // Function to open the Deductions Input Modal
+            /**
+             * Opens the Deductions Input Modal for a specific employee and populates employee details
+             * and their latest gross pay.
+             * @param {string} employeeDocId - The Firestore document ID of the employee.
+             */
             window.openDeductionsModal = async (employeeDocId) => {
                 if (!userId) {
                     console.warn("User not authenticated. Cannot open deductions input.");
