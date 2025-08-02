@@ -3,2059 +3,1024 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DLV Electrical Services Co. Payroll System</title>
+    <title>Computer Shop Points System</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background-color: #0d1117;
         }
-        /* Custom scrollbar for the content area */
-        .content-area::-webkit-scrollbar {
-            width: 8px;
+        .screen {
+            display: none;
         }
-        .content-area::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        .screen.active {
+            display: block;
         }
-        .content-area::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
+        .pulse-once {
+            animation: pulse-once 1s ease-in-out;
         }
-        .content-area::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        /* Modal backdrop */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        /* Modal content */
-        .modal-content {
-            background-color: #fff;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh; /* Limit height to prevent overflow */
-            overflow-y: auto; /* Enable scrolling for modal content */
+        @keyframes pulse-once {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="bg-gray-900 text-gray-100">
 
-    <!-- Left Navigation Bar -->
-    <nav class="w-64 bg-gray-800 text-white p-6 flex flex-col shadow-lg rounded-r-lg">
-        <div class="text-2xl font-bold mb-8 text-center">
-            DLV Payroll
-        </div>
-        <ul class="space-y-4">
-            <li>
-                <button class="nav-button w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="dashboard">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 001 1h3m-6-11v10a1 1 0 001 1h3"></path></svg>
-                    Dashboard
-                </button>
-            </li>
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="manage-employee">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.129-.007-.257-.02-.385m-1.993 0A5.002 5.002 0 0012 18a5.002 5.002 0 00-3.986-1.995M12 12h.01M12 7a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z"></path></svg>
-                    Manage Employee
-                </button>
-            </li>
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="site">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                    Site
-                </button>
-            </li>
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="process-payroll">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Process Payroll
-                </button>
-            </li>
-            <!-- New Deductions Navigation Button -->
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="deductions">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    Deductions
-                </button>
-            </li>
-            <!-- New Payroll Summary Navigation Button -->
-            <li>
-                <button class="nav-button admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200" data-target="payroll-summary">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-2m9-10H3a2 2 0 00-2 2v12a2 2 0 002 2h18a2 2 0 002-2V3a2 2 0 00-2-2z"></path></svg>
-                    Payroll Summary
-                </button>
-            </li>
-        </ul>
-        <div class="mt-auto pt-4 border-t border-gray-700">
-            <button id="activate-admin-mode-button" class="w-full flex items-center px-4 py-2 rounded-lg text-left bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
-                Activate Admin Mode
-            </button>
-            <button id="deactivate-admin-mode-button" class="admin-feature-only w-full flex items-center px-4 py-2 rounded-lg text-left bg-red-600 text-white hover:bg-red-700 transition-colors duration-200 mt-2">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                Deactivate Admin Mode
-            </button>
-        </div>
-    </nav>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col bg-gray-100 rounded-l-lg overflow-hidden">
-        <!-- Header -->
-        <header class="bg-white p-4 shadow-md flex items-center justify-between rounded-tl-lg">
-            <h1 class="text-2xl font-semibold text-gray-800" id="current-page-title">Dashboard</h1>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-600">Welcome, Admin!</span>
-                <span id="display-user-id" class="text-gray-500 text-sm font-semibold ml-2"></span>
-                <img src="https://placehold.co/40x40/cbd5e1/4a5568?text=AD" alt="Admin Avatar" class="w-10 h-10 rounded-full border-2 border-gray-300">
+    <!-- Auth Screens Container -->
+    <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
+        <div id="login-screen" class="screen active bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-laptop fa-3x text-cyan-400 mx-auto mb-2 animate-pulse"></i>
+                <h1 class="text-4xl font-extrabold text-white">Login</h1>
+                <p class="text-gray-400 mt-2">Enter your credentials to access your dashboard.</p>
             </div>
+            <div id="auth-error-message" class="hidden bg-red-500 text-white p-3 rounded-lg mb-4 text-sm text-center"></div>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-1">Email</label>
+                    <input type="email" id="login-email" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Password</label>
+                    <input type="password" id="login-password" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" required>
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-300 transform hover:scale-105">Login</button>
+                <button type="button" id="show-register-btn" class="w-full mt-2 py-3 px-4 text-cyan-400 hover:text-cyan-300 font-semibold transition-colors duration-300">Don't have an account? Register</button>
+            </form>
+        </div>
+
+        <div id="register-screen" class="screen bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-700">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-laptop fa-3x text-cyan-400 mx-auto mb-2 animate-pulse"></i>
+                <h1 class="text-4xl font-extrabold text-white">Register</h1>
+                <p class="text-gray-400 mt-2">Create your account to start earning points.</p>
+            </div>
+            <div id="register-error-message" class="hidden bg-red-500 text-white p-3 rounded-lg mb-4 text-sm text-center"></div>
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-400 mb-1">Name</label>
+                    <input type="text" id="register-name" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Email</label>
+                    <input type="email" id="register-email" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Password</label>
+                    <input type="password" id="register-password" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" required>
+                </div>
+                <button type="submit" class="w-full py-3 px-4 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-300 transform hover:scale-105">Register</button>
+                <button type="button" id="show-login-btn" class="w-full mt-2 py-3 px-4 text-cyan-400 hover:text-cyan-300 font-semibold transition-colors duration-300">Already have an account? Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard-screen" class="screen min-h-screen pt-20 p-4">
+        <header class="bg-gray-800 p-4 shadow-lg flex justify-between items-center fixed top-0 w-full z-10 border-b border-gray-700">
+            <div class="flex items-center">
+                <i class="fa-solid fa-user-shield fa-2x text-red-500 mr-2"></i>
+                <h2 class="text-2xl font-bold text-white">Admin Dashboard</h2>
+            </div>
+            <button id="admin-logout-btn" class="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-red-700 transition-colors duration-300 transform hover:scale-105">
+                <i class="fa-solid fa-power-off"></i><span class="hidden md:inline">Logout</span>
+            </button>
         </header>
 
-        <!-- Content Display Area -->
-        <div class="flex-1 p-6 overflow-y-auto content-area">
-            <!-- Dashboard Content -->
-            <div id="dashboard-content" class="page-content active">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Dashboard Overview</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Card 1: Total Employees -->
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-medium text-gray-700">Total Employees</h3>
-                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H2v-2a3 3 0 015.356-1.857M17 20v-2c0-.129-.007-.257-.02-.385m-1.993 0A5.002 5.002 0 0012 18a5.002 5.002 0 00-3.986-1.995M12 12h.01M12 7a2 2 0 110 4 2 2 0 010-4zm0 6a2 2 0 110 4 2 2 0 010-4z"></path></svg>
+        <div class="container mx-auto space-y-8 mt-4">
+            <!-- Shop IP Settings -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-network-wired mr-2 text-red-400"></i> Shop IP Settings</h3>
+                <form id="shop-ip-form" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 mb-1">Current Shop IP Address</label>
+                        <div class="relative">
+                            <input type="password" id="shop-ip-address" class="w-full p-3 pr-10 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="e.g., 203.0.113.195" required>
+                            <button type="button" id="toggle-ip-visibility" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-cyan-400">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
                         </div>
-                        <p class="text-4xl font-bold text-gray-900" id="total-employees">0</p>
-                        <p class="text-sm text-gray-500 mt-2">Active employees this month</p>
                     </div>
+                    <button type="submit" class="w-full py-3 px-4 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors duration-300 transform hover:scale-105">
+                        <i class="fa-solid fa-save mr-2"></i> Save IP Address
+                    </button>
+                </form>
+            </div>
 
-                    <!-- Card 2: Payroll Processed -->
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-medium text-gray-700">Payroll Processed</h3>
-                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        </div>
-                        <p class="text-4xl font-bold text-gray-900" id="payroll-processed">₱ 0</p>
-                        <p class="text-sm text-gray-500 mt-2">Total amount disbursed</p>
-                    </div>
-
-                    <!-- Card 3: Active Sites -->
-                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-medium text-gray-700">Active Sites</h3>
-                            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        </div>
-                        <p class="text-4xl font-bold text-gray-900" id="active-sites">0</p>
-                        <p class="text-sm text-gray-500 mt-2">Ongoing projects</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Recent Payroll Activities</h3>
-                    <ul class="divide-y divide-gray-200" id="recent-activities-list">
-                        </ul>
+            <!-- User Management -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-user-plus mr-2 text-cyan-400"></i> User Management</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="text-left text-gray-400 border-b border-gray-700">
+                                <th class="py-2 px-4">User ID</th>
+                                <th class="py-2 px-4">Email</th>
+                                <th class="py-2 px-4">Points</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-list">
+                            <!-- User data will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <div id="manage-employee-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Employees</h2>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-gray-800">Employee List</h3>
-                        <button id="add-employee-button" class="admin-feature-only bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                            Add New Employee
+            <!-- Voucher Creation -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-trophy mr-2 text-yellow-400"></i> Create New Voucher</h3>
+                <form id="create-voucher-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-1">
+                        <label class="block text-gray-400 mb-1">Voucher Name</label>
+                        <input type="text" id="voucher-name" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="e.g., 1 Hour Free Play" required>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-gray-400 mb-1">Points Needed</label>
+                        <input type="number" id="voucher-points" step="0.1" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="e.g., 50.0" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-400 mb-1">Description</label>
+                        <textarea id="voucher-description" class="w-full p-3 bg-gray-700 rounded-lg border border-gray-600 focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Description of the voucher" rows="2" required></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full py-3 px-4 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition-colors duration-300 transform hover:scale-105">
+                            <i class="fa-solid fa-plus mr-2"></i> Create Voucher
                         </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
-                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
-                                    <th class="py-3 px-6 text-left">Name</th>
-                                    <th class="py-3 px-6 text-left">Position</th>
-                                    <th class="py-3 px-6 text-left">Department/Site</th>
-                                    <th class="py-3 px-6 text-left">Contact No.</th>
-                                    <th class="py-3 px-6 text-left">Salary Rate</th>
-                                    <th class="py-3 px-6 text-left">Status</th>
-                                    <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="employee-list-body">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
+                </form>
             </div>
 
-            <div id="site-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Sites</h2>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-gray-800">Project Sites List</h3>
-                        <button id="add-site-button" class="admin-feature-only bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                            Add New Site
-                        </button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
-                                    <th class="py-3 px-6 text-left rounded-tl-lg">Site ID</th>
-                                    <th class="py-3 px-6 text-left">Site Name</th>
-                                    <th class="py-3 px-6 text-left">Location</th>
-                                    <th class="py-3 px-6 text-center rounded-tr-lg">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="site-list-body">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Process Payroll Content -->
-            <div id="process-payroll-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Process Payroll</h2>
-                <div id="process-payroll-tables-container" class="space-y-8">
-                    <!-- Employee data grouped by department/site will be dynamically loaded here -->
-                </div>
-            </div>
-
-            <!-- New Deductions Content -->
-            <div id="deductions-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Manage Deductions</h2>
-                <div id="deductions-tables-container" class="space-y-8">
-                    <!-- Employee data grouped by department/site will be dynamically loaded here -->
-                </div>
-            </div>
-
-            <!-- Payroll Summary Content -->
-            <div id="payroll-summary-content" class="page-content hidden">
-                <h2 class="text-3xl font-bold text-gray-800 mb-6">Payroll Summary</h2>
-                <div class="mb-4">
-                    <label for="payroll-summary-department-filter" class="block text-sm font-medium text-gray-700">Filter by Department/Site:</label>
-                    <select id="payroll-summary-department-filter" class="mt-1 block w-full md:w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2">
-                        <option value="">All Departments/Sites</option>
-                    </select>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full bg-white rounded-lg">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal rounded-t-lg">
-                                    <th class="py-3 px-6 text-left rounded-tl-lg">Employee ID</th>
-                                    <th class="py-3 px-6 text-left">Name</th>
-                                    <th class="py-3 px-6 text-left">Department/Site</th> <!-- NEW COLUMN -->
-                                    <th class="py-3 px-6 text-left">Total Gross Pay</th>
-                                    <th class="py-3 px-6 text-left">Total Deductions</th>
-                                    <th class="py-3 px-6 text-left">Total Net Pay</th>
-                                    <th class="py-3 px-6 text-center rounded-tr-lg">Payroll Count</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" id="payroll-summary-list-body">
-                                <!-- Payroll summary data will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div id="add-employee-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Employee</h2>
-            <form id="add-employee-form" class="space-y-4">
-                <div>
-                    <label for="employee-id" class="block text-sm font-medium text-gray-700">Employee ID</label>
-                    <input type="text" id="employee-id" name="employeeId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
-                </div>
-                <div>
-                    <label for="full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" id="full-name" name="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
-                    <input type="text" id="position" name="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                    <input type="text" id="address" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="contact-no" class="block text-sm font-medium text-gray-700">Contact No.</label>
-                    <input type="text" id="contact-no" name="contactNo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="department-site-dropdown" class="block text-sm font-medium text-gray-700">Department/Site</label>
-                    <select id="department-site-dropdown" name="departmentSite" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                        <option value="">Select Department/Site</option>
-                        </select>
-                </div>
-                <div>
-                    <label for="salary-rate" class="block text-sm font-medium text-gray-700">Salary Rate (PHP)</label>
-                    <input type="number" id="salary-rate" name="salaryRate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00" required>
-                </div>
-                <div>
-                    <label for="sss-contribution" class="block text-sm font-medium text-gray-700">SSS Contribution</label>
-                    <input type="number" id="sss-contribution" name="sssContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
-                </div>
-                <div>
-                    <label for="ph-contribution" class="block text-sm font-medium text-gray-700">PhilHealth Contribution</label>
-                    <input type="number" id="ph-contribution" name="phContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
-                </div>
-                <div>
-                    <label for="pagibig-contribution" class="block text-sm font-medium text-gray-700">Pag-IBIG Contribution</label>
-                    <input type="number" id="pagibig-contribution" name="pagibigContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" value="0.00">
-                </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-add-employee" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Save Employee
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="edit-employee-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Employee Details</h2>
-            <form id="edit-employee-form" class="space-y-4">
-                <input type="hidden" id="edit-employee-doc-id" name="docId">
-                <div>
-                    <label for="edit-employee-id" class="block text-sm font-medium text-gray-700">Employee ID</label>
-                    <input type="text" id="edit-employee-id" name="employeeId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
-                </div>
-                <div>
-                    <label for="edit-full-name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" id="edit-full-name" name="fullName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="edit-position" class="block text-sm font-medium text-gray-700">Position</label>
-                    <input type="text" id="edit-position" name="position" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="edit-address" class="block text-sm font-medium text-gray-700">Address</label>
-                    <input type="text" id="edit-address" name="address" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="edit-contact-no" class="block text-sm font-medium text-gray-700">Contact No.</label>
-                    <input type="text" id="edit-contact-no" name="contactNo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="edit-department-site-dropdown" class="block text-sm font-medium text-gray-700">Department/Site</label>
-                    <select id="edit-department-site-dropdown" name="departmentSite" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                        <option value="">Select Department/Site</option>
-                        </select>
-                </div>
-                <div>
-                    <label for="edit-salary-rate" class="block text-sm font-medium text-gray-700">Salary Rate (PHP)</label>
-                    <input type="number" id="edit-salary-rate" name="salaryRate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01" required>
-                </div>
-                <div>
-                    <label for="edit-sss-contribution" class="block text-sm font-medium text-gray-700">SSS Contribution</label>
-                    <input type="number" id="edit-sss-contribution" name="sssContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-ph-contribution" class="block text-sm font-medium text-gray-700">PhilHealth Contribution</label>
-                    <input type="number" id="edit-ph-contribution" name="phContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
-                </div>
-                <div>
-                    <label for="edit-pagibig-contribution" class="block text-sm font-medium text-gray-700">Pag-IBIG Contribution</label>
-                    <input type="number" id="edit-pagibig-contribution" name="pagibigContribution" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" step="0.01">
-                </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-edit-employee" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Update Employee
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="add-site-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Add New Site</h2>
-            <form id="add-site-form" class="space-y-4">
-                <div>
-                    <label for="site-id" class="block text-sm font-medium text-gray-700">Site ID</label>
-                    <input type="text" id="site-id" name="siteId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" readonly>
-                </div>
-                <div>
-                    <label for="site-name" class="block text-sm font-medium text-gray-700">Site Name</label>
-                    <input type="text" id="site-name" name="siteName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <div>
-                    <label for="site-location" class="block text-sm font-medium text-gray-700">Location</label>
-                    <input type="text" id="site-location" name="siteLocation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                </div>
-                <!-- Removed Status field from site modal -->
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-add-site" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Save Site
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Activate Admin Mode</h2>
-            <div class="space-y-4">
-                <div>
-                    <label for="admin-password-input" class="block text-sm font-medium text-gray-700">Admin Password</label>
-                    <input type="password" id="admin-password-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" required>
-                    <span id="admin-error-message" class="text-red-500 text-sm mt-1 block"></span>
-                </div>
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-admin-modal-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Cancel
-                    </button>
-                    <button type="button" id="activate-admin-modal-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Activate
-                    </button>
+            <!-- Pending Claims -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-sync mr-2 text-purple-400"></i> Pending Voucher Claims</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead>
+                            <tr class="text-left text-gray-400 border-b border-gray-700">
+                                <th class="py-2 px-4">User</th>
+                                <th class="py-2 px-4">Voucher</th>
+                                <th class="py-2 px-4">Status</th>
+                                <th class="py-2 px-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="claim-list">
+                            <!-- Claim data will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-confirmation-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Confirm Deletion</h2>
-            <p class="text-gray-700 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
-            <div class="flex justify-end space-x-3 mt-6">
-                <button type="button" id="cancel-delete-button" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Cancel
+    <!-- User Dashboard -->
+    <div id="user-dashboard-screen" class="screen pt-20 p-4">
+        <header class="bg-gray-800 p-4 shadow-lg flex justify-between items-center fixed top-0 w-full z-10 border-b border-gray-700">
+            <div class="flex items-center">
+                <i class="fa-solid fa-user fa-2x text-cyan-500 mr-2"></i>
+                <h2 id="user-greeting" class="text-2xl font-bold text-white">Hello!</h2>
+            </div>
+            <button id="user-logout-btn" class="flex items-center space-x-2 bg-red-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-red-700 transition-colors duration-300 transform hover:scale-105">
+                <i class="fa-solid fa-power-off"></i><span class="hidden md:inline">Logout</span>
+            </button>
+        </header>
+
+        <div class="container mx-auto space-y-8 mt-4">
+            <!-- User Points and Status -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 text-center">
+                <div class="flex flex-col items-center">
+                    <div id="user-status-icon" class="p-4 rounded-full mb-4 bg-gray-500">
+                        <i class="fa-solid fa-clock fa-2x text-white"></i>
+                    </div>
+                    <h3 id="user-status-text" class="text-2xl font-bold text-white">Status: Offline</h3>
+                    <p class="text-lg text-gray-400 mt-2">
+                        Your Points: <span id="user-points" class="text-cyan-400 font-extrabold text-3xl">0.0</span>
+                    </p>
+                    <!-- New: Playtime Timer Display -->
+                    <p class="text-lg text-gray-400 mt-2">
+                        Playing Time: <span id="playtime-timer" class="text-cyan-400 font-extrabold text-2xl">00:00:00</span>
+                    </p>
+                </div>
+                <div class="mt-6 flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                    <button id="start-playing-btn" class="w-full py-3 px-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors duration-300 disabled:bg-gray-600 transform hover:scale-105">
+                        <i class="fa-solid fa-laptop mr-2"></i> Start Playing
                     </button>
-                <button type="button" id="confirm-delete-button" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-colors duration-200">
-                        Delete
+                    <button id="end-playing-btn" class="w-full py-3 px-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-300 disabled:bg-gray-600 transform hover:scale-105" disabled>
+                        <i class="fa-solid fa-power-off mr-2"></i> End Playing
                     </button>
+                </div>
+            </div>
+
+            <!-- Available Vouchers -->
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4 flex items-center"><i class="fa-solid fa-trophy mr-2 text-yellow-400"></i> Available Vouchers</h3>
+                <div id="voucher-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Voucher data will be inserted here by JavaScript -->
+                </div>
             </div>
         </div>
+
+        <footer class="mt-8 p-4 text-center text-gray-500">
+            <p>&copy; 2024 Computer Shop Points System</p>
+        </footer>
     </div>
 
-    <!-- New Payroll Input Modal -->
-    <div id="payroll-input-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Payroll Input for Employee</h2>
-            <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Name: <span id="payroll-employee-name" class="font-normal"></span></p>
-                <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="payroll-employee-id" class="font-normal"></span></p>
-                <!-- Hidden input to store the employee's Firestore document ID -->
-                <input type="hidden" id="payroll-employee-doc-id">
-                <input type="hidden" id="payroll-employee-salary-rate">
-            </div>
-            <form id="payroll-input-form" class="space-y-4">
-                <div>
-                    <label for="working-days" class="block text-sm font-medium text-gray-700">Working Days</label>
-                    <input type="number" id="working-days" name="workingDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="overtime-hrs" class="block text-sm font-medium text-gray-700">Overtime Hours</label>
-                    <input type="number" id="overtime-hrs" name="overtimeHrs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="sunday-holiday-duty" class="block text-sm font-medium text-gray-700">Sunday/Holiday Duty (Hours)</label>
-                    <input type="number" id="sunday-holiday-duty" name="sundayHolidayDuty" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="night-shift-work-days" class="block text-sm font-medium text-gray-700">Night Shift Work Days (8-hour shifts)</label>
-                    <input type="number" id="night-shift-work-days" name="nightShiftWorkDays" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-                <div>
-                    <label for="night-shift-overtime-hrs" class="block text-sm font-medium text-gray-700">Night Shift Overtime Hours</label>
-                    <input type="number" id="night-shift-overtime-hrs" name="nightShiftOvertimeHrs" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.5">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Basic Pay:</p>
-                        <p class="text-lg font-bold text-gray-900" id="calculated-basic-pay">₱ 0.00</p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Overtime Pay:</p>
-                        <p class="text-lg font-bold text-gray-900" id="calculated-overtime-pay">₱ 0.00</p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Sunday/Holiday Pay:</p>
-                        <p class="text-lg font-bold text-gray-900" id="calculated-sunday-holiday-pay">₱ 0.00</p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Night Shift Differential:</p>
-                        <p class="text-lg font-bold text-gray-900" id="calculated-night-shift-differential">₱ 0.00</p>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Night Shift Overtime Pay:</p>
-                        <p class="text-lg font-bold text-gray-900" id="calculated-night-shift-overtime-pay">₱ 0.00</p>
-                    </div>
-                    <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900">Gross Pay: <span id="calculated-gross-pay">₱ 0.00</span></p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-payroll-input" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Close
-                    </button>
-                    <button type="submit" id="save-payroll-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Save Payroll
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- New Deductions Input Modal -->
-    <div id="deductions-input-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Deductions Input for Employee</h2>
-            <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Name: <span id="deductions-employee-name" class="font-normal"></span></p>
-                <p class="text-lg font-semibold text-gray-700">Employee ID: <span id="deductions-employee-id" class="font-normal"></span></p>
-                <input type="hidden" id="deductions-employee-doc-id">
-                <input type="hidden" id="deductions-employee-payroll-doc-id">
-            </div>
-            <form id="deductions-input-form" class="space-y-4">
-                <div class="bg-gray-100 p-4 rounded-md">
-                    <p class="text-md font-medium text-gray-700">Latest Gross Pay:</p>
-                    <p class="text-2xl font-bold text-gray-900" id="deductions-gross-pay">₱ 0.00</p>
-                </div>
-
-                <!-- Government Benefits (read-only display and hidden inputs for calculation) -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">SSS Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-sss-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-sss-contribution" value="0">
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">PhilHealth Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-ph-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-ph-contribution" value="0">
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Pag-IBIG Contribution:</p>
-                        <p class="text-lg font-bold text-gray-900" id="deductions-pagibig-contribution">₱ 0.00</p>
-                        <input type="hidden" id="hidden-pagibig-contribution" value="0">
-                    </div>
-                </div>
-
-                <!-- Other Deductions (editable inputs) -->
-                <div class="pt-4 border-t border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Other Deductions</h3>
-                </div>
-                <div>
-                    <label for="govt-loan" class="block text-sm font-medium text-gray-700">Government Loan</label>
-                    <input type="number" id="govt-loan" name="govtLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="coop-share" class="block text-sm font-medium text-gray-700">Coop Share</label>
-                    <input type="number" id="coop-share" name="coopShare" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="withholding-tax" class="block text-sm font-medium text-gray-700">With Holding Tax</label>
-                    <input type="number" id="withholding-tax" name="withholdingTax" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="unpaid-loan" class="block text-sm font-medium text-gray-700">Unpaid Loan</label>
-                    <input type="number" id="unpaid-loan" name="unpaidLoan" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="coop-2025" class="block text-sm font-medium text-gray-700">Coop 2025</label>
-                    <input type="number" id="coop-2025" name="coop2025" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="ca-voucher" class="block text-sm font-medium text-gray-700">C/A Voucher</label>
-                    <input type="number" id="ca-voucher" name="caVoucher" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="daily-vale" class="block text-sm font-medium text-gray-700">Daily Vale</label>
-                    <input type="number" id="daily-vale" name="dailyVale" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-                <div>
-                    <label for="others-deduction" class="block text-sm font-medium text-gray-700">Others</label>
-                    <input type="number" id="others-deduction" name="othersDeduction" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2" value="0" min="0" step="0.01">
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                    <div class="col-span-full text-right pt-2">
-                        <p class="text-xl font-bold text-gray-900">Total Deductions: <span id="calculated-total-deductions">₱ 0.00</span></p>
-                        <p class="text-xl font-bold text-gray-900 mt-2">Net Pay: <span id="calculated-net-pay">₱ 0.00</span></p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end space-x-3 mt-6">
-                    <button type="button" id="cancel-deductions-input" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-200">
-                        Close
-                    </button>
-                    <button type="submit" id="save-deductions-button" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-200">
-                        Save Deductions
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <!-- Firebase SDK Scripts -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, updateDoc, deleteDoc, getDoc, getDocs, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, addDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase configuration (provided by the user)
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAYpApEwrgAsso-dJ-uTAX3AI4yRZBn9JU",
-            authDomain: "payroll-aef73.firebaseapp.com",
-            projectId: "payroll-aef73",
-            storageBucket: "payroll-aef73.firebaseapp.com",
-            messagingSenderId: "717714854870",
-            appId: "1:717714854870:web:b1e7eb0dc82cd61dbc8a77",
-            measurementId: "G-F31PSMN7RD"
+            apiKey: "AIzaSyDYBilMN1zpfCxDkbLdsecKmE6shvFvNtE",
+            authDomain: "phub-9e8d7.firebaseapp.com",
+            projectId: "phub-9e8d7",
+            storageBucket: "phub-9e8d7.firebasestorage.app",
+            messagingSenderId: "81975234635",
+            appId: "1:81975234635:web:a6d0cf2b098fd7e94c3dce",
+            measurementId: "G-3F1ZQX6ZRQ"
         };
-
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
         const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        const appId = firebaseConfig.projectId;
+        let currentUser = null;
+        let isAdmin = false;
+        let playingTimer = null;
+        let playtimeTimerInterval = null;
+        let isPlaying = false;
+        let currentPoints = 0;
+        let shopIpAddress = ''; // New variable to store the shop's IP
 
-        let userId = null;
-        // __app_id and __initial_auth_token are provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // Variables to hold unsubscribe functions for listeners
+        let unsubscribeAdminListeners = null;
+        let unsubscribeUserListeners = null;
 
-        // Admin Mode variables
-        let isAdminMode = false;
-        // **WARNING:** Hardcoding passwords in client-side code is highly insecure.
-        // For a real application, implement proper Firebase Authentication for admin users
-        // and check custom claims or roles for authorization.
-        const ADMIN_PASSWORD = "dlvadmin"; 
+        // Firestore path constants
+        const usersCollection = `artifacts/${appId}/public/data/users`;
+        const vouchersCollection = `artifacts/${appId}/public/data/vouchers`;
+        const claimsCollection = `artifacts/${appId}/public/data/claims`;
+        const settingsDocRef = doc(db, `artifacts/${appId}/public/data/settings`, 'shop_settings');
+        const ADMIN_EMAIL = 'admin@pesohub.com';
+        
+        // UI elements
+        const authContainer = document.getElementById('auth-container');
+        const loginScreen = document.getElementById('login-screen');
+        const registerScreen = document.getElementById('register-screen');
+        const adminDashboardScreen = document.getElementById('admin-dashboard-screen');
+        const userDashboardScreen = document.getElementById('user-dashboard-screen');
+        const authErrorMessage = document.getElementById('auth-error-message');
+        const registerErrorMessage = document.getElementById('register-error-message');
+        const playtimeTimerElement = document.getElementById('playtime-timer');
+        const userGreetingElement = document.getElementById('user-greeting');
+        
+        // Function to show/hide screens
+        const showScreen = (screenId) => {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        };
 
-        // --- Global element references ---
-        const totalEmployeesCard = document.getElementById('total-employees');
-        const payrollProcessedCard = document.getElementById('payroll-processed');
-        const activeSitesCard = document.getElementById('active-sites');
-        const recentActivitiesList = document.getElementById('recent-activities-list');
-        const employeeListBody = document.getElementById('employee-list-body'); // For Manage Employee tab
-        const processPayrollTablesContainer = document.getElementById('process-payroll-tables-container'); // Container for grouped tables
-        const deductionsTablesContainer = document.getElementById('deductions-tables-container'); // New container for deductions
-        const departmentSiteDropdown = document.getElementById('department-site-dropdown');
-        const editDepartmentSiteDropdown = document.getElementById('edit-department-site-dropdown'); // For Edit Employee Modal
-        const siteListBody = document.getElementById('site-list-body');
-        const displayUserIdSpan = document.getElementById('display-user-id');
-        const payrollSummaryListBody = document.getElementById('payroll-summary-list-body'); // New: For Payroll Summary table body
-        const payrollSummaryDepartmentFilter = document.getElementById('payroll-summary-department-filter'); // New: Payroll Summary filter dropdown
+        // UI Event Listeners
+        document.getElementById('show-register-btn').addEventListener('click', () => showScreen('register-screen'));
+        document.getElementById('show-login-btn').addEventListener('click', () => showScreen('login-screen'));
+        document.getElementById('login-form').addEventListener('submit', handleLogin);
+        document.getElementById('register-form').addEventListener('submit', handleRegister);
+        document.getElementById('admin-logout-btn').addEventListener('click', handleLogout);
+        document.getElementById('user-logout-btn').addEventListener('click', handleLogout);
+        document.getElementById('start-playing-btn').addEventListener('click', handleStartPlaying);
+        document.getElementById('end-playing-btn').addEventListener('click', handleEndPlaying);
+        document.getElementById('create-voucher-form').addEventListener('submit', handleCreateVoucher);
+        document.getElementById('shop-ip-form').addEventListener('submit', handleSaveShopIp);
+        document.getElementById('toggle-ip-visibility').addEventListener('click', toggleIpVisibility);
+        
+        // --- NEW: Function to toggle IP visibility ---
+        function toggleIpVisibility() {
+            const ipInput = document.getElementById('shop-ip-address');
+            const icon = document.querySelector('#toggle-ip-visibility i');
+            if (ipInput.type === 'password') {
+                ipInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                ipInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
 
-        // Admin mode related elements
-        const adminFeatureElements = document.querySelectorAll('.admin-feature-only'); 
-        const activateAdminModeButton = document.getElementById('activate-admin-mode-button');
-        const deactivateAdminModeButton = document.getElementById('deactivate-admin-mode-button'); 
-        const adminModal = document.getElementById('admin-modal');
-        const adminPasswordInput = document.getElementById('admin-password-input');
-        const activateAdminModalButton = document.getElementById('activate-admin-modal-button');
-        const cancelAdminModalButton = document.getElementById('cancel-admin-modal-button');
-        const adminErrorMessage = document.getElementById('admin-error-message');
+        // --- AUTHENTICATION FUNCTIONS ---
 
-        // Global references for navigation and page content
-        const navButtons = document.querySelectorAll('.nav-button');
-        const pageContents = document.querySelectorAll('.page-content');
-        const currentPageTitle = document.getElementById('current-page-title');
-
-        // Employee Modals
-        const addEmployeeButton = document.getElementById('add-employee-button');
-        const addEmployeeModal = document.getElementById('add-employee-modal');
-        const cancelAddEmployee = document.getElementById('cancel-add-employee');
-        const addEmployeeForm = document.getElementById('add-employee-form');
-        const employeeIdInput = document.getElementById('employee-id');
-
-        const editEmployeeModal = document.getElementById('edit-employee-modal');
-        const cancelEditEmployee = document.getElementById('cancel-edit-employee');
-        const editEmployeeForm = document.getElementById('edit-employee-form');
-        const editEmployeeDocIdInput = document.getElementById('edit-employee-doc-id');
-        const editEmployeeIdInput = document.getElementById('edit-employee-id'); 
-        const editFullNameInput = document.getElementById('edit-full-name');
-        const editPositionInput = document.getElementById('edit-position');
-        const editAddressInput = document.getElementById('edit-address');
-        const editContactNoInput = document.getElementById('edit-contact-no');
-        const editSalaryRateInput = document.getElementById('edit-salary-rate');
-        const editSssContributionInput = document.getElementById('edit-sss-contribution');
-        const editPhilhealthContributionInput = document.getElementById('edit-ph-contribution');
-        const editPagibigContributionInput = document.getElementById('edit-pagibig-contribution');
-
-
-        // Site Modals
-        const addSiteButton = document.getElementById('add-site-button');
-        const addSiteModal = document.getElementById('add-site-modal');
-        const cancelAddSite = document.getElementById('cancel-add-site');
-        const addSiteForm = document.getElementById('add-site-form'); 
-        const siteIdInput = document.getElementById('site-id');
-
-        // Delete Confirmation Modal
-        const deleteConfirmationModal = document.getElementById('delete-confirmation-modal');
-        const cancelDeleteButton = document.getElementById('cancel-delete-button');
-        const confirmDeleteButton = document.getElementById('confirm-delete-button');
-        let employeeToDeleteDocId = null; // To store the ID of the employee to be deleted
-
-        // Payroll Input Modal elements
-        const payrollInputModal = document.getElementById('payroll-input-modal');
-        const cancelPayrollInputButton = document.getElementById('cancel-payroll-input');
-        const payrollEmployeeNameSpan = document.getElementById('payroll-employee-name');
-        const payrollEmployeeIdSpan = document.getElementById('payroll-employee-id');
-        const payrollEmployeeDocIdInput = document.getElementById('payroll-employee-doc-id'); // New hidden input for doc ID
-        const payrollEmployeeSalaryRateInput = document.getElementById('payroll-employee-salary-rate');
-        const workingDaysInput = document.getElementById('working-days');
-        const overtimeHrsInput = document.getElementById('overtime-hrs');
-        const sundayHolidayDutyInput = document.getElementById('sunday-holiday-duty');
-        const nightShiftWorkDaysInput = document.getElementById('night-shift-work-days');
-        const nightShiftOvertimeHrsInput = document.getElementById('night-shift-overtime-hrs');
-        const calculatedBasicPaySpan = document.getElementById('calculated-basic-pay');
-        const calculatedOvertimePaySpan = document.getElementById('calculated-overtime-pay');
-        const calculatedSundayHolidayPaySpan = document.getElementById('calculated-sunday-holiday-pay');
-        const calculatedNightShiftDifferentialSpan = document.getElementById('calculated-night-shift-differential');
-        const calculatedNightShiftOvertimePaySpan = document.getElementById('calculated-night-shift-overtime-pay');
-        const calculatedGrossPaySpan = document.getElementById('calculated-gross-pay');
-        const payrollInputForm = document.getElementById('payroll-input-form'); // Reference to the form
-
-        // Deductions Input Modal elements
-        const deductionsInputModal = document.getElementById('deductions-input-modal');
-        const cancelDeductionsInputButton = document.getElementById('cancel-deductions-input');
-        const deductionsEmployeeNameSpan = document.getElementById('deductions-employee-name');
-        const deductionsEmployeeIdSpan = document.getElementById('deductions-employee-id');
-        const deductionsEmployeeDocIdInput = document.getElementById('deductions-employee-doc-id');
-        const deductionsEmployeePayrollDocIdInput = document.getElementById('deductions-employee-payroll-doc-id');
-        const deductionsGrossPaySpan = document.getElementById('deductions-gross-pay');
-        // New elements for SSS, PhilHealth, Pag-IBIG contributions in deductions modal
-        const deductionsSssContributionSpan = document.getElementById('deductions-sss-contribution');
-        const deductionsPhContributionSpan = document.getElementById('deductions-ph-contribution');
-        const deductionsPagibigContributionSpan = document.getElementById('deductions-pagibig-contribution');
-        const hiddenSssContributionInput = document.getElementById('hidden-sss-contribution');
-        const hiddenPhContributionInput = document.getElementById('hidden-ph-contribution');
-        const hiddenPagibigContributionInput = document.getElementById('hidden-pagibig-contribution');
-
-        const govtLoanInput = document.getElementById('govt-loan');
-        const coopShareInput = document.getElementById('coop-share');
-        const withholdingTaxInput = document.getElementById('withholding-tax');
-        const unpaidLoanInput = document.getElementById('unpaid-loan');
-        const coop2025Input = document.getElementById('coop-2025');
-        const caVoucherInput = document.getElementById('ca-voucher');
-        const dailyValeInput = document.getElementById('daily-vale');
-        const othersDeductionInput = document.getElementById('others-deduction');
-        const calculatedTotalDeductionsSpan = document.getElementById('calculated-total-deductions');
-        const calculatedNetPaySpan = document.getElementById('calculated-net-pay');
-        const deductionsInputForm = document.getElementById('deductions-input-form');
-
-
-        /**
-         * Populates the Department/Site dropdowns with data from Firestore sites.
-         * Clears existing options before populating.
-         */
-        const populateDepartmentSiteDropdown = async () => {
-            const dropdowns = [departmentSiteDropdown, editDepartmentSiteDropdown];
-            
-            // Clear existing options in both dropdowns
-            dropdowns.forEach(dropdown => {
-                if (dropdown) {
-                    dropdown.innerHTML = '<option value="">Select Department/Site</option>'; 
-                }
-            });
+        // Handle user registration
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            registerErrorMessage.textContent = '';
+            registerErrorMessage.classList.add('hidden');
 
             try {
-                if (!userId) {
-                    console.warn("User not authenticated yet. Cannot fetch sites for dropdown.");
-                    return;
-                }
-                const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-                const querySnapshot = await getDocs(q); // Use getDocs for a one-time fetch
-                querySnapshot.forEach((doc) => {
-                    const site = doc.data();
-                    const option = document.createElement('option');
-                    option.value = site.siteName;
-                    option.textContent = `Site: ${site.siteName} (${site.siteLocation})`;
-                    
-                    dropdowns.forEach(dropdown => {
-                        if (dropdown) {
-                            dropdown.appendChild(option.cloneNode(true)); // Clone to add to both
-                        }
-                    });
-                });
-            } catch (e) {
-                console.error("Error populating department/site dropdown: ", e);
-            }
-        };
+                await setPersistence(auth, browserSessionPersistence);
+                
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const newUser = userCredential.user;
+                const userDocRef = doc(db, usersCollection, newUser.uid);
+                
+                const isFirstAdmin = newUser.email === ADMIN_EMAIL;
 
-        /**
-         * Populates the Payroll Summary Department/Site filter dropdown with unique department/site names.
-         */
-        const populatePayrollSummaryDepartmentFilter = async () => {
-            if (!payrollSummaryDepartmentFilter) return;
-
-            payrollSummaryDepartmentFilter.innerHTML = '<option value="">All Departments/Sites</option>'; // Always start with "All" option
-
-            try {
-                if (!userId) {
-                    console.warn("User not authenticated yet. Cannot fetch employees for filter dropdown.");
-                    return;
-                }
-                const q = query(collection(db, `/artifacts/${appId}/public/data/employees`));
-                const querySnapshot = await getDocs(q);
-                const uniqueDepartments = new Set();
-                querySnapshot.forEach((doc) => {
-                    const employee = doc.data();
-                    if (employee.departmentSite) {
-                        uniqueDepartments.add(employee.departmentSite);
-                    }
+                await setDoc(userDocRef, {
+                    name: name,
+                    email: newUser.email,
+                    points: 0,
+                    isActive: isFirstAdmin,
+                    isAdmin: isFirstAdmin,
+                    playing: false,
+                    createdAt: serverTimestamp(),
+                    lastActive: null,
                 });
 
-                Array.from(uniqueDepartments).sort().forEach(department => {
-                    const option = document.createElement('option');
-                    option.value = department;
-                    option.textContent = department;
-                    payrollSummaryDepartmentFilter.appendChild(option);
-                });
-            } catch (e) {
-                console.error("Error populating payroll summary department filter: ", e);
-            }
-        };
-
-
-        /**
-         * Fetches and displays employee data in the Manage Employee, Process Payroll,
-         * and Deductions tables. Groups employees by department/site for payroll/deductions.
-         * Updates dashboard employee and payroll counts.
-         */
-        const fetchEmployees = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch employees.");
-                return;
-            }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/employees`), orderBy("departmentSite"));
-            onSnapshot(q, (querySnapshot) => {
-                employeeListBody.innerHTML = ''; // Clear current list for Manage Employee
-                processPayrollTablesContainer.innerHTML = ''; // Clear current list for Process Payroll
-                deductionsTablesContainer.innerHTML = ''; // Clear current list for Deductions
-
-                let totalEmployees = 0;
-                let totalPayroll = 0;
-                const groupedEmployees = {}; // Object to group employees by department/site
-
-                querySnapshot.forEach((doc) => {
-                    totalEmployees++;
-                    const employee = doc.data();
-                    const employeeId = doc.id; 
-                    totalPayroll += parseFloat(employee.salaryRate || 0);
-
-                    // Add employee to the groupedEmployees object
-                    const departmentSite = employee.departmentSite || 'Unassigned';
-                    if (!groupedEmployees[departmentSite]) {
-                        groupedEmployees[departmentSite] = [];
-                    }
-                    groupedEmployees[departmentSite].push({ ...employee, docId: doc.id });
-
-                    // Row for Manage Employee table
-                    const manageRow = employeeListBody.insertRow();
-                    manageRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                    manageRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${employee.employeeId || employeeId}</td>
-                        <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.departmentSite || ''}</td>
-                        <td class="py-3 px-6 text-left">${employee.contactNo || ''}</td>
-                        <td class="py-3 px-6 text-left">₱ ${parseFloat(employee.salaryRate || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">Active</span></td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                });
-                totalEmployeesCard.textContent = totalEmployees;
-                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-                // Dynamically create tables for Process Payroll based on grouped employees
-                for (const siteName in groupedEmployees) {
-                    // Process Payroll Table
-                    let payrollSiteSection = document.createElement('div');
-                    payrollSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
-                    payrollSiteSection.innerHTML += `
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                                <thead>
-                                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                        <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
-                                        <th class="py-2 px-4 text-left">Name</th>
-                                        <th class="py-2 px-4 text-left">Position</th>
-                                        <th class="py-2 px-4 text-left">Status</th>
-                                        <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-600 text-sm font-light" id="process-payroll-table-${siteName.replace(/\s/g, '-')}-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                    processPayrollTablesContainer.appendChild(payrollSiteSection);
-
-                    let currentPayrollSiteTbody = document.getElementById(`process-payroll-table-${siteName.replace(/\s/g, '-')}-body`);
-
-                    // Deductions Table
-                    let deductionsSiteSection = document.createElement('div');
-                    deductionsSiteSection.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'mb-6');
-                    deductionsSiteSection.innerHTML += `
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Department/Site: ${siteName}</h3>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white rounded-lg border border-gray-200">
-                                <thead>
-                                    <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                                        <th class="py-2 px-4 text-left rounded-tl-lg">Employee ID</th>
-                                        <th class="py-2 px-4 text-left">Name</th>
-                                        <th class="py-2 px-4 text-left">Position</th>
-                                        <th class="py-2 px-4 text-left">Status</th>
-                                        <th class="py-2 px-4 text-center rounded-tr-lg">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="text-gray-600 text-sm font-light" id="deductions-table-${siteName.replace(/\s/g, '-')}-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                    deductionsTablesContainer.appendChild(deductionsSiteSection);
-
-                    let currentDeductionsSiteTbody = document.getElementById(`deductions-table-${siteName.replace(/\s/g, '-')}-body`);
-
-                    groupedEmployees[siteName].forEach(employee => {
-                        // Populate Process Payroll Table
-                        const payrollRow = currentPayrollSiteTbody.insertRow();
-                        payrollRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        payrollRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">
-                                <button class="text-blue-600 hover:underline open-payroll-input-btn" data-id="${employee.docId}">
-                                    ${employee.employeeId || employee.docId}
-                                </button>
-                            </td>
-                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-payroll" data-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-payroll" data-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-
-                        // Populate Deductions Table
-                        const deductionsRow = currentDeductionsSiteTbody.insertRow();
-                        deductionsRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        deductionsRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">
-                                <button class="text-blue-600 hover:underline open-deductions-input-btn" data-id="${employee.docId}">
-                                    ${employee.employeeId || employee.docId}
-                                </button>
-                            </td>
-                            <td class="py-3 px-6 text-left">${employee.fullName || ''}</td>
-                            <td class="py-3 px-6 text-left">${employee.position || ''}</td>
-                            <td class="py-3 px-6 text-left"><span class="bg-green-200 text-green-600 py-1 px-3 rounded-full text-xs">${employee.status || ''}</span></td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex item-center justify-center space-x-2">
-                                    <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-employee-btn-deductions" data-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-employee-btn-deductions" data-id="${employee.docId}">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                    });
-                }
-
-                // Attach event listeners after all content is loaded
-                attachEmployeeActionListeners();
-
-            }, (error) => {
-                console.error("Error fetching employees: ", error);
-            });
-        };
-
-        /**
-         * Attaches event listeners to dynamically created edit/delete buttons
-         * for employees across different tabs.
-         */
-        const attachEmployeeActionListeners = () => {
-            // For Manage Employee tab
-            document.querySelectorAll('#employee-list-body .edit-employee-btn').forEach(button => {
-                button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#employee-list-body .delete-employee-btn').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
-            });
-
-            // For Process Payroll tab (buttons inside dynamically generated tables)
-            document.querySelectorAll('#process-payroll-tables-container .edit-employee-btn-payroll').forEach(button => {
-                button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#process-payroll-tables-container .delete-employee-btn-payroll').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('.open-payroll-input-btn').forEach(button => {
-                button.onclick = (e) => openPayrollInputModal(e.currentTarget.dataset.id);
-            });
-
-            // For Deductions tab (buttons inside dynamically generated tables)
-            document.querySelectorAll('#deductions-tables-container .edit-employee-btn-deductions').forEach(button => {
-                button.onclick = (e) => openEditEmployeeModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('#deductions-tables-container .delete-employee-btn-deductions').forEach(button => {
-                button.onclick = (e) => openDeleteConfirmationModal(e.currentTarget.dataset.id);
-            });
-            document.querySelectorAll('.open-deductions-input-btn').forEach(button => {
-                button.onclick = (e) => openDeductionsModal(e.currentTarget.dataset.id);
-            });
-        };
-
-
-        /**
-         * Fetches and displays site data in the Manage Sites table.
-         * Updates the dashboard active sites count.
-         */
-        const fetchSites = () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch sites.");
-                return;
-            }
-            const q = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-            onSnapshot(q, (querySnapshot) => {
-                siteListBody.innerHTML = ''; // Clear current list
-                let activeSitesCount = 0;
-                querySnapshot.forEach((doc) => {
-                    const site = doc.data();
-                    // Removed status check for active sites as status field is removed from site
-                    // if (site.siteStatus === 'Ongoing') {
-                    //     activeSitesCount++;
-                    // }
-                    const newRow = siteListBody.insertRow();
-                    newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-
-                    // Removed statusColorClass logic
-                    newRow.innerHTML = `
-                        <td class="py-3 px-6 text-left whitespace-nowrap">${site.siteId || doc.id}</td>
-                        <td class="py-3 px-6 text-left">${site.siteName || ''}</td>
-                        <td class="py-3 px-6 text-left">${site.siteLocation || ''}</td>
-                        <td class="py-3 px-6 text-center">
-                            <div class="flex item-center justify-center space-x-2">
-                                <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-site-btn" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                </button>
-                                <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-site-btn" data-id="${doc.id}">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                });
-                // Since status is removed, we can't count "active" sites directly from siteStatus.
-                // For now, setting to total sites. You might need to define "active" differently.
-                activeSitesCard.textContent = querySnapshot.size; 
-                populateDepartmentSiteDropdown(); // Re-populate dropdown after sites are fetched
-            }, (error) => {
-                console.error("Error fetching sites: ", error);
-            });
-        };
-
-        /**
-         * Updates the dashboard cards with current employee and site counts.
-         */
-        const updateDashboardCounts = async () => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot update dashboard counts.");
-                return;
-            }
-            try {
-                // Employees
-                const employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
-                const employeeSnapshot = await getDocs(employeesQuery);
-                let totalEmployees = employeeSnapshot.size;
-                let totalPayroll = 0;
-                employeeSnapshot.forEach(doc => {
-                    const employee = doc.data();
-                    totalPayroll += parseFloat(employee.salaryRate || 0);
-                });
-                totalEmployeesCard.textContent = totalEmployees;
-                payrollProcessedCard.textContent = `₱ ${totalPayroll.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-
-                // Sites
-                const sitesQuery = query(collection(db, `/artifacts/${appId}/public/data/sites`));
-                const siteSnapshot = await getDocs(sitesQuery);
-                // Adjusted active sites count since siteStatus is removed
-                activeSitesCard.textContent = siteSnapshot.size; 
-
-                // Recent Activities (placeholder for now, you'd populate this with actual activity data)
-                recentActivitiesList.innerHTML = `
-                    <li class="py-3 flex justify-between items-center">
-                        <div>
-                            <p class="font-medium text-gray-900">No recent activities.</p>
-                        </div>
-                    </li>
-                `;
-
+                showModal('Registration successful! Please wait for an admin to activate your account.');
+                showScreen('login-screen');
             } catch (error) {
-                console.error("Error updating dashboard counts:", error);
+                registerErrorMessage.textContent = `Error: ${error.message}`;
+                registerErrorMessage.classList.remove('hidden');
             }
-        };
+        }
 
-        /**
-         * Fetches and displays a summary of payroll and deduction records per employee.
-         * @param {string} departmentSiteFilter - Optional. The department/site name to filter by.
-         * If empty or null, all employees are included.
-         */
-        const fetchPayrollSummary = async (departmentSiteFilter = '') => {
-            if (!userId) {
-                console.warn("User not authenticated. Cannot fetch payroll summary.");
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
-                return;
-            }
-
-            if (!isAdminMode) {
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Please activate admin mode to view payroll summary.</td></tr>`;
-                return;
-            }
-
-
-            payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">Loading payroll summary...</td></tr>`;
+        // Handle user login
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            authErrorMessage.textContent = '';
+            authErrorMessage.classList.add('hidden');
 
             try {
-                // 1. Fetch employees, optionally filtered by department/site
-                let employeesQuery;
-                if (departmentSiteFilter) {
-                    employeesQuery = query(
-                        collection(db, `/artifacts/${appId}/public/data/employees`),
-                        where("departmentSite", "==", departmentSiteFilter)
-                    );
+                await setPersistence(auth, browserSessionPersistence);
+                
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const loggedInUser = userCredential.user;
+                const userDocRef = doc(db, usersCollection, loggedInUser.uid);
+                const userSnap = await getDoc(userDocRef);
+
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    if (userData.isActive || userData.isAdmin) {
+                        // Success, onAuthStateChanged will handle the rest
+                    } else {
+                        await signOut(auth);
+                        authErrorMessage.textContent = 'Account is inactive. Please contact an admin.';
+                        authErrorMessage.classList.remove('hidden');
+                    }
                 } else {
-                    employeesQuery = query(collection(db, `/artifacts/${appId}/public/data/employees`));
+                     await signOut(auth);
+                     authErrorMessage.textContent = 'User data not found. Please register again.';
+                     authErrorMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                authErrorMessage.textContent = `Error: ${error.message}`;
+                authErrorMessage.classList.remove('hidden');
+            }
+        }
+
+        // Handle user logout
+        async function handleLogout() {
+            if (isPlaying) {
+                await handleEndPlaying();
+            }
+            await signOut(auth);
+        }
+        
+        // Unsubscribe all active listeners
+        function unsubscribeAll() {
+            if (unsubscribeAdminListeners) {
+                unsubscribeAdminListeners();
+                unsubscribeAdminListeners = null;
+            }
+            if (unsubscribeUserListeners) {
+                unsubscribeUserListeners();
+                unsubscribeUserListeners = null;
+            }
+        }
+
+        // Auth state observer
+        onAuthStateChanged(auth, async (user) => {
+            unsubscribeAll(); 
+            if (user) {
+                currentUser = user;
+                const userDocRef = doc(db, usersCollection, currentUser.uid);
+                const userSnap = await getDoc(userDocRef);
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    isAdmin = userData.isAdmin;
+                    currentPoints = userData.points || 0;
+                    isPlaying = userData.playing || false;
+
+                    if (isAdmin) {
+                        showScreen('admin-dashboard-screen');
+                        unsubscribeAdminListeners = setupAdminListeners();
+                    } else if (userData.isActive) {
+                        showScreen('user-dashboard-screen');
+                        unsubscribeUserListeners = setupUserListeners();
+                        if (isPlaying) {
+                            const lastActiveTime = userData.lastActive ? userData.lastActive.toDate().getTime() : new Date().getTime();
+                            const elapsedTimeSeconds = Math.floor((new Date().getTime() - lastActiveTime) / 1000);
+                            startPlaytimeTimer(elapsedTimeSeconds);
+                            startPointTimer();
+                        }
+                    } else {
+                        await signOut(auth);
+                        showScreen('login-screen');
+                    }
+                } else {
+                    await signOut(auth);
+                }
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                if (playingTimer) clearInterval(playingTimer);
+                if (playtimeTimerInterval) clearInterval(playtimeTimerInterval);
+                playingTimer = null;
+                playtimeTimerInterval = null;
+                showScreen('login-screen');
+            }
+        });
+
+        // --- ADMIN DASHBOARD FUNCTIONS ---
+
+        function setupAdminListeners() {
+            const usersSub = onSnapshot(collection(db, usersCollection), (snapshot) => {
+                const userList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderUserList(userList.filter(u => !u.isAdmin));
+            });
+
+            const claimsSub = onSnapshot(collection(db, claimsCollection), (snapshot) => {
+                const claimList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderClaimList(claimList.filter(c => c.status === 'Pending'));
+            });
+
+            const settingsSub = onSnapshot(settingsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const settingsData = docSnap.data();
+                    shopIpAddress = settingsData.allowedIpAddress || '';
+                    document.getElementById('shop-ip-address').value = shopIpAddress;
+                }
+            });
+            
+            return () => {
+                usersSub();
+                claimsSub();
+                settingsSub();
+            };
+        }
+        
+        function renderUserList(users) {
+            const userListBody = document.getElementById('user-list');
+            userListBody.innerHTML = '';
+            users.forEach(u => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700';
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-sm font-mono text-gray-400 break-all">${u.id}</td>
+                    <td class="py-3 px-4">${u.email}</td>
+                    <td class="py-3 px-4 font-bold text-cyan-400">${(u.points || 0).toFixed(1)}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${u.playing ? 'bg-green-500' : 'bg-gray-500'} text-white">
+                            ${u.playing ? 'Online' : 'Offline'}
+                        </span>
+                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${u.isActive ? 'bg-blue-500' : 'bg-red-500'} text-white">
+                            ${u.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 flex space-x-2">
+                        <button class="toggle-active-btn p-2 rounded-full ${u.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white transition-colors duration-300" data-uid="${u.id}" data-status="${u.isActive}">
+                            <i class="fa-solid ${u.isActive ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </button>
+                        <button class="delete-user-btn p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors duration-300" data-uid="${u.id}">
+                            <i class="fa-solid fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                userListBody.appendChild(row);
+            });
+            userListBody.querySelectorAll('.toggle-active-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.dataset.uid;
+                    const status = e.currentTarget.dataset.status === 'true';
+                    handleToggleUserActive(userId, !status);
+                });
+            });
+            userListBody.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const userId = e.currentTarget.dataset.uid;
+                    handleDeleteUser(userId);
+                });
+            });
+        }
+        
+        async function handleToggleUserActive(userId, newStatus) {
+            try {
+                await updateDoc(doc(db, usersCollection, userId), { isActive: newStatus });
+            } catch (e) {
+                console.error("Error updating user status:", e);
+                showModal('Failed to update user status. Check console and security rules.');
+            }
+        }
+
+        async function handleDeleteUser(userId) {
+            showConfirm("Are you sure you want to delete this user? This action cannot be undone.", async () => {
+                try {
+                    await deleteDoc(doc(db, usersCollection, userId));
+                } catch (e) {
+                    console.error("Error deleting user:", e);
+                    showModal('Failed to delete user. Check console and security rules.');
+                }
+            });
+        }
+
+        async function handleCreateVoucher(e) {
+            e.preventDefault();
+            const name = document.getElementById('voucher-name').value;
+            const pointsNeeded = document.getElementById('voucher-points').value;
+            const description = document.getElementById('voucher-description').value;
+            
+            try {
+                await addDoc(collection(db, vouchersCollection), {
+                    name,
+                    pointsNeeded: parseFloat(pointsNeeded),
+                    description,
+                    createdAt: serverTimestamp()
+                });
+                showModal('Voucher created successfully!');
+                document.getElementById('create-voucher-form').reset();
+            } catch (e) {
+                console.error("Error creating voucher:", e);
+                showModal('Failed to create voucher.');
+            }
+        }
+
+        async function handleSaveShopIp(e) {
+            e.preventDefault();
+            const ipAddress = document.getElementById('shop-ip-address').value;
+            try {
+                await setDoc(settingsDocRef, {
+                    allowedIpAddress: ipAddress
+                }, { merge: true });
+                showModal('Shop IP address saved successfully!');
+            } catch (e) {
+                console.error("Error saving shop IP:", e);
+                showModal('Failed to save IP address.');
+            }
+        }
+
+        function renderClaimList(claims) {
+            const claimListBody = document.getElementById('claim-list');
+            claimListBody.innerHTML = '';
+            claims.forEach(c => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-700';
+                row.innerHTML = `
+                    <td class="py-3 px-4">${c.userEmail}</td>
+                    <td class="py-3 px-4">${c.voucherName || 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-500 text-white">
+                            ${c.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 flex space-x-2">
+                        <button class="approve-claim-btn p-2 bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors duration-300" data-cid="${c.id}" data-uid="${c.userId}" data-vid="${c.voucherId}">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button class="decline-claim-btn p-2 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors duration-300" data-cid="${c.id}">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </td>
+                `;
+                claimListBody.appendChild(row);
+            });
+            claimListBody.querySelectorAll('.approve-claim-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { cid, uid, vid } = e.currentTarget.dataset;
+                    handleApproveClaim(cid, uid, vid);
+                });
+            });
+            claimListBody.querySelectorAll('.decline-claim-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const { cid } = e.currentTarget.dataset;
+                    handleDeclineClaim(cid);
+                });
+            });
+        }
+        
+        async function handleDeclineClaim(claimId) {
+            try {
+                await updateDoc(doc(db, claimsCollection, claimId), { status: 'Declined' });
+                showModal(`Claim declined successfully.`);
+            } catch(e) {
+                console.error("Error declining claim:", e);
+                showModal('Failed to decline claim. Check console and security rules.');
+            }
+        }
+
+        async function handleApproveClaim(claimId, userId, voucherId) {
+            try {
+                const voucherDoc = await getDoc(doc(db, vouchersCollection, voucherId));
+                if (!voucherDoc.exists()) {
+                    showModal('Error: This voucher no longer exists. Declining claim.');
+                    await handleDeclineClaim(claimId);
+                    return;
+                }
+                const voucherData = voucherDoc.data();
+                const pointsNeeded = voucherData.pointsNeeded;
+
+                const userDoc = await getDoc(doc(db, usersCollection, userId));
+                if (!userDoc.exists()) {
+                    showModal('Error: This user no longer exists. Declining claim.');
+                    await handleDeclineClaim(claimId);
+                    return;
+                }
+                const userData = userDoc.data();
+                const userCurrentPoints = userData.points;
+
+                if (userCurrentPoints >= pointsNeeded) {
+                    await updateDoc(doc(db, usersCollection, userId), {
+                        points: userCurrentPoints - pointsNeeded
+                    });
+                    await updateDoc(doc(db, claimsCollection, claimId), { status: 'Approved' });
+                    showModal(`Claim approved. ${pointsNeeded.toFixed(1)} points deducted from user.`);
+                } else {
+                    showModal(`Cannot approve. User has insufficient points. Declining claim.`);
+                    await handleDeclineClaim(claimId);
+                }
+            } catch (e) {
+                console.error("Error approving claim:", e);
+                showModal('Failed to approve claim. Check console and security rules.');
+            }
+        }
+
+
+        // --- USER DASHBOARD FUNCTIONS ---
+
+        function setupUserListeners() {
+            const userSub = onSnapshot(doc(db, usersCollection, currentUser.uid), (docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data();
+                    currentPoints = userData.points || 0;
+                    isPlaying = userData.playing || false;
+                    renderUserDashboard(userData);
+                }
+            });
+
+            const vouchersSub = onSnapshot(collection(db, vouchersCollection), (snapshot) => {
+                const vouchers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderVouchers(vouchers);
+            });
+            
+            const settingsSub = onSnapshot(settingsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const settingsData = docSnap.data();
+                    shopIpAddress = settingsData.allowedIpAddress || '';
+                }
+            });
+            
+            return () => {
+                userSub();
+                vouchersSub();
+                settingsSub();
+            };
+        }
+
+        function renderUserDashboard(userData) {
+            document.getElementById('user-points').textContent = (userData.points || 0).toFixed(1);
+            userGreetingElement.textContent = `Hello, ${userData.name || 'User'}!`;
+
+            const statusIcon = document.getElementById('user-status-icon');
+            const statusText = document.getElementById('user-status-text');
+            const startBtn = document.getElementById('start-playing-btn');
+            const endBtn = document.getElementById('end-playing-btn');
+            
+            if (userData.playing) {
+                statusIcon.className = 'p-4 rounded-full mb-4 bg-green-500 animate-pulse';
+                statusText.textContent = 'Status: Playing';
+                startBtn.disabled = true;
+                endBtn.disabled = false;
+            } else {
+                statusIcon.className = 'p-4 rounded-full mb-4 bg-gray-500';
+                statusText.textContent = 'Status: Offline';
+                startBtn.disabled = false;
+                endBtn.disabled = true;
+            }
+            
+            if (userData.playing && playtimeTimerInterval === null) {
+                const lastActiveTime = userData.lastActive ? userData.lastActive.toDate().getTime() : new Date().getTime();
+                const elapsedTimeSeconds = Math.floor((new Date().getTime() - lastActiveTime) / 1000);
+                startPlaytimeTimer(elapsedTimeSeconds);
+                startPointTimer();
+            } else if (!userData.playing) {
+                if (playingTimer) clearInterval(playingTimer);
+                if (playtimeTimerInterval) clearInterval(playtimeTimerInterval);
+                playingTimer = null;
+                playtimeTimerInterval = null;
+                playtimeTimerElement.textContent = '00:00:00';
+            }
+        }
+
+        function renderVouchers(vouchers) {
+            const voucherListDiv = document.getElementById('voucher-list');
+            voucherListDiv.innerHTML = '';
+            vouchers.forEach(v => {
+                const voucherCard = document.createElement('div');
+                voucherCard.className = 'bg-gray-700 p-6 rounded-xl shadow-md border border-gray-600 flex flex-col';
+                voucherCard.innerHTML = `
+                    <div class="flex-grow">
+                        <h4 class="text-xl font-bold text-white mb-2">${v.name}</h4>
+                        <p class="text-gray-400 text-sm mb-4">${v.description}</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-semibold text-cyan-400 mb-4">
+                            Cost: ${parseFloat(v.pointsNeeded).toFixed(1)} Points
+                        </p>
+                        <button class="claim-voucher-btn w-full py-2 px-4 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-300 disabled:bg-gray-600 transform hover:scale-105"
+                            data-vid="${v.id}" data-vname="${v.name}" data-points="${v.pointsNeeded}">
+                            Claim Voucher
+                        </button>
+                    </div>
+                `;
+                const claimButton = voucherCard.querySelector('.claim-voucher-btn');
+                if (currentPoints < v.pointsNeeded) {
+                    claimButton.disabled = true;
+                    claimButton.textContent = 'Insufficient Points';
+                }
+                claimButton.addEventListener('click', (e) => {
+                    const { vid, vname, points } = e.currentTarget.dataset;
+                    handleClaimVoucher(vid, vname, parseFloat(points));
+                });
+                voucherListDiv.appendChild(voucherCard);
+            });
+        }
+
+        async function getUserIpAddress() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                if (!response.ok) throw new Error('Failed to fetch IP address');
+                const data = await response.json();
+                return data.ip;
+            } catch (e) {
+                console.error("Error fetching IP address:", e);
+                return null;
+            }
+        }
+        
+        async function handleStartPlaying() {
+            if (currentUser && !isPlaying) {
+                if (!shopIpAddress) {
+                    showModal('Admin has not set the shop IP address. Please contact the admin.');
+                    return;
+                }
+
+                const userIp = await getUserIpAddress();
+                if (!userIp) {
+                    showModal('Failed to get your IP address. Please check your internet connection.');
+                    return;
                 }
                 
-                const employeesSnapshot = await getDocs(employeesQuery);
-                const employeesMap = {};
-                employeesSnapshot.forEach(doc => {
-                    employeesMap[doc.id] = doc.data();
-                });
-
-                // 2. Fetch all payroll records
-                const payrollQuery = query(collection(db, `/artifacts/${appId}/public/data/payroll_records`));
-                const payrollSnapshot = await getDocs(payrollQuery);
-
-                // 3. Fetch all deduction records
-                const deductionQuery = query(collection(db, `/artifacts/${appId}/public/data/deduction_records`));
-                const deductionSnapshot = await getDocs(deductionQuery);
-
-                const employeeSummary = {};
-
-                // Aggregate payroll data, only for filtered employees
-                payrollSnapshot.forEach(doc => {
-                    const record = doc.data();
-                    const employeeDocId = record.employeeDocId;
-                    const employeeData = employeesMap[employeeDocId]; // Get employee details
-
-                    // Only include if employeeData exists (meaning it passed the department filter)
-                    if (employeeData) { 
-                        if (!employeeSummary[employeeDocId]) {
-                            employeeSummary[employeeDocId] = {
-                                employeeId: record.employeeId,
-                                employeeName: employeeData.fullName, // Use full name from employee data
-                                departmentSite: employeeData.departmentSite || 'N/A', // Get department/site
-                                totalGrossPay: 0,
-                                totalDeductions: 0,
-                                totalNetPay: 0, 
-                                payrollCount: 0,
-                            };
-                        }
-                        employeeSummary[employeeDocId].totalGrossPay += record.grossPay || 0;
-                        employeeSummary[employeeDocId].payrollCount++;
-                    }
-                });
-
-                // Aggregate deduction data, only for filtered employees
-                deductionSnapshot.forEach(doc => {
-                    const record = doc.data();
-                    const employeeDocId = record.employeeDocId;
-
-                    // Only include if employeeSummary already contains this employee (meaning it passed the department filter)
-                    if (employeeSummary[employeeDocId]) {
-                        employeeSummary[employeeDocId].totalDeductions += record.totalDeductions || 0;
-                    }
-                });
-
-                // Calculate total net pay for each employee and convert to array
-                const summaryArray = [];
-                for (const empDocId in employeeSummary) {
-                    const summary = employeeSummary[empDocId];
-                    summary.totalNetPay = summary.totalGrossPay - summary.totalDeductions;
-                    summaryArray.push(summary);
+                if (userIp !== shopIpAddress) {
+                    showModal('You can only earn points while inside the shop network.');
+                    return;
                 }
 
-                // Sort the summary array by departmentSite
-                summaryArray.sort((a, b) => {
-                    const siteA = a.departmentSite.toUpperCase(); // ignore case
-                    const siteB = b.departmentSite.toUpperCase(); // ignore case
-                    if (siteA < siteB) {
-                        return -1;
-                    }
-                    if (siteA > siteB) {
-                        return 1;
-                    }
-                    // If department/site is the same, sort by employee name
-                    const nameA = a.employeeName.toUpperCase();
-                    const nameB = b.employeeName.toUpperCase();
-                    if (nameA < nameB) {
-                        return -1;
-                    }
-                    if (nameA > nameB) {
-                        return 1;
-                    }
-                    return 0; // names must be equal
-                });
-
-
-                // Clear and populate the table
-                payrollSummaryListBody.innerHTML = '';
-                if (summaryArray.length === 0) {
-                    payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-gray-500">No payroll summary data available for this selection.</td></tr>`;
-                } else {
-                    summaryArray.forEach(summary => {
-                        const newRow = payrollSummaryListBody.insertRow();
-                        newRow.classList.add('border-b', 'border-gray-200', 'hover:bg-gray-100');
-                        newRow.innerHTML = `
-                            <td class="py-3 px-6 text-left whitespace-nowrap">${summary.employeeId || 'N/A'}</td>
-                            <td class="py-3 px-6 text-left">${summary.employeeName || ''}</td>
-                            <td class="py-3 px-6 text-left">${summary.departmentSite || 'N/A'}</td> <!-- NEW CELL -->
-                            <td class="py-3 px-6 text-left">₱ ${summary.totalGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-left">₱ ${summary.totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-left">₱ ${summary.totalNetPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            <td class="py-3 px-6 text-center">${summary.payrollCount}</td>
-                        `;
+                try {
+                    await updateDoc(doc(db, usersCollection, currentUser.uid), {
+                        playing: true,
+                        lastActive: serverTimestamp(),
                     });
-                }
-
-            } catch (e) {
-                console.error("Error fetching payroll summary: ", e);
-                payrollSummaryListBody.innerHTML = `<tr><td colspan="7" class="py-3 px-6 text-center text-red-500">Error loading summary: ${e.message}</td></tr>`;
-            }
-        };
-
-        /**
-         * Shows the selected content tab and updates the navigation button's active state.
-         * Also triggers data fetching for relevant tabs.
-         * @param {string} targetId - The ID of the content section to display.
-         */
-        const showContent = (targetId) => {
-            pageContents.forEach(content => {
-                content.classList.add('hidden');
-                content.classList.remove('active');
-            });
-
-            const targetContent = document.getElementById(targetId + '-content');
-            if (targetContent) {
-                targetContent.classList.remove('hidden');
-                targetContent.classList.add('active');
-            }
-
-            const buttonText = document.querySelector(`.nav-button[data-target="${targetId}"]`).textContent.trim();
-            currentPageTitle.textContent = buttonText;
-
-            navButtons.forEach(button => {
-                if (button.dataset.target === targetId) {
-                    button.classList.add('bg-gray-700', 'text-white');
-                    button.classList.remove('text-gray-300', 'hover:bg-gray-700');
-                } else {
-                    button.classList.remove('bg-gray-700', 'text-white');
-                    button.classList.add('text-gray-300', 'hover:bg-gray-700');
+                } catch (e) {
+                    console.error("Error starting playtime:", e);
                 }
             }
-            );
+        }
 
-            // Re-fetch data when switching to relevant tabs
-            if (targetId === 'manage-employee' || targetId === 'process-payroll' || targetId === 'deductions') {
-                fetchEmployees(); // Will populate all relevant tables
-                populateDepartmentSiteDropdown();
-            } else if (targetId === 'site') {
-                fetchSites();
-            } else if (targetId === 'dashboard') {
-                updateDashboardCounts();
-            } else if (targetId === 'payroll-summary') {
-                populatePayrollSummaryDepartmentFilter(); // Populate filter dropdown first
-                fetchPayrollSummary(); // Call the new function to load summary (initially all)
-            }
-        };
-
-
-        // Authenticate user with Firebase
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                console.log("Authenticated with Firebase UID:", userId);
-            } else {
+        async function handleEndPlaying() {
+            if (currentUser && isPlaying) {
                 try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in with custom token. User ID:", userId);
-                    } else {
-                        // If no initialAuthToken, try anonymous sign-in
-                        await signInAnonymously(auth);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in anonymously (no custom token). User ID:", userId);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed, attempting fallback to anonymous:", error);
+                    await updateDoc(doc(db, usersCollection, currentUser.uid), {
+                        playing: false,
+                    });
+                } catch (e) {
+                    console.error("Error ending playtime:", e);
+                }
+            }
+        }
+
+        async function handleClaimVoucher(voucherId, voucherName, pointsNeeded) {
+            const userDoc = await getDoc(doc(db, usersCollection, currentUser.uid));
+            if (userDoc.exists() && userDoc.data().points >= pointsNeeded) {
+                showConfirm(`Claim "${voucherName}" for ${pointsNeeded.toFixed(1)} points?`, async () => {
                     try {
-                        await signInAnonymously(auth);
-                        userId = auth.currentUser.uid;
-                        console.log("Signed in anonymously after initial auth failure. User ID:", userId);
-                    } catch (anonError) {
-                        console.error("Anonymous sign-in also failed:", anonError);
-                        // Fallback to random UUID if all Firebase auth fails
-                        userId = crypto.randomUUID();
-                        console.error("No Firebase user ID obtained, using a temporary UUID:", userId);
+                        await addDoc(collection(db, claimsCollection), {
+                            userId: currentUser.uid,
+                            voucherId: voucherId,
+                            voucherName: voucherName, // Store voucher name for easier display
+                            userEmail: currentUser.email,
+                            status: 'Pending',
+                            createdAt: serverTimestamp(),
+                        });
+                        showModal('Voucher claim submitted. Please wait for admin approval.');
+                    } catch (e) {
+                        console.error("Error claiming voucher:", e);
+                        showModal('Failed to submit claim.');
                     }
-                }
-            }
-
-            // After all authentication attempts, ensure userId is set and then fetch data
-            if (userId) {
-                console.log("Final User ID for data operations:", userId);
-                displayUserIdSpan.textContent = `User ID: ${userId}`; // Display the user ID
-                fetchEmployees();
-                fetchSites();
-                updateDashboardCounts();
-            } else {
-                console.error("Failed to obtain a user ID after all sign-in attempts. Data persistence will not work.");
-            }
-        });
-
-
-        /**
-         * Updates the visibility of admin-only UI elements based on `isAdminMode` status.
-         */
-        const updateAdminUI = () => {
-            adminFeatureElements.forEach(el => {
-                if (isAdminMode) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
-                }
-            });
-
-            if (activateAdminModeButton) {
-                if (isAdminMode) {
-                    activateAdminModeButton.classList.add('hidden'); // Hide activate button once activated
-                } else {
-                    activateAdminModeButton.classList.remove('hidden');
-                }
-            }
-            if (deactivateAdminModeButton) { // Control visibility of deactivate button
-                if (isAdminMode) {
-                    deactivateAdminModeButton.classList.remove('hidden');
-                } else {
-                    deactivateAdminModeButton.classList.add('hidden');
-                }
-            }
-        };
-
-        // Admin mode activation logic
-        if (activateAdminModeButton) {
-            activateAdminModeButton.addEventListener('click', () => {
-                if (adminModal) {
-                    adminModal.classList.remove('hidden');
-                    if (adminPasswordInput) adminPasswordInput.value = ''; // Clear previous input
-                    if (adminErrorMessage) adminErrorMessage.textContent = ''; // Clear previous error
-                }
-            });
-        }
-
-        if (cancelAdminModalButton) {
-            cancelAdminModalButton.addEventListener('click', () => {
-                if (adminModal) adminModal.classList.add('hidden');
-            });
-        }
-
-        if (activateAdminModalButton) {
-            activateAdminModalButton.addEventListener('click', () => {
-                if (adminPasswordInput && adminErrorMessage) {
-                    const enteredPassword = adminPasswordInput.value;
-                    if (enteredPassword === ADMIN_PASSWORD) {
-                        isAdminMode = true;
-                        sessionStorage.setItem('isAdminMode', 'true'); // Persist admin mode for the session
-                        if (adminModal) adminModal.classList.add('hidden');
-                        updateAdminUI();
-                        showContent('dashboard'); // Re-show dashboard to ensure correct active tab
-                        console.log("Admin mode activated!");
-                    } else {
-                        adminErrorMessage.textContent = "Incorrect password.";
-                    }
-                }
-            });
-        }
-
-        // Admin mode deactivation (logout) logic
-        if (deactivateAdminModeButton) {
-            deactivateAdminModeButton.addEventListener('click', () => {
-                isAdminMode = false;
-                sessionStorage.removeItem('isAdminMode'); // Remove admin mode from session storage
-                updateAdminUI(); // Update UI to hide admin features
-                showContent('dashboard'); // Redirect to dashboard
-                console.log("Admin mode deactivated!");
-            });
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Employee Management elements
-            const addEmployeeButton = document.getElementById('add-employee-button');
-            const addEmployeeModal = document.getElementById('add-employee-modal');
-            const cancelAddEmployee = document.getElementById('cancel-add-employee');
-            const addEmployeeForm = document.getElementById('add-employee-form');
-            const employeeIdInput = document.getElementById('employee-id');
-            
-
-            // Site Management elements
-            const addSiteButton = document.getElementById('add-site-button');
-            const addSiteModal = document.getElementById('add-site-modal');
-            const cancelAddSite = document.getElementById('cancel-add-site');
-            const addSiteForm = document.getElementById('add-site-form'); 
-            const siteIdInput = document.getElementById('site-id');
-            
-            // Check if admin mode was previously activated in this session
-            isAdminMode = sessionStorage.getItem('isAdminMode') === 'true';
-
-            // Set initial UI state based on admin mode
-            updateAdminUI();
-            
-            // Always show dashboard on initial load (or if admin mode isn't active)
-            showContent('dashboard'); 
-
-
-            /**
-             * Generates a unique employee ID in the format DLV-XXXXX.
-             * @returns {string} The generated employee ID.
-             */
-            const generateEmployeeId = () => {
-                const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
-                return `DLV-${randomNumbers}`;
-            };
-
-            /**
-             * Generates a unique site ID in the format DLV-SITE-XXXXX.
-             * @returns {string} The generated site ID.
-             */
-            const generateSiteId = () => {
-                const randomNumbers = Math.floor(10000 + Math.random() * 90000); // 5 random digits
-                return `DLV-SITE-${randomNumbers}`;
-            };
-
-            // Event listener for "Add New Employee" button
-            if (addEmployeeButton) { // Ensure button exists before adding listener
-                addEmployeeButton.addEventListener('click', () => {
-                    employeeIdInput.value = generateEmployeeId(); // Generate and set ID
-                    populateDepartmentSiteDropdown(); // Populate dropdown before showing modal
-                    addEmployeeModal.classList.remove('hidden');
                 });
+            } else {
+                showModal('Insufficient points to claim this voucher.');
             }
-
-            // Event listener for "Cancel" button in the add employee modal
-            cancelAddEmployee.addEventListener('click', () => {
-                addEmployeeModal.classList.add('hidden');
-                addEmployeeForm.reset(); // Clear the form
-            });
-
-            // Event listener for add employee form submission
-            addEmployeeForm.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Prevent default form submission
-
-                if (!userId) {
-                    console.error("User not authenticated. Cannot save employee.");
+        }
+        
+        function startPointTimer() {
+            if (playingTimer) clearInterval(playingTimer);
+            const INTERVAL_MS = 6000; // 6 seconds
+            const POINTS_PER_INTERVAL = 0.1; // Adds 0.1 points every 6 seconds for a total of 1 point per minute
+            playingTimer = setInterval(async () => {
+                if (!currentUser || !isPlaying) {
+                    clearInterval(playingTimer);
                     return;
-                }
-
-                const formData = new FormData(addEmployeeForm);
-                const employeeData = {
-                    employeeId: formData.get('employeeId'),
-                    fullName: formData.get('fullName'),
-                    position: formData.get('position'),
-                    address: formData.get('address'),
-                    contactNo: formData.get('contactNo'),
-                    departmentSite: formData.get('departmentSite'),
-                    salaryRate: parseFloat(formData.get('salaryRate')),
-                    sssContribution: parseFloat(formData.get('sssContribution')),
-                    phContribution: parseFloat(formData.get('phContribution')),
-                    pagibigContribution: parseFloat(formData.get('pagibigContribution')),
-                    status: 'Active', // Default status
-                    createdAt: new Date()
                 };
-
                 try {
-                    await addDoc(collection(db, `/artifacts/${appId}/public/data/employees`), employeeData);
-                    console.log("Employee added successfully!");
-                    addEmployeeModal.classList.add('hidden'); // Hide modal after submission
-                    addEmployeeForm.reset(); // Clear the form
+                    const userDocRef = doc(db, usersCollection, currentUser.uid);
+                    const newPoints = currentPoints + POINTS_PER_INTERVAL;
+                    await updateDoc(userDocRef, {
+                        points: newPoints,
+                        lastActive: serverTimestamp(),
+                    });
+                    // No need to update currentPoints here, onSnapshot will do it.
                 } catch (e) {
-                    console.error("Error adding employee: ", e);
+                    console.error("Error updating points:", e);
                 }
+            }, INTERVAL_MS);
+        }
+
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function startPlaytimeTimer(initialSeconds = 0) {
+            if (playtimeTimerInterval) clearInterval(playtimeTimerInterval);
+            let totalSeconds = initialSeconds;
+            playtimeTimerElement.textContent = formatTime(totalSeconds);
+            playtimeTimerInterval = setInterval(() => {
+                totalSeconds++;
+                playtimeTimerElement.textContent = formatTime(totalSeconds);
+            }, 1000);
+        }
+
+        function showModal(message) {
+            const existingModal = document.getElementById('custom-modal');
+            if (existingModal) existingModal.remove();
+            
+            const modalHtml = `
+                <div id="custom-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm text-center border border-gray-700">
+                        <p class="text-white mb-4">${message}</p>
+                        <button id="modal-close-btn" class="py-2 px-4 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-300">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('modal-close-btn').addEventListener('click', () => {
+                document.getElementById('custom-modal').remove();
             });
+        }
 
-            // Event listener for "Cancel" button in the edit employee modal
-            if (cancelEditEmployee) {
-                cancelEditEmployee.addEventListener('click', () => {
-                    editEmployeeModal.classList.add('hidden');
-                    editEmployeeForm.reset();
-                });
-            }
+        function showConfirm(message, onConfirm) {
+            const existingModal = document.getElementById('custom-confirm-modal');
+            if (existingModal) existingModal.remove();
 
-            // Event listener for edit employee form submission
-            if (editEmployeeForm) {
-                editEmployeeForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot update employee.");
-                        return;
-                    }
-
-                    const docId = editEmployeeDocIdInput.value;
-                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, docId);
-
-                    const formData = new FormData(editEmployeeForm);
-                    const updatedData = {
-                        fullName: formData.get('fullName'),
-                        position: formData.get('position'),
-                        address: formData.get('address'),
-                        contactNo: formData.get('contactNo'),
-                        departmentSite: formData.get('departmentSite'),
-                        salaryRate: parseFloat(formData.get('salaryRate')),
-                        sssContribution: parseFloat(formData.get('sssContribution')),
-                        phContribution: parseFloat(formData.get('phContribution')),
-                        pagibigContribution: parseFloat(formData.get('pagibigContribution')),
-                    };
-
-                    try {
-                        await updateDoc(employeeRef, updatedData);
-                        console.log("Employee updated successfully!");
-                        editEmployeeModal.classList.add('hidden');
-                        editEmployeeForm.reset();
-                    } catch (e) {
-                        console.error("Error updating employee: ", e);
-                    }
-                });
-            }
-
-            /**
-             * Opens the Edit Employee Modal and populates it with the selected employee's data.
-             * @param {string} docId - The Firestore document ID of the employee to edit.
-             */
-            window.openEditEmployeeModal = async (docId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot edit employee.");
-                    return;
-                }
-                try {
-                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, docId);
-                    const employeeSnap = await getDoc(employeeRef);
-
-                    if (employeeSnap.exists()) {
-                        const employeeData = employeeSnap.data();
-                        editEmployeeDocIdInput.value = docId;
-                        editEmployeeIdInput.value = employeeData.employeeId || docId;
-                        editFullNameInput.value = employeeData.fullName || '';
-                        editPositionInput.value = employeeData.position || '';
-                        editAddressInput.value = employeeData.address || '';
-                        editContactNoInput.value = employeeData.contactNo || '';
-                        editSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0).toFixed(2);
-                        editSssContributionInput.value = parseFloat(employeeData.sssContribution || 0).toFixed(2);
-                        editPhilhealthContributionInput.value = parseFloat(employeeData.phContribution || 0).toFixed(2);
-                        editPagibigContributionInput.value = parseFloat(employeeData.pagibigContribution || 0).toFixed(2);
-                        
-                        // Populate and select the correct option in the department/site dropdown
-                        await populateDepartmentSiteDropdown(); // Ensure dropdown is populated first
-                        if (editDepartmentSiteDropdown) {
-                            editDepartmentSiteDropdown.value = employeeData.departmentSite || '';
-                        }
-
-                        editEmployeeModal.classList.remove('hidden');
-                    } else {
-                        console.error("No such employee document!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching employee for edit: ", e);
-                }
-            };
-
-            /**
-             * Opens the Delete Confirmation Modal for a given employee.
-             * @param {string} docId - The Firestore document ID of the employee to delete.
-             */
-            window.openDeleteConfirmationModal = (docId) => {
-                employeeToDeleteDocId = docId; // Store the ID
-                deleteConfirmationModal.classList.remove('hidden');
-            };
-
-            // Event listener for "Cancel" button in the delete confirmation modal
-            if (cancelDeleteButton) {
-                cancelDeleteButton.addEventListener('click', () => {
-                    deleteConfirmationModal.classList.add('hidden');
-                    employeeToDeleteDocId = null; // Clear the stored ID
-                });
-            }
-
-            // Event listener for "Confirm Delete" button in the delete confirmation modal
-            if (confirmDeleteButton) {
-                confirmDeleteButton.addEventListener('click', async () => {
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot delete employee.");
-                        return;
-                    }
-                    if (employeeToDeleteDocId) {
-                        try {
-                            await deleteDoc(doc(db, `/artifacts/${appId}/public/data/employees`, employeeToDeleteDocId));
-                            console.log("Employee deleted successfully!");
-                            deleteConfirmationModal.classList.add('hidden');
-                            employeeToDeleteDocId = null; // Clear the stored ID
-                        } catch (e) {
-                            console.error("Error deleting employee: ", e);
-                        }
-                    }
-                });
-            }
-
-
-            // Event listener for "Add New Site" button
-            if (addSiteButton) { // Ensure button exists before adding listener
-                addSiteButton.addEventListener('click', () => {
-                    siteIdInput.value = generateSiteId(); // Generate and set ID
-                    addSiteModal.classList.remove('hidden');
-                });
-            }
-
-            // Event listener for "Cancel" button in the site modal
-            cancelAddSite.addEventListener('click', () => {
-                addSiteModal.classList.add('hidden');
-                addSiteForm.reset(); // Clear the form
+            const modalHtml = `
+                <div id="custom-confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm text-center border border-gray-700">
+                        <p class="text-white mb-4">${message}</p>
+                        <div class="flex justify-center space-x-4">
+                            <button id="confirm-yes-btn" class="py-2 px-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-300">Yes</button>
+                            <button id="confirm-no-btn" class="py-2 px-4 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors duration-300">No</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('confirm-yes-btn').addEventListener('click', () => {
+                onConfirm();
+                document.getElementById('custom-confirm-modal').remove();
             });
-
-            // Event listener for site form submission
-            if (addSiteForm) {
-                addSiteForm.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Prevent default form submission
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save site.");
-                        return;
-                    }
-
-                    const formData = new FormData(addSiteForm);
-                    const siteData = {
-                        siteId: formData.get('siteId'),
-                        siteName: formData.get('siteName'),
-                        siteLocation: formData.get('siteLocation'),
-                        // Removed siteStatus from siteData
-                        createdAt: new Date()
-                    };
-
-                    try {
-                        // Sites are public data, so they are stored in a public collection
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/sites`), siteData);
-                        console.log("Site added successfully!");
-                        addSiteModal.classList.add('hidden'); // Hide modal after submission
-                        addSiteForm.reset(); // Clear the form
-                    } catch (e) {
-                        console.error("Error adding site: ", e);
-                    }
-                });
-            }
-
-            /**
-             * Calculates and updates the payroll components (Basic Pay, Overtime Pay, etc.)
-             * and the Gross Pay based on user inputs in the payroll input modal.
-             */
-            const calculatePayroll = () => {
-                const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0); // This is assumed to be the DAILY salary rate
-                const workingDays = parseFloat(workingDaysInput.value || 0);
-                const overtimeHrs = parseFloat(overtimeHrsInput.value || 0);
-                const sundayHolidayDuty = parseFloat(sundayHolidayDutyInput.value || 0);
-                const nightShiftWorkDays = parseFloat(nightShiftWorkDaysInput.value || 0); // Represents full 8-hour night shifts
-                const nightShiftOvertimeHrs = parseFloat(nightShiftOvertimeHrsInput.value || 0);
-
-                // Constants for calculations
-                const dailyRate = salaryRate; // Daily rate is directly from the employee's salaryRate
-                const dailyWorkingHours = 8; // Assuming 8 hours per day
-                const hourlyRate = dailyRate / dailyWorkingHours; // Hourly rate based on daily rate
-
-                // --- Individual Payroll Component Calculations ---
-
-                // Basic Pay: Daily Rate multiplied by the number of working days
-                const basicPay = dailyRate * workingDays;
-                console.log(`Basic Pay: ${dailyRate.toFixed(2)} (Daily Rate) * ${workingDays} (Working Days) = ${basicPay.toFixed(2)}`);
-
-                // Overtime Pay: Overtime Hours * Hourly Rate * 125% (standard overtime premium)
-                const overtimePay = overtimeHrs * hourlyRate * 1.25;
-                console.log(`Overtime Pay: ${overtimeHrs} (OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.25 (OT Premium) = ${overtimePay.toFixed(2)}`);
-
-                // Sunday/Holiday Pay: Sunday/Holiday Duty Hours * Hourly Rate * 130% (standard premium for working on Sundays/Holidays)
-                const sundayHolidayPay = sundayHolidayDuty * hourlyRate * 1.30;
-                console.log(`Sunday/Holiday Pay: ${sundayHolidayDuty} (Sun/Hol Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.30 (Sun/Hol Premium) = ${sundayHolidayPay.toFixed(2)}`);
-
-                // Night Shift Differential: Night Shift Work Days * Daily Working Hours * Hourly Rate * 10% (night shift premium)
-                // Assumes each 'Night Shift Work Day' is a full 8-hour shift.
-                const nightShiftDifferential = nightShiftWorkDays * dailyWorkingHours * hourlyRate * 0.10;
-                console.log(`Night Shift Differential: ${nightShiftWorkDays} (Night Shift Days) * ${dailyWorkingHours} (Hrs/Day) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 0.10 (Night Diff Premium) = ${nightShiftDifferential.toFixed(2)}`);
-
-                // Night Shift Overtime Pay: Night Shift Overtime Hours * Hourly Rate * 137.5% (125% OT premium on top of 10% night diff)
-                // Calculation: (Hourly Rate * 1.10 for night shift) * 1.25 for overtime = Hourly Rate * 1.375
-                const nightShiftOvertimePay = nightShiftOvertimeHrs * hourlyRate * 1.375;
-                console.log(`Night Shift Overtime Pay: ${nightShiftOvertimeHrs} (NS OT Hrs) * ${hourlyRate.toFixed(2)} (Hourly Rate) * 1.375 (NS OT Premium) = ${nightShiftOvertimePay.toFixed(2)}`);
-
-
-                const grossPay = basicPay + overtimePay + sundayHolidayPay + nightShiftDifferential + nightShiftOvertimePay;
-                console.log(`Gross Pay: Basic (${basicPay.toFixed(2)}) + OT (${overtimePay.toFixed(2)}) + Sun/Hol (${sundayHolidayPay.toFixed(2)}) + NSD (${nightShiftDifferential.toFixed(2)}) + NSOT (${nightShiftOvertimePay.toFixed(2)}) = ${grossPay.toFixed(2)}`);
-
-
-                // Update display
-                calculatedBasicPaySpan.textContent = `₱ ${basicPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedOvertimePaySpan.textContent = `₱ ${overtimePay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedSundayHolidayPaySpan.textContent = `₱ ${sundayHolidayPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedNightShiftDifferentialSpan.textContent = `₱ ${nightShiftDifferential.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedNightShiftOvertimePaySpan.textContent = `₱ ${nightShiftOvertimePay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedGrossPaySpan.textContent = `₱ ${grossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            };
-
-            /**
-             * Opens the Payroll Input Modal for a specific employee and populates employee details.
-             * @param {string} docId - The Firestore document ID of the employee.
-             */
-            window.openPayrollInputModal = async (docId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot open payroll input.");
-                    return;
-                }
-                try {
-                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, docId);
-                    const employeeSnap = await getDoc(employeeRef);
-
-                    if (employeeSnap.exists()) {
-                        const employeeData = employeeSnap.data();
-                        payrollEmployeeNameSpan.textContent = employeeData.fullName || '';
-                        payrollEmployeeIdSpan.textContent = employeeData.employeeId || docId;
-                        payrollEmployeeDocIdInput.value = docId; // Store the employee's Firestore doc ID
-                        payrollEmployeeSalaryRateInput.value = parseFloat(employeeData.salaryRate || 0);
-
-                        // Reset input fields and calculations
-                        workingDaysInput.value = 0;
-                        overtimeHrsInput.value = 0;
-                        sundayHolidayDutyInput.value = 0;
-                        nightShiftWorkDaysInput.value = 0;
-                        nightShiftOvertimeHrsInput.value = 0;
-                        calculatePayroll(); // Initial calculation with zero inputs
-
-                        payrollInputModal.classList.remove('hidden');
-                    } else {
-                        console.error("No such employee document for payroll input!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching employee for payroll input: ", e);
-                }
-            };
-
-            // Event listeners for payroll input fields to trigger calculation
-            workingDaysInput.addEventListener('input', calculatePayroll);
-            overtimeHrsInput.addEventListener('input', calculatePayroll);
-            sundayHolidayDutyInput.addEventListener('input', calculatePayroll);
-            nightShiftWorkDaysInput.addEventListener('input', calculatePayroll);
-            nightShiftOvertimeHrsInput.addEventListener('input', calculatePayroll);
-
-            // Event listener for closing payroll input modal
-            if (cancelPayrollInputButton) {
-                cancelPayrollInputButton.addEventListener('click', () => {
-                    payrollInputModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for saving payroll data
-            if (payrollInputForm) {
-                payrollInputForm.addEventListener('submit', async (event) => {
-                    event.preventDefault(); // Prevent default form submission
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save payroll record.");
-                        return;
-                    }
-
-                    // Re-calculate to ensure latest values are used before saving
-                    calculatePayroll(); 
-
-                    const employeeDocId = payrollEmployeeDocIdInput.value;
-                    const employeeName = payrollEmployeeNameSpan.textContent;
-                    const employeeId = payrollEmployeeIdSpan.textContent;
-                    const salaryRate = parseFloat(payrollEmployeeSalaryRateInput.value || 0);
-
-                    const payrollRecord = {
-                        employeeDocId: employeeDocId,
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        salaryRate: salaryRate,
-                        workingDays: parseFloat(workingDaysInput.value || 0),
-                        overtimeHrs: parseFloat(overtimeHrsInput.value || 0),
-                        sundayHolidayDuty: parseFloat(sundayHolidayDutyInput.value || 0),
-                        nightShiftWorkDays: parseFloat(nightShiftWorkDaysInput.value || 0),
-                        nightShiftOvertimeHrs: parseFloat(nightShiftOvertimeHrsInput.value || 0),
-                        basicPay: parseFloat(calculatedBasicPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        overtimePay: parseFloat(calculatedOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        sundayHolidayPay: parseFloat(calculatedSundayHolidayPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        nightShiftDifferential: parseFloat(calculatedNightShiftDifferentialSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        nightShiftOvertimePay: parseFloat(calculatedNightShiftOvertimePaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        grossPay: parseFloat(calculatedGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        payrollDate: new Date(),
-                        processedByUserId: userId
-                    };
-
-                    try {
-                        // Save the payroll record to a new collection
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/payroll_records`), payrollRecord);
-                        console.log("Payroll record saved successfully!", payrollRecord);
-                        payrollInputModal.classList.add('hidden'); // Hide modal after saving
-                        // Optionally, show a success message to the user
-                    } catch (e) {
-                        console.error("Error saving payroll record: ", e);
-                        // Optionally, show an error message to the user
-                    }
-                });
-            }
-
-            /**
-             * Calculates and updates the total deductions and net pay based on user inputs
-             * in the deductions input modal.
-             */
-            const calculateDeductions = () => {
-                const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, '') || 0);
-                // Get government contributions from hidden inputs
-                const sssContribution = parseFloat(hiddenSssContributionInput.value || 0);
-                const phContribution = parseFloat(hiddenPhContributionInput.value || 0);
-                const pagibigContribution = parseFloat(hiddenPagibigContributionInput.value || 0);
-
-                const govtLoan = parseFloat(govtLoanInput.value || 0);
-                const coopShare = parseFloat(coopShareInput.value || 0);
-                const withholdingTax = parseFloat(withholdingTaxInput.value || 0);
-                const unpaidLoan = parseFloat(unpaidLoanInput.value || 0);
-                const coop2025 = parseFloat(coop2025Input.value || 0);
-                const caVoucher = parseFloat(caVoucherInput.value || 0);
-                const dailyVale = parseFloat(dailyValeInput.value || 0);
-                const othersDeduction = parseFloat(othersDeductionInput.value || 0);
-
-                // Include government contributions in total deductions
-                const totalDeductions = govtLoan + coopShare + withholdingTax + unpaidLoan + coop2025 + caVoucher + dailyVale + othersDeduction +
-                                        sssContribution + phContribution + pagibigContribution;
-                const netPay = grossPay - totalDeductions;
-
-                calculatedTotalDeductionsSpan.textContent = `₱ ${totalDeductions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                calculatedNetPaySpan.textContent = `₱ ${netPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            };
-
-            /**
-             * Opens the Deductions Input Modal for a specific employee and populates employee details
-             * and their latest gross pay.
-             * @param {string} employeeDocId - The Firestore document ID of the employee.
-             */
-            window.openDeductionsModal = async (employeeDocId) => {
-                if (!userId) {
-                    console.warn("User not authenticated. Cannot open deductions input.");
-                    return;
-                }
-                try {
-                    const employeeRef = doc(db, `/artifacts/${appId}/public/data/employees`, employeeDocId);
-                    const employeeSnap = await getDoc(employeeRef);
-
-                    if (employeeSnap.exists()) {
-                        const employeeData = employeeSnap.data();
-                        deductionsEmployeeNameSpan.textContent = employeeData.fullName || '';
-                        deductionsEmployeeIdSpan.textContent = employeeData.employeeId || employeeDocId;
-                        deductionsEmployeeDocIdInput.value = employeeDocId;
-
-                        // Populate SSS, PhilHealth, Pag-IBIG contributions
-                        const sss = parseFloat(employeeData.sssContribution || 0);
-                        const ph = parseFloat(employeeData.phContribution || 0);
-                        const pagibig = parseFloat(employeeData.pagibigContribution || 0);
-
-                        deductionsSssContributionSpan.textContent = `₱ ${sss.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        deductionsPhContributionSpan.textContent = `₱ ${ph.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        deductionsPagibigContributionSpan.textContent = `₱ ${pagibig.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        
-                        hiddenSssContributionInput.value = sss;
-                        hiddenPhContributionInput.value = ph;
-                        hiddenPagibigContributionInput.value = pagibig;
-
-
-                        // Fetch the latest gross pay from payroll_records
-                        const payrollRecordsQuery = query(
-                            collection(db, `/artifacts/${appId}/public/data/payroll_records`),
-                            where("employeeDocId", "==", employeeDocId),
-                            orderBy("payrollDate", "desc"),
-                            limit(1)
-                        );
-                        const payrollSnapshot = await getDocs(payrollRecordsQuery);
-                        let latestGrossPay = 0;
-                        let latestPayrollDocId = null;
-
-                        if (!payrollSnapshot.empty) {
-                            const latestPayrollRecord = payrollSnapshot.docs[0].data();
-                            latestGrossPay = latestPayrollRecord.grossPay || 0;
-                            latestPayrollDocId = payrollSnapshot.docs[0].id;
-                        } else {
-                            console.warn(`No payroll records found for employee ${employeeData.fullName}. Gross Pay set to 0.`);
-                        }
-                        
-                        deductionsGrossPaySpan.textContent = `₱ ${latestGrossPay.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-                        deductionsEmployeePayrollDocIdInput.value = latestPayrollDocId; // Store the associated payroll record ID
-
-                        // Reset other deduction input fields
-                        govtLoanInput.value = 0;
-                        coopShareInput.value = 0;
-                        withholdingTaxInput.value = 0;
-                        unpaidLoanInput.value = 0;
-                        coop2025Input.value = 0;
-                        caVoucherInput.value = 0;
-                        dailyValeInput.value = 0;
-                        othersDeductionInput.value = 0;
-
-                        calculateDeductions(); // Initial calculation with all values
-
-                        deductionsInputModal.classList.remove('hidden');
-                    } else {
-                        console.error("No such employee document for deductions input!");
-                    }
-                } catch (e) {
-                    console.error("Error fetching employee for deductions input: ", e);
-                }
-            };
-
-            // Event listeners for deduction input fields to trigger calculation
-            govtLoanInput.addEventListener('input', calculateDeductions);
-            coopShareInput.addEventListener('input', calculateDeductions);
-            withholdingTaxInput.addEventListener('input', calculateDeductions);
-            unpaidLoanInput.addEventListener('input', calculateDeductions);
-            coop2025Input.addEventListener('input', calculateDeductions);
-            caVoucherInput.addEventListener('input', calculateDeductions);
-            dailyValeInput.addEventListener('input', calculateDeductions);
-            othersDeductionInput.addEventListener('input', calculateDeductions);
-            // No need to add event listeners for the hidden SSS/PhilHealth/Pag-IBIG inputs as they are pre-filled
-
-            // Event listener for closing deductions input modal
-            if (cancelDeductionsInputButton) {
-                cancelDeductionsInputButton.addEventListener('click', () => {
-                    deductionsInputModal.classList.add('hidden');
-                });
-            }
-
-            // Event listener for saving deductions data
-            if (deductionsInputForm) {
-                deductionsInputForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    if (!userId) {
-                        console.error("User not authenticated. Cannot save deduction record.");
-                        return;
-                    }
-
-                    calculateDeductions(); // Re-calculate to ensure latest values are used before saving
-
-                    const employeeDocId = deductionsEmployeeDocIdInput.value;
-                    const payrollDocId = deductionsEmployeePayrollDocIdInput.value;
-                    const employeeName = deductionsEmployeeNameSpan.textContent;
-                    const employeeId = deductionsEmployeeIdSpan.textContent;
-                    const grossPay = parseFloat(deductionsGrossPaySpan.textContent.replace('₱ ', '').replace(/,/g, ''));
-
-                    const deductionRecord = {
-                        employeeDocId: employeeDocId,
-                        payrollDocId: payrollDocId, // Link to the specific payroll record
-                        employeeId: employeeId,
-                        employeeName: employeeName,
-                        grossPay: grossPay,
-                        // Include government contributions in the saved record
-                        sssContribution: parseFloat(hiddenSssContributionInput.value || 0),
-                        phContribution: parseFloat(hiddenPhContributionInput.value || 0),
-                        pagibigContribution: parseFloat(hiddenPagibigContributionInput.value || 0),
-                        
-                        govtLoan: parseFloat(govtLoanInput.value || 0),
-                        coopShare: parseFloat(coopShareInput.value || 0),
-                        withholdingTax: parseFloat(withholdingTaxInput.value || 0),
-                        unpaidLoan: parseFloat(unpaidLoanInput.value || 0),
-                        coop2025: parseFloat(coop2025Input.value || 0),
-                        caVoucher: parseFloat(caVoucherInput.value || 0),
-                        dailyVale: parseFloat(dailyValeInput.value || 0),
-                        othersDeduction: parseFloat(othersDeductionInput.value || 0),
-                        totalDeductions: parseFloat(calculatedTotalDeductionsSpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        netPay: parseFloat(calculatedNetPaySpan.textContent.replace('₱ ', '').replace(/,/g, '')),
-                        deductionDate: new Date(),
-                        processedByUserId: userId
-                    };
-
-                    try {
-                        await addDoc(collection(db, `/artifacts/${appId}/public/data/deduction_records`), deductionRecord);
-                        console.log("Deduction record saved successfully!", deductionRecord);
-                        deductionsInputModal.classList.add('hidden');
-                    } catch (e) {
-                        console.error("Error saving deduction record: ", e);
-                    }
-                });
-            }
-
-            // Add console.log to confirm button clicks
-            navButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetId = button.dataset.target;
-                    console.log(`Nav button clicked: ${targetId}`); // Diagnostic log
-                    showContent(targetId);
-                });
+            document.getElementById('confirm-no-btn').addEventListener('click', () => {
+                document.getElementById('custom-confirm-modal').remove();
             });
-
-            // Event listener for the new payroll summary department filter dropdown
-            if (payrollSummaryDepartmentFilter) {
-                payrollSummaryDepartmentFilter.addEventListener('change', (event) => {
-                    const selectedDepartment = event.target.value;
-                    fetchPayrollSummary(selectedDepartment); // Re-fetch summary with filter
-                });
-            }
-        });
+        }
     </script>
 </body>
 </html>
+```
+
+---
+
+### **MAHALAGA:** I-update ang Iyong Firebase Security Rules
+
+Para gumana nang tama ang mga admin actions, kailangan mong palitan ang iyong mga security rules sa Firebase.
+
+
+```json
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if the user is the admin.
+    // IMPORTANT: Replace "PASTE_ADMIN_UID_HERE" with your actual Admin User ID
+    // from the Firebase Authentication console.
+    function isAdmin() {
+      return request.auth.uid == "PASTE_ADMIN_UID_HERE";
+    }
+
+    // --- User Data Rules ---
+    match /artifacts/phub-9e8d7/public/data/users/{userId} {
+
+      // CREATE: Any new authenticated user can create their own document.
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // READ: A user can read their own data. An admin can read any user's data.
+      allow get: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      // LIST: Only an admin can get a list of all users.
+      allow list: if isAdmin();
+
+      // UPDATE:
+      // - A user can update their own 'playing', 'lastActive', and 'points' status.
+      // - An admin can update any user's 'isActive' status and 'points' (for voucher claims).
+      allow update: if request.auth != null && 
+        ( (request.auth.uid == userId && request.resource.data.keys().hasAny(['playing', 'lastActive', 'points'])) ||
+          (isAdmin() && request.resource.data.keys().hasAny(['isActive', 'points'])) );
+
+      // DELETE: Only an admin can delete a user account.
+      allow delete: if isAdmin();
+    }
+
+    // --- Vouchers Rules ---
+    match /artifacts/phub-9e8d7/public/data/vouchers/{voucherId} {
+      // READ: Any authenticated user can read vouchers.
+      allow get, list: if request.auth != null;
+      // WRITE: Only an admin can create, update, or delete vouchers.
+      allow write: if isAdmin();
+    }
+
+    // --- Claims Rules ---
+    match /artifacts/phub-9e8d7/public/data/claims/{claimId} {
+      // CREATE: A user can create a claim for themselves.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // READ: Only an admin can read the list of claims.
+      allow get, list: if isAdmin();
+      // UPDATE: Only an admin can update a claim's status.
+      allow update: if isAdmin();
+      // DELETE: No one can delete claims to maintain history.
+      allow delete: if false;
+    }
+    
+    // --- Settings Rules ---
+    match /artifacts/phub-9e8d7/public/data/settings/shop_settings {
+      // READ: Any authenticated user can read settings (to get the shop IP).
+      allow read: if request.auth != null;
+      // WRITE: Only an admin can change the settings.
+      allow write: if isAdmin();
+    }
+  }
+}
+```
+
+### Paano I-update ang Security Rules:
+
+1.  **Hanapin ang iyong Admin User UID:**
+    * Pumunta sa iyong **Firebase Project Console**.
+    * Sa kaliwang menu, i-click ang **Authentication**.
+    * Sa **Users** tab, hanapin ang iyong admin account (e.g., `admin@pesohub.com`).
+    * Kopyahin ang **User UID** na katabi nito. Ito ay isang mahabang string ng mga letra at numero.
+
+2.  **I-paste ang UID sa Rules:**
+    * Sa bagong security rules sa itaas, palitan ang `"PASTE_ADMIN_UID_HERE"` ng User UID na kinopya mo.
+
+3.  **I-publish ang Bagong Rules:**
+    * Pumunta sa **Firestore Database** > **Rules** tab sa iyong Firebase Console.
+    * Burahin ang lahat ng laman nito at i-paste ang **buong updated na rules** (kasama na ang iyong UID).
+    * I-click ang **Publish**.
+
+Pagkatapos mong gawin ang mga pagbabagong ito sa code at sa security rules, dapat ay gumana na nang maayos ang lahat ng admin features. Pakisabi kung mayroon ka pang ibang katanung
